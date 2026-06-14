@@ -1,0 +1,157 @@
+.hero {
+  background: linear-gradient(135deg, var(--purple-900) 0%, var(--vinyl-black) 100%);
+  padding: var(--s-12) var(--s-12);
+}
+
+.heroInner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: var(--t-caption);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold-500);
+  margin-bottom: var(--s-3);
+}
+
+.heroTitle {
+  font-family: var(--font-display);
+  font-size: var(--t-h1);
+  color: #fff;
+  margin: 0 0 var(--s-3) 0;
+  line-height: var(--lh-tight);
+}
+
+.heroSub {
+  font-size: var(--t-body-lg);
+  color: rgba(255,255,255,0.65);
+  margin: 0;
+  max-width: 560px;
+  line-height: var(--lh-relaxed);
+}
+
+/* Filter bar */
+.filterBar {
+  background: var(--cream-deep);
+  border-bottom: 1px solid var(--rule);
+  padding: var(--s-4) var(--s-12);
+}
+
+.filterInner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+
+.pill {
+  all: unset;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: var(--t-body-sm);
+  font-weight: 600;
+  color: var(--ink-2);
+  background: var(--paper);
+  border: 1.5px solid var(--rule);
+  border-radius: var(--r-full);
+  padding: 6px var(--s-5);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.pill:hover {
+  border-color: var(--purple-700);
+  color: var(--purple-700);
+}
+
+.pillActive {
+  background: var(--purple-700);
+  color: #fff;
+  border-color: var(--purple-700);
+}
+
+/* Body */
+.body {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--s-8) var(--s-12) var(--s-12);
+}
+
+.count {
+  font-size: var(--t-body-sm);
+  color: var(--ink-3);
+  margin: 0 0 var(--s-5) 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-6);
+}
+
+.cardWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+/* Rarity stars */
+.stars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 var(--s-2);
+}
+
+.starFull {
+  color: var(--gold-500);
+  font-size: 13px;
+}
+
+.starEmpty {
+  color: var(--rule);
+  font-size: 13px;
+}
+
+.starsLabel {
+  font-size: var(--t-micro);
+  color: var(--ink-3);
+  margin-right: var(--s-1);
+}
+
+/* Empty */
+.empty {
+  text-align: center;
+  padding: var(--s-20) var(--s-8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-4);
+}
+
+.emptyTitle {
+  font-family: var(--font-display);
+  font-size: var(--t-h3);
+  color: var(--purple-900);
+  margin: 0;
+}
+
+.btnPrimary {
+  all: unset;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--t-body-sm);
+  background: var(--purple-700);
+  color: #fff;
+  border-radius: var(--r-full);
+  padding: 11px var(--s-8);
+  transition: background 0.15s;
+}
+
+.btnPrimary:hover { background: var(--purple-600); }

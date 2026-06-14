@@ -1,0 +1,424 @@
+/* ── Page shell ──────────────────────────────────────────── */
+.page {
+  display: grid;
+  /* In RTL: column 1 = RIGHT (form), column 2 = LEFT (art) */
+  grid-template-columns: 480px 1fr;
+  /* Fixed height so switching tabs never causes layout jump */
+  height: calc(100vh - 68px);
+}
+
+/* ── Form panel (RIGHT in RTL) ───────────────────────────── */
+.formPanel {
+  background: var(--cream);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--s-12) var(--s-10);
+  overflow-y: auto;
+}
+
+.formCard {
+  width: 100%;
+  max-width: 400px;
+  /* auto margins center vertically when space is available,
+     and collapse to 0 when content overflows — no clipping */
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+/* Logo back-link */
+.logoLink {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: var(--s-8);
+  text-decoration: none;
+}
+
+.logoDisc {
+  width: 34px;
+  height: 34px;
+}
+
+.logoText {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--purple-900);
+  letter-spacing: -0.01em;
+}
+
+/* ── Tabs ────────────────────────────────────────────────── */
+.tabs {
+  display: inline-flex;
+  background: var(--cream-deep);
+  border-radius: var(--r-full);
+  padding: 4px;
+  margin-bottom: var(--s-6);
+}
+
+.tab {
+  font-family: var(--font-body);
+  font-size: var(--t-body-sm);
+  font-weight: 600;
+  background: none;
+  border: none;
+  border-radius: var(--r-full);
+  padding: 8px 24px;
+  cursor: pointer;
+  color: var(--ink-2);
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.tabActive {
+  background: var(--purple-700);
+  color: #fff;
+}
+
+/* ── Headings ────────────────────────────────────────────── */
+.headingBlock {
+  margin-bottom: var(--s-6);
+}
+
+.heading {
+  font-family: var(--font-display);
+  font-size: var(--t-h2);
+  font-weight: 700;
+  color: var(--purple-900);
+  margin: 0 0 var(--s-2);
+  line-height: var(--lh-tight);
+}
+
+.subheading {
+  font-size: var(--t-body-sm);
+  color: var(--ink-2);
+  margin: 0;
+}
+
+/* ── Form fields ─────────────────────────────────────────── */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.twoCol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-3);
+}
+
+.labelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.label {
+  font-size: var(--t-body-sm);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.forgotLink {
+  font-size: var(--t-caption);
+  color: var(--purple-600);
+  text-decoration: none;
+}
+
+.forgotLink:hover {
+  text-decoration: underline;
+}
+
+.input {
+  font-family: var(--font-body);
+  font-size: var(--t-body);
+  background: var(--paper);
+  border: 1.5px solid var(--rule);
+  border-radius: var(--r-md);
+  padding: 11px var(--s-4);
+  color: var(--ink);
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input::placeholder {
+  color: var(--ink-3);
+}
+
+.input:focus {
+  border-color: var(--purple-400);
+  box-shadow: 0 0 0 3px var(--purple-100);
+}
+
+/* ── Password field with show/hide toggle ────────────────── */
+.pwdWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.pwdWrap .input {
+  padding-left: 44px; /* room for the eye button on the left (RTL) */
+}
+
+.eyeBtn {
+  position: absolute;
+  left: var(--s-3);
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--ink-3);
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+
+.eyeBtn:hover {
+  color: var(--purple-700);
+}
+
+/* ── Form error ─────────────────────────────────────────── */
+.formError {
+  font-size: var(--t-body-sm);
+  color: var(--danger);
+  background: rgba(168, 50, 74, 0.08);
+  border: 1px solid rgba(168, 50, 74, 0.2);
+  border-radius: var(--r-sm);
+  padding: var(--s-2) var(--s-3);
+  margin: 0;
+}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.btnPrimary {
+  font-family: var(--font-body);
+  font-size: var(--t-body);
+  font-weight: 700;
+  background: var(--purple-700);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-full);
+  padding: 13px var(--s-8);
+  cursor: pointer;
+  width: 100%;
+  margin-top: var(--s-2);
+  transition: background 0.15s;
+}
+
+.btnPrimary:hover {
+  background: var(--purple-600);
+}
+
+.btnGold {
+  font-family: var(--font-body);
+  font-size: var(--t-body);
+  font-weight: 700;
+  background: var(--gold-500);
+  color: var(--purple-900);
+  border: none;
+  border-radius: var(--r-full);
+  padding: 13px var(--s-8);
+  cursor: pointer;
+  width: 100%;
+  margin-top: var(--s-2);
+  transition: background 0.15s;
+}
+
+.btnGold:hover {
+  background: var(--gold-300);
+}
+
+/* ── Terms & switch ──────────────────────────────────────── */
+.terms {
+  font-size: var(--t-caption);
+  color: var(--ink-3);
+  text-align: center;
+  margin: var(--s-2) 0 0;
+}
+
+.terms a {
+  color: var(--purple-600);
+  text-decoration: none;
+}
+
+.terms a:hover {
+  text-decoration: underline;
+}
+
+.switchPrompt {
+  font-size: var(--t-body-sm);
+  color: var(--ink-2);
+  text-align: center;
+  margin: var(--s-6) 0 0;
+}
+
+.switchLink {
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: var(--t-body-sm);
+  font-weight: 700;
+  color: var(--purple-700);
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.switchLink:hover {
+  color: var(--purple-600);
+}
+
+/* ── Back button ─────────────────────────────────────────── */
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: var(--t-body-sm);
+  font-weight: 600;
+  color: var(--ink-2);
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: var(--s-6);
+  transition: color 0.15s;
+}
+
+.backBtn:hover {
+  color: var(--purple-700);
+}
+
+/* ── Success state ───────────────────────────────────────── */
+.successBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--s-6) 0;
+  gap: var(--s-4);
+}
+
+.successIcon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: var(--s-2);
+}
+
+.successIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.successTitle {
+  font-family: var(--font-display);
+  font-size: var(--t-h2);
+  font-weight: 700;
+  color: var(--purple-900);
+  margin: 0;
+  line-height: var(--lh-tight);
+}
+
+.successBody {
+  font-size: var(--t-body-sm);
+  color: var(--ink-2);
+  line-height: var(--lh-relaxed);
+  max-width: 320px;
+  margin: 0;
+}
+
+/* ── Art panel (LEFT in RTL) ─────────────────────────────── */
+.artPanel {
+  background: linear-gradient(160deg, var(--purple-700) 0%, var(--purple-900) 50%, var(--vinyl-black) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--s-16) var(--s-12);
+  position: relative;
+  overflow: hidden;
+}
+
+.vinylArt {
+  position: absolute;
+  width: 440px;
+  height: 440px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+.artContent {
+  position: relative;
+  z-index: 1;
+}
+
+.artEyebrow {
+  font-family: var(--font-body);
+  font-size: var(--t-caption);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-300);
+  margin: 0 0 var(--s-4);
+}
+
+.artTitle {
+  font-family: var(--font-display);
+  font-size: 38px;
+  font-weight: 700;
+  line-height: var(--lh-snug);
+  color: #fff;
+  margin: 0 0 var(--s-5);
+  max-width: 360px;
+}
+
+.artBody {
+  font-size: var(--t-body-lg);
+  line-height: var(--lh-relaxed);
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 340px;
+  margin: 0 0 var(--s-10);
+}
+
+.artStats {
+  display: flex;
+  gap: var(--s-8);
+  position: relative;
+  z-index: 1;
+}
+
+.artStat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+
+.artStatNum {
+  font-family: var(--font-display);
+  font-size: var(--t-h3);
+  font-weight: 700;
+  color: var(--gold-500);
+  line-height: 1;
+}
+
+.artStatLabel {
+  font-size: var(--t-caption);
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}

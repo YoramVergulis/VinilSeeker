@@ -1,0 +1,11 @@
+.section {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--s-20) var(--s-12) 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-6);
+}

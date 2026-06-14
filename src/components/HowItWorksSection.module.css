@@ -1,0 +1,42 @@
+.section {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--s-20) var(--s-12) 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-6);
+}
+
+.card {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-lg);
+  padding: var(--s-8) 28px;
+}
+
+.num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 48px;
+  color: var(--gold-500);
+  line-height: 1;
+  margin-bottom: var(--s-4);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--t-h4);
+  color: var(--purple-900);
+  margin: 0 0 var(--s-2);
+}
+
+.desc {
+  font-size: 15px;
+  line-height: var(--lh-relaxed);
+  color: var(--ink-2);
+  margin: 0;
+}

@@ -1,0 +1,323 @@
+/* ── Profile header ── */
+.header {
+  background: linear-gradient(135deg, var(--purple-900) 0%, var(--vinyl-black) 100%);
+  padding: var(--s-12) var(--s-12);
+}
+
+.headerInner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--s-8);
+  flex-wrap: wrap;
+}
+
+/* ── Avatar circle ── */
+.avatar {
+  border-radius: var(--r-full);
+  background: var(--purple-700);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-lg);
+}
+
+/* ── Header info ── */
+.headerInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.userName {
+  font-family: var(--font-display);
+  font-size: var(--t-h1);
+  color: #fff;
+  margin: 0 0 var(--s-1) 0;
+  line-height: var(--lh-tight);
+}
+
+.userEmail {
+  font-size: var(--t-body-sm);
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0 0 var(--s-3) 0;
+}
+
+.userMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+
+.metaChip {
+  font-size: var(--t-body-sm);
+  font-weight: 600;
+  color: var(--gold-300);
+  background: rgba(217, 164, 65, 0.15);
+  padding: 2px var(--s-3);
+  border-radius: var(--r-full);
+}
+
+.metaDot {
+  color: rgba(255, 255, 255, 0.25);
+  font-size: var(--t-body-sm);
+}
+
+.metaText {
+  font-size: var(--t-body-sm);
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* ── Header action buttons ── */
+.headerActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  flex-shrink: 0;
+}
+
+.btnSecondary {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--t-body-sm);
+  background: transparent;
+  color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--r-full);
+  padding: 9px var(--s-5);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+
+.btnSecondary:hover {
+  border-color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.btnSignOut {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--t-body-sm);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--r-full);
+  padding: 9px var(--s-5);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.btnSignOut:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+/* ── Edit card ── */
+.editWrap {
+  background: var(--cream-deep);
+  padding: var(--s-8) var(--s-12);
+  border-bottom: 1px solid var(--rule);
+}
+
+.editCard {
+  max-width: 680px;
+  margin: 0 auto;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-md);
+  padding: var(--s-8);
+  box-shadow: var(--shadow-sm);
+}
+
+.editTitle {
+  font-family: var(--font-display);
+  font-size: var(--t-h3);
+  color: var(--purple-900);
+  margin: 0 0 var(--s-6) 0;
+}
+
+.editGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-4);
+}
+
+.editActions {
+  display: flex;
+  gap: var(--s-3);
+  margin-top: var(--s-6);
+}
+
+/* ── My listings section ── */
+.listings {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--s-12) var(--s-12);
+}
+
+.listingsHeader {
+  margin-bottom: var(--s-8);
+}
+
+.eyebrow {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--t-caption);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold-500);
+  margin-bottom: var(--s-2);
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: var(--t-h2);
+  color: var(--purple-900);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.count {
+  font-family: var(--font-body);
+  font-size: var(--t-body);
+  font-weight: 700;
+  background: var(--purple-700);
+  color: #fff;
+  padding: 1px 10px;
+  border-radius: var(--r-full);
+  line-height: 1.7;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-6);
+}
+
+.cardWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.editBtn {
+  font-family: var(--font-body);
+  font-size: var(--t-body-sm);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  background: var(--cream-deep);
+  color: var(--purple-700);
+  border: 1.5px solid var(--rule);
+  border-radius: var(--r-full);
+  padding: 9px var(--s-4);
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.editBtn:hover {
+  background: var(--purple-700);
+  color: #fff;
+  border-color: var(--purple-700);
+}
+
+/* ── Empty state ── */
+.emptyState {
+  text-align: center;
+  padding: var(--s-20) var(--s-8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-4);
+}
+
+.emptyTitle {
+  font-family: var(--font-display);
+  font-size: var(--t-h3);
+  color: var(--purple-900);
+  margin: 0;
+}
+
+.emptyBody {
+  font-size: var(--t-body);
+  color: var(--ink-3);
+  margin: 0;
+}
+
+/* ── Form elements ── */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.label {
+  font-size: var(--t-body-sm);
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.input {
+  font-family: var(--font-body);
+  font-size: var(--t-body);
+  color: var(--ink);
+  background: var(--cream);
+  border: 1.5px solid var(--rule);
+  border-radius: var(--r-md);
+  padding: 10px var(--s-4);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input:focus {
+  border-color: var(--purple-700);
+}
+
+/* ── Shared buttons ── */
+.btnPrimary {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--t-body-sm);
+  background: var(--purple-700);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-full);
+  padding: 11px var(--s-8);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btnPrimary:hover {
+  background: var(--purple-600);
+}
+
+.btnGhost {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--t-body-sm);
+  background: transparent;
+  color: var(--ink-2);
+  border: 1.5px solid var(--rule);
+  border-radius: var(--r-full);
+  padding: 11px var(--s-6);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.btnGhost:hover {
+  border-color: var(--ink-2);
+  color: var(--ink);
+}

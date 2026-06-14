@@ -1,0 +1,71 @@
+.section {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--s-20) var(--s-12) 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 14px;
+}
+
+.chip {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-md);
+  padding: 22px var(--s-3);
+  text-align: center;
+  text-decoration: none;
+  color: var(--ink);
+  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
+  display: block;
+}
+
+.chip:hover {
+  background: var(--purple-700);
+  color: #fff;
+  border-color: var(--purple-700);
+  transform: translateY(-2px);
+}
+
+.disc {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto var(--s-2);
+  border-radius: var(--r-full);
+  background: radial-gradient(circle, var(--purple-700) 0 30%, var(--vinyl-black) 31% 100%);
+  position: relative;
+}
+
+.disc::after {
+  content: '';
+  position: absolute;
+  inset: 38%;
+  border-radius: var(--r-full);
+  background: var(--gold-500);
+}
+
+.chip:hover .disc {
+  background: radial-gradient(circle, var(--gold-500) 0 30%, var(--vinyl-black) 31% 100%);
+}
+
+.chip:hover .disc::after {
+  background: var(--cream);
+}
+
+.name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.count {
+  font-size: var(--t-caption);
+  color: var(--ink-3);
+  margin-top: 2px;
+}
+
+.chip:hover .count {
+  color: var(--purple-200);
+}

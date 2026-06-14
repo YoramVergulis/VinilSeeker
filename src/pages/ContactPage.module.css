@@ -1,0 +1,186 @@
+.hero {
+  background: linear-gradient(135deg, var(--purple-900) 0%, var(--vinyl-black) 100%);
+  padding: var(--s-12) var(--s-12);
+}
+.heroInner { max-width: 1000px; margin: 0 auto; }
+.eyebrow {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: var(--t-caption);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold-500);
+  margin-bottom: var(--s-3);
+}
+.heroTitle {
+  font-family: var(--font-display);
+  font-size: var(--t-h1);
+  color: #fff;
+  margin: 0 0 var(--s-3) 0;
+  line-height: var(--lh-tight);
+}
+.heroSub {
+  font-size: var(--t-body-lg);
+  color: rgba(255,255,255,0.65);
+  margin: 0;
+  line-height: var(--lh-relaxed);
+}
+
+.body {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--s-10) var(--s-8) var(--s-16);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-8);
+  align-items: start;
+}
+
+/* Form card */
+.formCard {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-lg);
+  padding: var(--s-8);
+}
+.formTitle {
+  font-family: var(--font-display);
+  font-size: var(--t-h3);
+  color: var(--purple-900);
+  margin: 0 0 var(--s-6) 0;
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+.fieldWrap { display: flex; flex-direction: column; gap: var(--s-2); }
+.label {
+  font-family: var(--font-body);
+  font-size: var(--t-body-sm);
+  font-weight: 700;
+  color: var(--ink);
+}
+.input,
+.select,
+.textarea {
+  font-family: var(--font-body);
+  font-size: var(--t-body-sm);
+  color: var(--ink);
+  background: var(--cream);
+  border: 1.5px solid var(--rule);
+  border-radius: var(--r-md);
+  padding: 10px var(--s-4);
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+.input:focus,
+.select:focus,
+.textarea:focus {
+  border-color: var(--purple-700);
+  box-shadow: 0 0 0 3px rgba(59,31,92,0.08);
+}
+.textarea { resize: vertical; min-height: 120px; }
+
+.formError {
+  font-size: var(--t-body-sm);
+  color: var(--danger);
+  margin: 0;
+}
+
+.btnPrimary {
+  all: unset;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--t-body-sm);
+  background: var(--purple-700);
+  color: #fff;
+  border-radius: var(--r-full);
+  padding: 12px var(--s-10);
+  text-align: center;
+  transition: background 0.15s;
+}
+.btnPrimary:hover { background: var(--purple-600); }
+
+.btnSecondary {
+  all: unset;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--t-body-sm);
+  color: var(--purple-700);
+  border: 1.5px solid var(--purple-700);
+  border-radius: var(--r-full);
+  padding: 11px var(--s-10);
+  text-align: center;
+  transition: background 0.15s, color 0.15s;
+}
+.btnSecondary:hover { background: var(--purple-700); color: #fff; }
+
+/* Success state */
+.successState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-8) 0;
+  text-align: center;
+}
+.successTitle {
+  font-family: var(--font-display);
+  font-size: var(--t-h3);
+  color: var(--purple-900);
+  margin: 0;
+}
+.successText {
+  font-size: var(--t-body-sm);
+  color: var(--ink-2);
+  line-height: var(--lh-relaxed);
+  margin: 0;
+}
+
+/* Info cards */
+.infoCol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+.infoCard {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-md);
+  padding: var(--s-5);
+  display: flex;
+  gap: var(--s-4);
+  align-items: flex-start;
+}
+.infoIcon {
+  width: 44px;
+  height: 44px;
+  background: rgba(59,31,92,0.07);
+  border-radius: var(--r-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.infoContent { display: flex; flex-direction: column; gap: var(--s-1); }
+.infoTitle {
+  font-family: var(--font-body);
+  font-size: var(--t-body-sm);
+  font-weight: 700;
+  color: var(--purple-900);
+  margin: 0;
+}
+.infoLine {
+  font-size: var(--t-body-sm);
+  color: var(--ink-2);
+  margin: 0;
+  line-height: var(--lh-relaxed);
+}

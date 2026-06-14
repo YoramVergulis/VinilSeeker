@@ -1,0 +1,186 @@
+.nav {
+  background: rgba(245, 239, 230, 0.92);
+  border-bottom: 1px solid var(--rule);
+  padding: 0 var(--s-12);
+  display: flex;
+  align-items: center;
+  gap: var(--s-8);
+  height: 68px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* ── Logo ── */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  text-decoration: none;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.logoDisc {
+  width: 36px;
+  height: 36px;
+}
+
+.logoText {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--purple-900);
+  letter-spacing: -0.01em;
+}
+
+/* ── Nav links ── */
+.links {
+  display: flex;
+  gap: 28px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.link {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+  text-decoration: none;
+  padding: 6px 0;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.link:hover {
+  color: var(--purple-700);
+}
+
+.linkActive {
+  color: var(--purple-700);
+  border-bottom-color: var(--purple-700);
+}
+
+/* ── Actions ── */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-shrink: 0;
+}
+
+.btnGhost {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  background: transparent;
+  color: var(--purple-700);
+  border: 1px solid transparent;
+  border-radius: var(--r-full);
+  padding: 10px var(--s-5);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.15s;
+  line-height: 1;
+}
+
+.btnGhost:hover {
+  background: var(--purple-50);
+}
+
+.btnPrimary {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  background: var(--purple-700);
+  color: #fff;
+  border: 1px solid transparent;
+  border-radius: var(--r-full);
+  padding: 10px var(--s-5);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.15s;
+  line-height: 1;
+}
+
+.btnPrimary:hover {
+  background: var(--purple-600);
+}
+
+/* ── Saved / heart icon button ── */
+.heartBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: 1.5px solid var(--rule);
+  border-radius: var(--r-full);
+  cursor: pointer;
+  color: var(--ink-3);
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.heartBtn:hover {
+  border-color: var(--burgundy);
+  color: var(--burgundy);
+  background: rgba(122, 37, 64, 0.05);
+}
+
+/* ── Logged-in user avatar ── */
+.avatarBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  background: transparent;
+  border: 1.5px solid var(--rule);
+  border-radius: var(--r-full);
+  padding: 4px var(--s-3) 4px var(--s-2);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.avatarBtn:hover {
+  border-color: var(--purple-700);
+  background: rgba(59, 31, 92, 0.04);
+}
+
+.avatarCircle {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-full);
+  background: var(--purple-700);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.avatarName {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--purple-900);
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

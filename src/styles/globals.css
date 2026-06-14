@@ -1,0 +1,167 @@
+@import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700;900&family=Assistant:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* ---------- PURPLE SCALE (primary brand) ---------- */
+  --purple-50:  #F4EFFA;
+  --purple-100: #E4D7F2;
+  --purple-200: #C9B0E5;
+  --purple-300: #A687D2;
+  --purple-400: #7E5CB8;
+  --purple-500: #5A3997;
+  --purple-600: #432575;
+  --purple-700: #3B1F5C;
+  --purple-800: #2A1542;
+  --purple-900: #1A0C2B;
+
+  /* ---------- VINYL BLACK & NEUTRALS ---------- */
+  --vinyl-black: #0F0814;
+  --ink:         #1A1126;
+  --ink-2:       #4A3D5C;
+  --ink-3:       #7A6E8A;
+  --rule:        #D9D2C4;
+  --paper:       #FAF6EE;
+  --cream:       #F5EFE6;
+  --cream-deep:  #ECE3D2;
+  --white:       #FFFFFF;
+
+  /* ---------- ACCENTS ---------- */
+  --gold-300:   #E8C076;
+  --gold-500:   #D9A441;
+  --gold-700:   #A67622;
+  --burgundy:   #7A2540;
+
+  /* ---------- SEMANTIC ---------- */
+  --success:    #2E7D5B;
+  --success-bg: #DCEEDF;
+  --warning:    #B8801A;
+  --warning-bg: #F7E8C8;
+  --danger:     #A8324A;
+  --danger-bg:  #F5DAE0;
+  --info:       #2D5A8A;
+  --info-bg:    #D8E3F0;
+
+  /* ---------- TYPOGRAPHY ---------- */
+  --font-display: 'Frank Ruhl Libre', 'David Libre', Georgia, serif;
+  --font-body:    'Assistant', 'Heebo', system-ui, -apple-system, sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, monospace;
+
+  --t-display:   56px;
+  --t-h1:        40px;
+  --t-h2:        32px;
+  --t-h3:        24px;
+  --t-h4:        20px;
+  --t-body-lg:   18px;
+  --t-body:      16px;
+  --t-body-sm:   14px;
+  --t-caption:   12px;
+  --t-micro:     11px;
+
+  --lh-tight:    1.15;
+  --lh-snug:     1.35;
+  --lh-normal:   1.55;
+  --lh-relaxed:  1.7;
+
+  /* ---------- SPACING (4px base) ---------- */
+  --s-1:  4px;
+  --s-2:  8px;
+  --s-3:  12px;
+  --s-4:  16px;
+  --s-5:  20px;
+  --s-6:  24px;
+  --s-8:  32px;
+  --s-10: 40px;
+  --s-12: 48px;
+  --s-16: 64px;
+  --s-20: 80px;
+  --s-24: 96px;
+
+  /* ---------- RADII ---------- */
+  --r-none: 0;
+  --r-xs:   4px;
+  --r-sm:   8px;
+  --r-md:   12px;
+  --r-lg:   16px;
+  --r-xl:   24px;
+  --r-full: 9999px;
+
+  /* ---------- SHADOWS (purple-tinted) ---------- */
+  --shadow-xs:    0 1px 2px rgba(26, 12, 43, 0.06);
+  --shadow-sm:    0 2px 6px rgba(26, 12, 43, 0.08), 0 1px 2px rgba(26, 12, 43, 0.04);
+  --shadow-md:    0 6px 16px rgba(26, 12, 43, 0.10), 0 2px 4px rgba(26, 12, 43, 0.05);
+  --shadow-lg:    0 16px 36px rgba(26, 12, 43, 0.14), 0 4px 8px rgba(26, 12, 43, 0.06);
+  --shadow-xl:    0 28px 64px rgba(26, 12, 43, 0.20);
+  --shadow-inset: inset 0 1px 2px rgba(26, 12, 43, 0.10);
+  --shadow-vinyl: 0 8px 24px rgba(15, 8, 20, 0.45);
+}
+
+/* ---------- RESET & BASE ---------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  direction: rtl;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--t-body);
+  line-height: var(--lh-normal);
+  color: var(--ink);
+  background: var(--cream);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---------- SEMANTIC TYPE CLASSES ---------- */
+.t-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--t-display);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.02em;
+  color: var(--purple-900);
+}
+
+.t-h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--t-h1);
+  line-height: var(--lh-tight);
+  color: var(--purple-900);
+}
+
+.t-h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--t-h2);
+  line-height: var(--lh-snug);
+  color: var(--purple-900);
+}
+
+.t-h3 {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--t-h3);
+  line-height: var(--lh-snug);
+  color: var(--ink);
+}
+
+.t-body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: var(--t-body);
+  line-height: var(--lh-normal);
+  color: var(--ink);
+}
+
+.t-caption {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--t-caption);
+  line-height: var(--lh-snug);
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}

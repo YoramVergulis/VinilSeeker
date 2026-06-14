@@ -1,0 +1,176 @@
+.card {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--purple-300);
+}
+
+/* ── Cover ── */
+.cover {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  background: var(--vinyl-black);
+  overflow: hidden;
+}
+
+.coverImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s;
+}
+
+.card:hover .coverImg {
+  transform: scale(1.04);
+}
+
+/* vinyl disc that peeks in on hover */
+.vinylPeek {
+  position: absolute;
+  top: 50%;
+  right: -50px;
+  transform: translateY(-50%);
+  width: 140px;
+  height: 140px;
+  border-radius: var(--r-full);
+  background: radial-gradient(circle, var(--vinyl-black) 0 30%, var(--purple-900) 31% 100%);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--purple-800);
+  transition: right 0.35s;
+  z-index: 1;
+}
+
+.vinylPeek::after {
+  content: '';
+  position: absolute;
+  inset: 38%;
+  border-radius: var(--r-full);
+  background: var(--gold-500);
+}
+
+.card:hover .vinylPeek {
+  right: -90px;
+}
+
+/* corner badge */
+.badge {
+  position: absolute;
+  top: var(--s-3);
+  right: var(--s-3);
+  font-size: var(--t-micro);
+  font-weight: 700;
+  padding: 4px var(--s-2);
+  border-radius: var(--r-full);
+  letter-spacing: 0.04em;
+  z-index: 2;
+  background: var(--gold-500);
+  color: var(--purple-900);
+}
+
+.badgeBurgundy {
+  background: var(--burgundy);
+  color: #fff;
+}
+
+.badgeDark {
+  background: var(--vinyl-black);
+  color: #fff;
+}
+
+/* save button */
+.saveBtn {
+  position: absolute;
+  top: var(--s-3);
+  left: var(--s-3);
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-full);
+  background: rgba(15, 8, 20, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transition: background 0.15s;
+}
+
+.saveBtn:hover {
+  background: var(--purple-700);
+}
+
+.saveBtnActive {
+  background: var(--burgundy);
+  color: #fff;
+}
+
+.saveBtnActive:hover {
+  background: var(--burgundy);
+}
+
+/* ── Body ── */
+.body {
+  padding: var(--s-4) var(--s-4) var(--s-4);
+  padding-inline: 18px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 19px;
+  color: var(--ink);
+  line-height: var(--lh-snug);
+  margin: 0 0 var(--s-1);
+}
+
+.meta {
+  font-size: var(--t-body-sm);
+  color: var(--ink-2);
+}
+
+.foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-top: var(--s-3);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--rule);
+}
+
+.price {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+  color: var(--purple-900);
+  line-height: 1;
+}
+
+.priceOld {
+  font-size: var(--t-caption);
+  color: var(--ink-3);
+  text-decoration: line-through;
+}
+
+.loc {
+  font-size: var(--t-caption);
+  color: var(--ink-3);
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+}

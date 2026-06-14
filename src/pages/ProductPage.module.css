@@ -1,0 +1,749 @@
+/* ── Breadcrumb ──────────────────────────────────────────── */
+.breadcrumb {
+  background: var(--cream-deep);
+  border-bottom: 1px solid var(--rule);
+  padding: var(--s-3) var(--s-12);
+}
+
+.breadcrumbInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+
+.crumbBtn {
+  font-family: var(--font-body);
+  font-size: var(--t-body-sm);
+  font-weight: 500;
+  color: var(--purple-600);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.crumbBtn:hover { color: var(--purple-900); }
+
+.crumbSep {
+  font-size: var(--t-body-sm);
+  color: var(--ink-3);
+}
+
+.crumbCurrent {
+  font-size: var(--t-body-sm);
+  color: var(--ink-2);
+  font-weight: 500;
+}
+
+/* ── Main layout ─────────────────────────────────────────── */
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--s-10) var(--s-12);
+  display: grid;
+  /* RTL: column 1 = RIGHT (details), column 2 = LEFT (cover) */
+  grid-template-columns: 1fr 380px;
+  gap: var(--s-12);
+  align-items: start;
+}
+
+/* ── Cover column (LEFT in RTL) ──────────────────────────── */
+.coverCol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  position: sticky;
+  top: calc(68px + var(--s-6));
+}
+
+.coverWrap {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  background: var(--vinyl-black);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-vinyl);
+}
+
+/* Vinyl disc peek — animates in from the right side */
+.discWrap {
+  position: absolute;
+  top: 50%;
+  left: -20%;
+  transform: translateY(-50%);
+  width: 75%;
+  aspect-ratio: 1 / 1;
+  transition: left 0.4s ease;
+  z-index: 1;
+}
+
+.coverWrap:hover .discWrap {
+  left: -32%;
+}
+
+.disc {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--r-full);
+  background:
+    radial-gradient(circle at 50% 50%, var(--purple-700) 0% 22%, var(--vinyl-black) 23% 100%);
+  box-shadow: var(--shadow-vinyl);
+}
+
+.disc::before {
+  content: '';
+  position: absolute;
+  inset: 28%;
+  border-radius: var(--r-full);
+  background: var(--gold-500);
+  box-shadow: inset 0 0 0 1px var(--gold-700);
+}
+
+.disc::after {
+  content: '';
+  position: absolute;
+  inset: 47%;
+  border-radius: var(--r-full);
+  background: var(--vinyl-black);
+}
+
+.coverImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  z-index: 2;
+  transition: transform 0.4s ease;
+}
+
+.coverWrap:hover .coverImg {
+  transform: scale(1.03);
+}
+
+.coverPlaceholder {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+/* Tags below cover */
+.tagRow {
+  display: flex;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-family: var(--font-body);
+  font-size: var(--t-caption);
+  font-weight: 600;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-full);
+  padding: 4px 12px;
+  color: var(--ink-2);
+}
+
+.tagCondition {
+  background: transparent;
+}
+
+/* ── Details column (RIGHT in RTL) ──────────────────────── */
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Badge pill */
+.badgePill {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--t-caption);
+  font-weight: 700;
+  border-radius: var(--r-full);
+  padding: 4px 12px;
+  margin-bottom: var(--s-4);
+  background: var(--gold-500);
+  color: var(--purple-900);
+  letter-spacing: 0.04em;
+}
+
+.badge_burgundy { background: var(--burgundy); color: #fff; }
+.badge_dark      { background: var(--vinyl-black); color: #fff; }
+
+.title {
+  font-family: var(--font-display);
+  font-size: var(--t-h1);
+  font-weight: 700;
+  color: var(--purple-900);
+  line-height: var(--lh-tight);
+  margin: 0 0 var(--s-2);
+}
+
+.subtitle {
+  font-size: var(--t-body-lg);
+  color: var(--ink-2);
+  margin: 0 0 var(--s-4);
+}
+
+.metaRow {
+  display: flex;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--s-5);
+}
+
+.metaChip {
+  font-size: var(--t-body-sm);
+  font-weight: 600;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-full);
+  padding: 4px 12px;
+  color: var(--ink-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pinIcon { color: var(--ink-3); }
+
+.divider {
+  height: 1px;
+  background: var(--rule);
+  margin: var(--s-5) 0;
+}
+
+/* Price */
+.priceBlock { margin-bottom: var(--s-5); }
+
+.priceRow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin-bottom: var(--s-1);
+}
+
+.priceOld {
+  font-size: var(--t-body);
+  color: var(--ink-3);
+  text-decoration: line-through;
+}
+
+.discount {
+  font-size: var(--t-body-sm);
+  font-weight: 700;
+  background: var(--danger-bg);
+  color: var(--danger);
+  border-radius: var(--r-full);
+  padding: 2px 8px;
+}
+
+.price {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--gold-700);
+  line-height: 1;
+}
+
+/* CTAs */
+.ctaStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  margin-bottom: var(--s-2);
+}
+
+.btnBuy {
+  font-family: var(--font-body);
+  font-size: var(--t-body-lg);
+  font-weight: 700;
+  background: var(--gold-500);
+  color: var(--purple-900);
+  border: none;
+  border-radius: var(--r-full);
+  padding: 15px var(--s-8);
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.15s;
+}
+
+.btnBuy:hover { background: var(--gold-300); }
+
+.btnSave {
+  font-family: var(--font-body);
+  font-size: var(--t-body);
+  font-weight: 600;
+  background: transparent;
+  border: 1.5px solid var(--purple-700);
+  border-radius: var(--r-full);
+  padding: 12px var(--s-8);
+  color: var(--purple-700);
+  cursor: pointer;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.btnSave:hover { background: var(--purple-50); }
+
+.btnSaved {
+  background: var(--purple-700);
+  color: #fff;
+  border-color: var(--purple-700);
+}
+
+.btnSaved:hover { background: var(--purple-600); }
+
+/* Seller card */
+.sellerCard {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-md);
+  padding: var(--s-4) var(--s-5);
+  margin-bottom: var(--s-2);
+}
+
+.sellerAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-full);
+  background: var(--purple-700);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: var(--t-h4);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sellerInfo { flex: 1; }
+
+.sellerName {
+  font-size: var(--t-body-sm);
+  font-weight: 700;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-bottom: 4px;
+}
+
+.verifiedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: var(--t-caption);
+  font-weight: 600;
+  color: var(--purple-700);
+}
+
+.sellerMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.stars { display: inline-flex; gap: 1px; }
+
+.sellerMetaText {
+  font-size: var(--t-caption);
+  color: var(--ink-3);
+}
+
+.contactBtn {
+  font-family: var(--font-body);
+  font-size: var(--t-body-sm);
+  font-weight: 600;
+  background: var(--purple-700);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-full);
+  padding: 9px var(--s-5);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.contactBtn:hover { background: var(--purple-600); }
+
+/* Description */
+.descBlock { padding-bottom: var(--s-4); }
+
+.descTitle {
+  font-family: var(--font-body);
+  font-size: var(--t-body-sm);
+  font-weight: 700;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 var(--s-3);
+}
+
+.desc {
+  font-size: var(--t-body-sm);
+  color: var(--ink-2);
+  line-height: var(--lh-relaxed);
+  margin: 0;
+}
+
+/* ── Offers comparison ───────────────────────────────────── */
+.offersHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-4);
+  margin-bottom: var(--s-5);
+  flex-wrap: wrap;
+}
+
+.offersTitle {
+  font-family: var(--font-display);
+  font-size: var(--t-h3);
+  color: var(--purple-900);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.offersCount {
+  font-family: var(--font-body);
+  font-size: var(--t-body-sm);
+  font-weight: 700;
+  background: var(--purple-700);
+  color: #fff;
+  padding: 1px 10px;
+  border-radius: var(--r-full);
+  line-height: 1.7;
+}
+
+.offersBestPrice {
+  font-size: var(--t-body-sm);
+  color: var(--ink-3);
+  margin: 0;
+}
+
+.offersBestPrice strong {
+  color: var(--gold-700);
+  font-weight: 700;
+}
+
+/* ── Offers group (stores / private) ── */
+.offersGroup {
+  margin-bottom: var(--s-5);
+}
+
+.offersGroupHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-bottom: var(--s-3);
+  color: var(--ink-2);
+}
+
+.offersGroupTitle {
+  font-size: var(--t-body-sm);
+  font-weight: 700;
+  color: var(--ink-2);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.offersGroupCount {
+  font-size: var(--t-caption);
+  font-weight: 700;
+  background: var(--cream-deep);
+  border: 1px solid var(--rule);
+  color: var(--ink-3);
+  padding: 1px 8px;
+  border-radius: var(--r-full);
+}
+
+.offersList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.emptyOffers {
+  font-size: var(--t-body-sm);
+  color: var(--ink-3);
+  margin: 0;
+  padding: var(--s-3) 0;
+}
+
+/* ── Individual offer card ── */
+.offerCard {
+  background: var(--paper);
+  border: 1.5px solid var(--rule);
+  border-radius: var(--r-md);
+  padding: var(--s-4) var(--s-5);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.offerCard:hover {
+  border-color: var(--purple-700);
+  box-shadow: var(--shadow-sm);
+}
+
+.offerBest {
+  border-color: var(--gold-500);
+  background: rgba(217, 164, 65, 0.04);
+}
+
+.offerBest:hover {
+  border-color: var(--gold-500);
+  box-shadow: 0 2px 8px rgba(217, 164, 65, 0.2);
+}
+
+.bestBadge {
+  display: inline-block;
+  font-size: var(--t-caption);
+  font-weight: 700;
+  background: var(--gold-500);
+  color: var(--purple-900);
+  border-radius: var(--r-full);
+  padding: 2px 10px;
+  margin-bottom: var(--s-2);
+  letter-spacing: 0.03em;
+}
+
+.offerRow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+}
+
+.offerAvatar {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--r-full);
+  background: var(--purple-700);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--t-body);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.offerAvatar[data-store="true"] {
+  background: var(--gold-700);
+}
+
+.offerInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.offerName {
+  font-size: var(--t-body-sm);
+  font-weight: 700;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  margin-bottom: 3px;
+}
+
+.storeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: var(--t-caption);
+  font-weight: 600;
+  color: var(--purple-700);
+}
+
+.offerMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+  font-size: var(--t-caption);
+  color: var(--ink-3);
+}
+
+.offerDot {
+  color: var(--rule);
+}
+
+.condChip {
+  font-size: var(--t-caption);
+  font-weight: 600;
+  background: rgba(59, 31, 92, 0.08);
+  color: var(--purple-700);
+  border-radius: var(--r-full);
+  padding: 1px 7px;
+}
+
+.offerRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--s-2);
+  flex-shrink: 0;
+}
+
+.offerPrice {
+  font-family: var(--font-display);
+  font-size: var(--t-h3);
+  font-weight: 700;
+  color: var(--purple-900);
+  line-height: 1;
+}
+
+.tagPrice {
+  color: var(--gold-700);
+  font-weight: 700;
+  border-color: var(--gold-500);
+}
+
+/* ── Similar records ─────────────────────────────────────── */
+.similar {
+  background: var(--cream-deep);
+  border-top: 1px solid var(--rule);
+  padding: var(--s-12) var(--s-12) var(--s-16);
+}
+
+.similarInner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.similarHeader { margin-bottom: var(--s-6); }
+
+.similarEyebrow {
+  font-size: var(--t-caption);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-700);
+  margin: 0 0 var(--s-2);
+}
+
+.similarTitle {
+  font-family: var(--font-display);
+  font-size: var(--t-h2);
+  font-weight: 700;
+  color: var(--purple-900);
+  margin: 0;
+  line-height: var(--lh-tight);
+}
+
+.similarGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-6);
+}
+
+/* ── Not found fallback ──────────────────────────────────── */
+.notFound {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  font-size: var(--t-body-lg);
+  color: var(--ink-2);
+}
+
+.linkBtn {
+  background: none;
+  border: none;
+  font-size: inherit;
+  color: var(--purple-700);
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+/* ── Tracklist ───────────────────────────────────────────── */
+.tracklist {
+  padding-bottom: var(--s-4);
+}
+
+.tracklistTitle {
+  font-family: var(--font-body);
+  font-size: var(--t-body-sm);
+  font-weight: 700;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 var(--s-4);
+}
+
+.trackSide {
+  margin-bottom: var(--s-4);
+}
+
+.sideLabel {
+  font-size: var(--t-caption);
+  font-weight: 700;
+  color: var(--gold-700);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding-bottom: var(--s-1);
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: var(--s-1);
+}
+
+.tracks {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.track {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: 6px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--t-body-sm);
+}
+
+.track:last-child {
+  border-bottom: none;
+}
+
+.trackNum {
+  color: var(--ink-3);
+  font-size: var(--t-caption);
+  width: 18px;
+  text-align: left;
+  flex-shrink: 0;
+}
+
+.trackTitle {
+  flex: 1;
+  color: var(--ink);
+  line-height: var(--lh-snug);
+}
+
+.trackDur {
+  color: var(--ink-3);
+  font-size: var(--t-caption);
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+  direction: ltr;
+}
