@@ -721,6 +721,67 @@ normalizeTracklist(discogsTracks)     // Discogs tracklist → [{ side, title, d
 
 **Status at end of session:** Chat fully real — no mock data. Conversations created in Supabase when "צור קשר" is clicked. Messages persist. Real user names shown. Auto-first message sent. Realtime updates work.
 
+### Session 12 — 2026-06-14
+**Goal:** Enable proper RLS on chat tables (`conversation` + `message`) — replace disabled RLS with correct per-user policies
+
+**No code files changed** — all fixes were SQL policies run in the Supabase SQL Editor.
+
+**Problem:** RLS was disabled on `conversation` and `message` tables (Session 11 workaround) because inserts and selects were failing with RLS on. Root cause: no policies existed, so Supabase blocked all operations by default.
+
+**Solution — SQL run in Supabase SQL Editor:**
+
+```sql
+-- conversation table
+ALTER TABLE conversation ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "conv_select" ON conversation;
+DROP POLICY IF EXISTS "conv_insert" ON conversation;
+
+CREATE POLICY "conv_select" ON conversation
+  FOR SELECT USING (buyer_id = auth.uid() OR seller_id = auth.uid());
+
+CREATE POLICY "conv_insert" ON conversation
+  FOR INSERT WITH CHECK (buyer_id = auth.uid());
+
+-- message table
+ALTER TABLE message ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "msg_select" ON message;
+DROP POLICY IF EXISTS "msg_insert" ON message;
+DROP POLICY IF EXISTS "msg_update" ON message;
+
+CREATE POLICY "msg_select" ON message
+  FOR SELECT USING (
+    EXISTS (SELECT 1 FROM conversation c
+      WHERE c.id = message.conversation_id
+        AND (c.buyer_id = auth.uid() OR c.seller_id = auth.uid()))
+  );
+
+CREATE POLICY "msg_insert" ON message
+  FOR INSERT WITH CHECK (
+    sender_id = auth.uid()
+    AND EXISTS (SELECT 1 FROM conversation c
+      WHERE c.id = message.conversation_id
+        AND (c.buyer_id = auth.uid() OR c.seller_id = auth.uid()))
+  );
+
+CREATE POLICY "msg_update" ON message
+  FOR UPDATE USING (
+    sender_id <> auth.uid()
+    AND EXISTS (SELECT 1 FROM conversation c
+      WHERE c.id = message.conversation_id
+        AND (c.buyer_id = auth.uid() OR c.seller_id = auth.uid()))
+  );
+```
+
+**Policy logic:**
+- `conv_select`: participants (buyer OR seller) can see their own conversations
+- `conv_insert`: only the buyer can create a conversation, and `buyer_id` must equal `auth.uid()`
+- `msg_select`: any participant in the conversation can read its messages
+- `msg_insert`: sender must be `auth.uid()`; must be a participant in the conversation
+- `msg_update`: can only mark received messages as read (not your own); must be a participant
+- Realtime (`subscribeToMessages`) works automatically — Supabase enforces `msg_select` on `postgres_changes` events
+
+**Status at end of session:** RLS enabled and working on both chat tables. All chat operations (create conversation, send message, mark read, realtime) pass through proper security policies.
+
 ---
 
 ## Rules for Claude in This Project
