@@ -35,6 +35,10 @@ export async function register(name, email, password) {
   })
   if (error) throw new Error(error.message)
   if (!data.session) throw new Error('נשלח אימייל אישור — אנא אשר את כתובתך לפני הכניסה')
+  // Sync name to profiles table (trigger may not fire fast enough in dev)
+  if (data.user) {
+    await supabase.from('profiles').upsert({ id: data.user.id, name, city: '' })
+  }
   return formatUser(data.user)
 }
 
@@ -54,6 +58,14 @@ export async function logout() {
 export async function updateUser(updates) {
   const { data, error } = await supabase.auth.updateUser({ data: updates })
   if (error) throw new Error(error.message)
+  // Keep profiles table in sync
+  if (data.user) {
+    await supabase.from('profiles').upsert({
+      id:   data.user.id,
+      name: updates.name ?? data.user.user_metadata?.name ?? '',
+      city: updates.city ?? data.user.user_metadata?.city ?? '',
+    })
+  }
   return formatUser(data.user)
 }
 

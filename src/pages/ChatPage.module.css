@@ -115,6 +115,15 @@
   flex-shrink: 0;
 }
 
+.convCity {
+  font-size: var(--t-micro);
+  color: var(--ink-2);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .convListing {
   font-size: var(--t-micro);
   color: var(--ink-3);
@@ -473,6 +482,31 @@
   font-style: italic;
 }
 
+/* ── Loading ── */
+.loadingState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-3);
+  color: var(--ink-3);
+  font-size: var(--t-body-sm);
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--rule);
+  border-top-color: var(--purple-700);
+  border-radius: var(--r-full);
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* ── No conversation selected ── */
 .noConv {
   flex: 1;
@@ -488,4 +522,20 @@
   font-size: var(--t-body);
   color: var(--ink-3);
   margin: 0;
+}
+
+.chatErrorBox {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  background: rgba(168,50,74,.08);
+  border: 1px solid var(--danger);
+  border-radius: var(--r-md);
+  padding: var(--s-4) var(--s-5);
+  color: var(--danger);
+  font-size: var(--t-body-sm);
+  font-weight: 600;
+  direction: rtl;
+  max-width: 420px;
+  text-align: center;
 }

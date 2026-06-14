@@ -31,7 +31,7 @@ export default function App() {
   const [vinylList,       setVinylList]       = useState([...ALL_VINYL])
   const [currentUser,     setCurrentUser]     = useState(null)
   const [editTarget,      setEditTarget]      = useState(null)
-  const [chatConvId,      setChatConvId]      = useState(null)
+  const [chatContext,     setChatContext]     = useState(null)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -98,7 +98,7 @@ export default function App() {
     if (opts.genre   !== undefined) setSearchGenre(opts.genre)
     if (opts.product !== undefined) setSelectedProduct(opts.product)
     if (opts.listing !== undefined) setEditTarget(opts.listing)
-    if (opts.convId  !== undefined) setChatConvId(opts.convId)
+    if (opts.chatContext !== undefined) setChatContext(opts.chatContext)
     setPage(pageName)
     window.scrollTo(0, 0)
     if (opts.scrollTo) {
@@ -125,7 +125,7 @@ export default function App() {
   }
 
   if (page === 'chat') {
-    return <ChatPage {...shared} initialConvId={chatConvId} />
+    return <ChatPage {...shared} chatContext={chatContext} />
   }
 
   if (page === 'admin') {

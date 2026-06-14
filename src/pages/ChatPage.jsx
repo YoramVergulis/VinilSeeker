@@ -1,85 +1,15 @@
 import { useState, useRef, useEffect } from 'react'
 import Layout from '../components/Layout'
 import styles from './ChatPage.module.css'
-
-const MOCK_CONVERSATIONS = [
-  {
-    id: 'c1',
-    sellerName: 'יוסי כהן',
-    sellerRating: 4.7,
-    lastSeen: 'פעיל עכשיו',
-    unread: 2,
-    time: '14:32',
-    listingTitle: 'Pink Floyd — The Wall',
-    listingArtist: 'Pink Floyd',
-    listingYear: '1979',
-    listingFormat: 'LP',
-    listingCondition: 'VG+',
-    listingPrice: 220,
-    messages: [
-      { id: 1, from: 'them', text: 'שלום, האם התקליט עדיין זמין?', time: '14:20' },
-      { id: 2, from: 'me',   text: 'כן, זמין! במצב מצוין', time: '14:25' },
-      { id: 3, from: 'them', text: 'מתי תוכל לאסוף? אני בדיזנגוף', time: '14:32' },
-    ],
-  },
-  {
-    id: 'c2',
-    sellerName: 'רינה לוי',
-    sellerRating: 4.9,
-    lastSeen: 'פעיל לפני שעה',
-    unread: 0,
-    time: '12:15',
-    listingTitle: 'Beatles — Abbey Road',
-    listingArtist: 'The Beatles',
-    listingYear: '1969',
-    listingFormat: 'LP',
-    listingCondition: 'VG',
-    listingPrice: 380,
-    messages: [
-      { id: 1, from: 'me',   text: 'שלום! האם המצב באמת VG?', time: '11:00' },
-      { id: 2, from: 'them', text: 'כן, כריכה מצוינת, תקליט בלאי קל', time: '11:30' },
-      { id: 3, from: 'me',   text: 'אשמח לקחת, מה הכתובת לאיסוף?', time: '12:00' },
-      { id: 4, from: 'them', text: 'תודה רבה! נשמח לעוד עסקה בעתיד', time: '12:15' },
-    ],
-  },
-  {
-    id: 'c3',
-    sellerName: 'דני אבן',
-    sellerRating: 4.5,
-    lastSeen: 'פעיל אתמול',
-    unread: 1,
-    time: 'אתמול',
-    listingTitle: 'Miles Davis — Kind of Blue',
-    listingArtist: 'Miles Davis',
-    listingYear: '1959',
-    listingFormat: 'LP',
-    listingCondition: 'VG+',
-    listingPrice: 95,
-    messages: [
-      { id: 1, from: 'them', text: 'האם המחיר עוד פתוח לדיון?', time: 'אתמול' },
-    ],
-  },
-  {
-    id: 'c4',
-    sellerName: 'שרה גולן',
-    sellerRating: 4.8,
-    lastSeen: 'פעיל לפני יומיים',
-    unread: 0,
-    time: 'שישי',
-    listingTitle: 'Led Zeppelin IV',
-    listingArtist: 'Led Zeppelin',
-    listingYear: '1971',
-    listingFormat: 'LP',
-    listingCondition: 'VG',
-    listingPrice: 290,
-    messages: [
-      { id: 1, from: 'me',   text: 'האם אפשר להשתמש בדואר?', time: 'חמישי' },
-      { id: 2, from: 'them', text: 'כן, שליח עד 35 ₪', time: 'חמישי' },
-      { id: 3, from: 'me',   text: 'מצוין! אשלח פרטי משלוח', time: 'שישי' },
-      { id: 4, from: 'them', text: 'נהדר, נתראה ביום ראשון', time: 'שישי' },
-    ],
-  },
-]
+import {
+  getOrCreateConversation,
+  getConversations,
+  getMessages,
+  sendMessage,
+  markAsRead,
+  subscribeToMessages,
+  getProfile,
+} from '../chat'
 
 function Avatar({ name, size = 40 }) {
   return (
@@ -89,58 +19,189 @@ function Avatar({ name, size = 40 }) {
   )
 }
 
-function Stars({ rating }) {
-  const full  = Math.floor(rating)
-  const half  = rating - full >= 0.5
-  const empty = 5 - full - (half ? 1 : 0)
-  return (
-    <span className={styles.stars} aria-label={`דירוג ${rating}`}>
-      {'★'.repeat(full)}
-      {half ? '½' : ''}
-      {'☆'.repeat(empty)}
-    </span>
-  )
+function formatTime(iso) {
+  if (!iso) return ''
+  const d   = new Date(iso)
+  const now = new Date()
+  const diffDays = Math.floor((now - d) / 86400000)
+  if (diffDays === 0) return d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })
+  if (diffDays === 1) return 'אתמול'
+  if (diffDays < 7)  return d.toLocaleDateString('he-IL', { weekday: 'short' })
+  return d.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric' })
 }
 
-export default function ChatPage({ onNavigate, currentUser, onLogout, initialConvId }) {
-  const [conversations, setConversations] = useState(MOCK_CONVERSATIONS)
-  const [selectedId, setSelectedId]       = useState(initialConvId ?? MOCK_CONVERSATIONS[0].id)
-  const [input, setInput]                 = useState('')
-  const [searchQuery, setSearchQuery]     = useState('')
-  const messagesEndRef                    = useRef(null)
+export default function ChatPage({ onNavigate, currentUser, onLogout, chatContext }) {
+  const [conversations, setConversations] = useState([])
+  const [selectedId,    setSelectedId]    = useState(null)
+  const [messages,      setMessages]      = useState([])
+  const [input,         setInput]         = useState('')
+  const [searchQuery,   setSearchQuery]   = useState('')
+  const [loadingConvs,  setLoadingConvs]  = useState(true)
+  const [loadingMsgs,   setLoadingMsgs]   = useState(false)
+  const [sending,       setSending]       = useState(false)
+  const [chatError,     setChatError]     = useState('')
+  const messagesBoxRef  = useRef(null)
+  const unsubscribeRef  = useRef(null)
 
-  const selected = conversations.find(c => c.id === selectedId)
+  const selected = conversations.find(c => c.id === selectedId) ?? null
 
   const filtered = searchQuery.trim()
     ? conversations.filter(c =>
-        c.sellerName.includes(searchQuery) ||
-        c.listingTitle.includes(searchQuery)
+        c.otherName.includes(searchQuery) ||
+        c.listing?.title?.includes(searchQuery)
       )
     : conversations
 
+  // ── Load conversations on mount ──
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [selectedId, selected?.messages?.length])
+    if (!currentUser) return
+    loadConvs()
+  }, [currentUser])
+
+  // ── Handle incoming chatContext (from ProductPage "צור קשר") ──
+  useEffect(() => {
+    if (!chatContext || !currentUser) return
+    handleChatContext()
+  }, [chatContext, currentUser])
+
+  // ── Load messages + subscribe when conversation is selected ──
+  useEffect(() => {
+    if (!selectedId) { setMessages([]); return }
+
+    if (unsubscribeRef.current) unsubscribeRef.current()
+
+    loadMsgs(selectedId)
+    unsubscribeRef.current = subscribeToMessages(selectedId, handleNewMessage)
+
+    return () => {
+      if (unsubscribeRef.current) unsubscribeRef.current()
+    }
+  }, [selectedId])
+
+  // ── Scroll to bottom inside the messages box (not the whole page) ──
+  useEffect(() => {
+    const el = messagesBoxRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [messages])
+
+  async function loadConvs() {
+    setLoadingConvs(true)
+    const convs = await getConversations()
+    setConversations(convs)
+    setLoadingConvs(false)
+    if (convs.length > 0 && !selectedId && !chatContext) {
+      setSelectedId(convs[0].id)
+    }
+  }
+
+  async function handleChatContext() {
+    if (!chatContext.sellerId) {
+      setChatError('מכירה זו לא ניתנת לשיחה (נתוני הדגמה)')
+      return
+    }
+    setChatError('')
+
+    // Look up the seller's real registered name from profiles
+    const sellerProfile = await getProfile(chatContext.sellerId)
+    const sellerName = sellerProfile?.name || chatContext.sellerName || 'מוכר'
+
+    const result = await getOrCreateConversation({
+      listingId:  chatContext.listingId,
+      sellerId:   chatContext.sellerId,
+      sellerName: sellerName,
+      buyerName:  currentUser.name,
+    })
+    if (!result) {
+      setChatError('לא ניתן ליצור שיחה — בדוק את הקונסול לפרטים')
+      return
+    }
+    if (result?.error) {
+      setChatError(`שגיאה: ${result.error}`)
+      return
+    }
+
+    const convId = result.id
+
+    // Send auto-first message for NEW conversations
+    if (result.isNew) {
+      const parts = []
+      if (chatContext.listingTitle)     parts.push(chatContext.listingTitle)
+      const meta = [
+        chatContext.listingCondition && `מצב: ${chatContext.listingCondition}`,
+        chatContext.listingPrice     && `מחיר: ₪${chatContext.listingPrice}`,
+        chatContext.sellerCity       && chatContext.sellerCity,
+      ].filter(Boolean)
+      if (meta.length) parts.push(meta.join(' | '))
+      parts.push('האם עדיין זמין?')
+      await sendMessage(convId, parts.join('\n'))
+    }
+
+    // Build a local conversation object so the sidebar shows immediately with real name/city
+    const localConv = {
+      id:        convId,
+      listingId: chatContext.listingId,
+      buyerId:   currentUser.id,
+      sellerId:  chatContext.sellerId,
+      otherName: sellerName,
+      iAmBuyer:  true,
+      updatedAt: new Date().toISOString(),
+      city:      chatContext.sellerCity || '',
+      listing:   chatContext.listingTitle ? {
+        title:     chatContext.listingTitle,
+        city:      chatContext.sellerCity      || '',
+        condition: chatContext.listingCondition || '',
+        price:     chatContext.listingPrice     ?? null,
+      } : null,
+    }
+
+    // Merge with DB conversations (avoids duplicate if getConversations returns it too)
+    const convs = await getConversations()
+    const merged = convs.some(c => c.id === convId)
+      ? convs.map(c => c.id === convId ? { ...c, otherName: sellerName, city: localConv.city } : c)
+      : [localConv, ...convs]
+    setConversations(merged)
+    setSelectedId(convId)
+  }
+
+  async function loadMsgs(convId) {
+    setLoadingMsgs(true)
+    const msgs = await getMessages(convId)
+    setMessages(msgs)
+    setLoadingMsgs(false)
+    markAsRead(convId)
+  }
+
+  function handleNewMessage(msg) {
+    setMessages(prev => prev.find(m => m.id === msg.id) ? prev : [...prev, msg])
+    if (msg.sender_id !== currentUser?.id) markAsRead(selectedId)
+  }
 
   function handleSelect(id) {
     setSelectedId(id)
-    setConversations(prev =>
-      prev.map(c => c.id === id ? { ...c, unread: 0 } : c)
-    )
   }
 
-  function handleSend() {
+  async function handleSend() {
     const text = input.trim()
-    if (!text) return
-    const now = new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })
-    setConversations(prev =>
-      prev.map(c =>
-        c.id === selectedId
-          ? { ...c, time: now, messages: [...c.messages, { id: Date.now(), from: 'me', text, time: now }] }
-          : c
-      )
-    )
+    if (!text || !selectedId || sending) return
     setInput('')
+    setSending(true)
+
+    // Optimistic message
+    const tempId = `opt_${Date.now()}`
+    const opt = { id: tempId, sender_id: currentUser.id, content: text, created_at: new Date().toISOString(), is_read: false }
+    setMessages(prev => [...prev, opt])
+
+    const sent = await sendMessage(selectedId, text)
+    if (sent) {
+      setMessages(prev => prev.map(m => m.id === tempId ? sent : m))
+      setConversations(prev =>
+        prev.map(c => c.id === selectedId ? { ...c, updatedAt: sent.created_at } : c)
+      )
+    } else {
+      // Roll back optimistic on failure
+      setMessages(prev => prev.filter(m => m.id !== tempId))
+    }
+    setSending(false)
   }
 
   function handleKeyDown(e) {
@@ -154,7 +215,6 @@ export default function ChatPage({ onNavigate, currentUser, onLogout, initialCon
 
   return (
     <Layout activePage="" onNavigate={onNavigate} currentUser={currentUser} onLogout={onLogout}>
-
       <div className={styles.chatShell}>
 
         {/* ── Sidebar ── */}
@@ -169,7 +229,7 @@ export default function ChatPage({ onNavigate, currentUser, onLogout, initialCon
               <input
                 type="search"
                 className={styles.searchInput}
-                placeholder="חפש בשיחות..."
+                placeholder="חפש שיחות..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
               />
@@ -177,14 +237,19 @@ export default function ChatPage({ onNavigate, currentUser, onLogout, initialCon
           </div>
 
           <div className={styles.convList}>
-            {filtered.length === 0 ? (
+            {loadingConvs ? (
+              <div className={styles.sidebarEmpty}>
+                <div className={styles.spinner} />
+                <span>טוען שיחות...</span>
+              </div>
+            ) : filtered.length === 0 ? (
               <div className={styles.sidebarEmpty}>
                 <svg viewBox="0 0 64 64" fill="none" width="48" height="48" aria-hidden="true">
                   <circle cx="32" cy="32" r="29" stroke="var(--rule)" strokeWidth="2" />
                   <circle cx="32" cy="32" r="10" fill="var(--purple-700)" />
                   <circle cx="32" cy="32" r="2.5" fill="var(--gold-500)" />
                 </svg>
-                <span>אין שיחות עדיין</span>
+                <span>{conversations.length === 0 ? 'אין שיחות עדיין' : 'לא נמצאו תוצאות'}</span>
               </div>
             ) : (
               filtered.map(conv => (
@@ -194,21 +259,18 @@ export default function ChatPage({ onNavigate, currentUser, onLogout, initialCon
                   className={`${styles.convItem} ${conv.id === selectedId ? styles.convItemActive : ''}`}
                   onClick={() => handleSelect(conv.id)}
                 >
-                  <Avatar name={conv.sellerName} size={40} />
+                  <Avatar name={conv.otherName} size={40} />
                   <div className={styles.convInfo}>
                     <div className={styles.convTopRow}>
-                      <span className={styles.convName}>{conv.sellerName}</span>
-                      <span className={styles.convTime}>{conv.time}</span>
+                      <span className={styles.convName}>{conv.otherName}</span>
+                      <span className={styles.convTime}>{formatTime(conv.updatedAt)}</span>
                     </div>
-                    <span className={styles.convListing}>על: {conv.listingTitle}</span>
-                    <div className={styles.convBottom}>
-                      <span className={styles.convPreview}>
-                        {conv.messages[conv.messages.length - 1]?.text ?? ''}
-                      </span>
-                      {conv.unread > 0 && (
-                        <span className={styles.unreadBadge}>{conv.unread}</span>
-                      )}
-                    </div>
+                    {(conv.city || conv.listing?.city) && (
+                      <span className={styles.convCity}>{conv.city || conv.listing?.city}</span>
+                    )}
+                    {conv.listing?.title && (
+                      <span className={styles.convListing}>על: {conv.listing.title}</span>
+                    )}
                   </div>
                 </button>
               ))
@@ -220,86 +282,93 @@ export default function ChatPage({ onNavigate, currentUser, onLogout, initialCon
         {selected ? (
           <div className={styles.convPanel}>
 
-            {/* Conv header */}
+            {/* Header */}
             <div className={styles.convHeader}>
               <div className={styles.convHeaderTop}>
-                <Avatar name={selected.sellerName} size={42} />
+                <Avatar name={selected.otherName} size={42} />
                 <div className={styles.convHeaderInfo}>
-                  <span className={styles.convHeaderName}>{selected.sellerName}</span>
-                  <span className={styles.convHeaderMeta}>
-                    {selected.lastSeen}
-                    {' · '}
-                    <Stars rating={selected.sellerRating} />
-                    {' '}
-                    {selected.sellerRating}
-                  </span>
+                  <span className={styles.convHeaderName}>{selected.otherName}</span>
+                  {(selected.city || selected.listing?.city) && (
+                    <span className={styles.convHeaderMeta}>
+                      {selected.city || selected.listing?.city}
+                    </span>
+                  )}
                 </div>
-                <button type="button" className={styles.btnOutline} onClick={() => {}}>
-                  צפה בפרופיל
-                </button>
               </div>
 
-              <div className={styles.convHeaderListing}>
-                <div className={styles.listingThumb}>
-                  <svg viewBox="0 0 48 48" width="48" height="48" aria-hidden="true">
-                    <circle cx="24" cy="24" r="24" fill="var(--vinyl-black)" />
-                    <circle cx="24" cy="24" r="8" fill="var(--purple-700)" />
-                    <circle cx="24" cy="24" r="2" fill="var(--gold-500)" />
-                  </svg>
-                </div>
-                <div className={styles.listingInfo}>
-                  <span className={styles.listingLabel}>על:</span>
-                  <span className={styles.listingTitle}>
-                    {selected.listingTitle} ({selected.listingYear})
-                  </span>
-                  <div className={styles.listingChips}>
-                    <span className={styles.chip}>{selected.listingFormat}</span>
-                    <span className={styles.chip}>{selected.listingCondition}</span>
-                    <span className={styles.priceChip}>₪{selected.listingPrice}</span>
+              {selected.listing && (
+                <div className={styles.convHeaderListing}>
+                  <div className={styles.listingThumb}>
+                    <svg viewBox="0 0 48 48" width="44" height="44" aria-hidden="true">
+                      <circle cx="24" cy="24" r="24" fill="var(--vinyl-black)" />
+                      <circle cx="24" cy="24" r="8" fill="var(--purple-700)" />
+                      <circle cx="24" cy="24" r="2" fill="var(--gold-500)" />
+                    </svg>
                   </div>
+                  <div className={styles.listingInfo}>
+                    <span className={styles.listingLabel}>על:</span>
+                    <span className={styles.listingTitle}>
+                      {selected.listing.title}
+                      {selected.listing.year ? ` (${selected.listing.year})` : ''}
+                    </span>
+                    <div className={styles.listingChips}>
+                      {selected.listing.format    && <span className={styles.chip}>{selected.listing.format}</span>}
+                      {selected.listing.condition && <span className={styles.chip}>{selected.listing.condition}</span>}
+                      {selected.listing.price     && <span className={styles.priceChip}>₪{selected.listing.price}</span>}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.btnOutline}
+                    onClick={() => onNavigate?.('product', { product: { id: selected.listing.id, title: selected.listing.title } })}
+                  >
+                    צפה במכירה
+                  </button>
                 </div>
-                <button type="button" className={styles.btnOutline} onClick={() => {}}>
-                  צפה במכירה
-                </button>
-              </div>
+              )}
             </div>
 
             {/* Messages */}
-            <div className={styles.messages}>
-              <div className={styles.dateSeparator}>היום</div>
-
-              {selected.messages.map(msg => (
-                <div
-                  key={msg.id}
-                  className={`${styles.msgRow} ${msg.from === 'me' ? styles.msgRowMe : styles.msgRowThem}`}
-                >
-                  {msg.from === 'them' && (
-                    <Avatar name={selected.sellerName} size={28} />
-                  )}
-                  <div className={`${styles.bubble} ${msg.from === 'me' ? styles.bubbleMe : styles.bubbleThem}`}>
-                    <p className={styles.bubbleText}>{msg.text}</p>
-                    <span className={styles.bubbleTime}>
-                      {msg.time}
-                      {msg.from === 'me' && ' ✓✓'}
-                    </span>
-                  </div>
+            <div className={styles.messages} ref={messagesBoxRef}>
+              {loadingMsgs ? (
+                <div className={styles.loadingState}>
+                  <div className={styles.spinner} />
+                  <span>טוען הודעות...</span>
                 </div>
-              ))}
-
-              <div ref={messagesEndRef} />
+              ) : messages.length === 0 ? (
+                <div className={styles.loadingState}>
+                  <svg viewBox="0 0 64 64" fill="none" width="48" height="48" aria-hidden="true">
+                    <circle cx="32" cy="32" r="29" stroke="var(--rule)" strokeWidth="2" />
+                    <circle cx="32" cy="32" r="10" fill="var(--purple-700)" />
+                    <circle cx="32" cy="32" r="2.5" fill="var(--gold-500)" />
+                  </svg>
+                  <span>שלח הודעה ראשונה</span>
+                </div>
+              ) : (
+                messages.map(msg => {
+                  const isMe = msg.sender_id === currentUser.id
+                  return (
+                    <div
+                      key={msg.id}
+                      className={`${styles.msgRow} ${isMe ? styles.msgRowMe : styles.msgRowThem}`}
+                    >
+                      {!isMe && <Avatar name={selected.otherName} size={28} />}
+                      <div className={`${styles.bubble} ${isMe ? styles.bubbleMe : styles.bubbleThem}`}>
+                        <p className={styles.bubbleText}>{msg.content}</p>
+                        <span className={styles.bubbleTime}>
+                          {formatTime(msg.created_at)}
+                          {isMe && (msg.is_read ? ' ✓✓' : ' ✓')}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })
+              )}
             </div>
 
             {/* Composer */}
             <div className={styles.composer}>
               <div className={styles.composerInner}>
-                <button type="button" className={styles.attachBtn} title="צרף תמונה">
-                  <svg viewBox="0 0 20 20" fill="none" width="18" height="18" aria-hidden="true">
-                    <path d="M9 4H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"
-                      stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                    <path d="M17 3l-7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                    <path d="M12 3h5v5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
                 <textarea
                   className={styles.composerInput}
                   placeholder="הקלד הודעה..."
@@ -312,7 +381,7 @@ export default function ChatPage({ onNavigate, currentUser, onLogout, initialCon
                   type="button"
                   className={styles.sendBtn}
                   onClick={handleSend}
-                  disabled={!input.trim()}
+                  disabled={!input.trim() || sending}
                   aria-label="שלח הודעה"
                 >
                   <svg viewBox="0 0 20 20" fill="none" width="18" height="18" aria-hidden="true">
@@ -321,24 +390,37 @@ export default function ChatPage({ onNavigate, currentUser, onLogout, initialCon
                 </button>
               </div>
               <p className={styles.composerNote}>
-                הודעות אינן מוצפנות מקצה לקצה — אל תשתף פרטי תשלום בצ'אט
+                אל תשתף פרטי תשלום בצ׳אט
               </p>
             </div>
 
           </div>
-        ) : (
+        ) : !loadingConvs ? (
           <div className={styles.noConv}>
-            <svg viewBox="0 0 64 64" fill="none" width="80" height="80" aria-hidden="true">
-              <circle cx="32" cy="32" r="29" stroke="var(--rule)" strokeWidth="2" />
-              <circle cx="32" cy="32" r="10" fill="var(--purple-700)" />
-              <circle cx="32" cy="32" r="2.5" fill="var(--gold-500)" />
-            </svg>
-            <p className={styles.noConvText}>בחר שיחה מהרשימה</p>
+            {chatError ? (
+              <div className={styles.chatErrorBox}>
+                <svg viewBox="0 0 16 16" fill="none" width="16" height="16" aria-hidden="true">
+                  <circle cx="8" cy="8" r="7" stroke="var(--danger)" strokeWidth="1.5"/>
+                  <path d="M8 5v3.5M8 11v.5" stroke="var(--danger)" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                {chatError}
+              </div>
+            ) : (
+              <>
+                <svg viewBox="0 0 64 64" fill="none" width="80" height="80" aria-hidden="true">
+                  <circle cx="32" cy="32" r="29" stroke="var(--rule)" strokeWidth="2" />
+                  <circle cx="32" cy="32" r="10" fill="var(--purple-700)" />
+                  <circle cx="32" cy="32" r="2.5" fill="var(--gold-500)" />
+                </svg>
+                <p className={styles.noConvText}>
+                  {conversations.length === 0 ? 'לחץ "צור קשר" על מכירה כדי להתחיל שיחה' : 'בחר שיחה מהרשימה'}
+                </p>
+              </>
+            )}
           </div>
-        )}
+        ) : null}
 
       </div>
-
     </Layout>
   )
 }

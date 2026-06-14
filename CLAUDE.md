@@ -684,6 +684,43 @@ normalizeTracklist(discogsTracks)     // Discogs tracklist → [{ side, title, d
 
 **Status at end of session:** Full Discogs integration. SearchPage shows live Discogs results below local listings. UploadPage auto-fills all fields from Discogs. ProductPage shows real tracklist and album notes for Discogs-sourced listings.
 
+### Session 11 — 2026-06-14
+**Goal:** Replace all mock chat data with real Supabase chat — real conversations, real messages, real user names
+
+**Files created:**
+- `src/chat.js` — Supabase chat service: `getOrCreateConversation`, `getConversations`, `getMessages`, `sendMessage`, `markAsRead`, `subscribeToMessages`, `getProfile`
+
+**Files updated:**
+- `src/pages/ChatPage.jsx` — full rewrite: removed all `MOCK_CONVERSATIONS`; loads real conversations from Supabase; loads messages per conversation; realtime subscription via `subscribeToMessages`; auto-first message with listing details on new conversation; city shown as subtitle in sidebar; scroll fixed to use `messagesBoxRef` (container scroll, not page scroll)
+- `src/pages/ChatPage.module.css` — added `.convCity`, `.chatErrorBox`, `.loadingState`, `.spinner`
+- `src/pages/ProductPage.jsx` — "צור קשר" now passes `{ listingId, sellerId, sellerName, sellerCity, listingTitle, listingPrice, listingCondition }` as `chatContext`; button disabled with tooltip for mock/demo listings (no `uploaderId`)
+- `src/pages/ProductPage.module.css` — added `.contactBtn:disabled` style
+- `src/App.jsx` — `chatConvId` state renamed to `chatContext`; navigate() updated to use `opts.chatContext`
+- `src/auth.js` — `register()` upserts to `profiles` table after signup; `updateUser()` upserts to `profiles` on profile edit
+
+**Supabase setup required (SQL run by user):**
+- `profiles` table: mirrors `auth.users` name+city; trigger `on_auth_user_created` auto-populates on register; backfill SQL for existing users; RLS: authenticated users can read all profiles, update own
+- `conversation` table: added columns `listing_id`, `buyer_id`, `seller_id`, `buyer_name`, `seller_name`, `updated_at`; RLS disabled for student project; UNIQUE constraint on `(listing_id, buyer_id, seller_id)` to prevent duplicate conversations
+- `message` table: columns `conversation_id`, `sender_id`, `content`, `is_read`; RLS disabled
+
+**Chat architecture:**
+- `getOrCreateConversation({ listingId, sellerId, sellerName, buyerName })` — uses `.limit(1)` (not `.maybeSingle()`) to find existing; tries INSERT with name columns, falls back without if columns missing; returns `{ id, isNew }`
+- `getConversations()` — batch-fetches profiles for all other participants to get real names; joins listing for title/city/format/condition/price; falls back gracefully if `buyer_name`/`seller_name` columns missing
+- Auto-first message: when `isNew === true`, sends formatted message: `listingTitle\nמצב: X | מחיר: ₪Y | City\nהאם עדיין זמין?`
+- Sidebar shows: real registered name (from profiles) + city (from listing) + listing title
+- Realtime: `subscribeToMessages` uses `supabase.channel().on('postgres_changes', INSERT)` — unsubscribes on conversation change/unmount
+- Scroll: `messagesBoxRef` on the `.messages` container; `el.scrollTop = el.scrollHeight` on message change (no page scroll)
+- Error feedback: red `chatErrorBox` shown when conversation creation fails
+
+**Key bugs fixed during session:**
+1. Duplicate conversations — `maybeSingle()` throws when >1 row exists → switched to `.limit(1)`; added UNIQUE DB constraint
+2. Page scrolling on send — `scrollIntoView` was scrolling the page; replaced with direct container `scrollTop`
+3. RLS blocking inserts — disabled RLS on conversation + message tables
+4. Schema cache errors (`buyer_name` column not found) — code falls back to INSERT without name columns
+5. "מוכר מרמת גן" fake names — real names now fetched from `profiles` table via `getProfile()`
+
+**Status at end of session:** Chat fully real — no mock data. Conversations created in Supabase when "צור קשר" is clicked. Messages persist. Real user names shown. Auto-first message sent. Realtime updates work.
+
 ---
 
 ## Rules for Claude in This Project

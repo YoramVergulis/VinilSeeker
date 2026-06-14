@@ -28,13 +28,30 @@ function VinylDisc() {
   )
 }
 
-function OfferCard({ offer, isBest, onNavigate }) {
+function OfferCard({ offer, isBest, onNavigate, productTitle }) {
   const isStore   = offer.type === 'store'
   const initial   = isStore
     ? (offer.storeName?.[0] ?? 'ח')
     : (offer.sellerName?.[0]?.toUpperCase() ?? offer.city?.[0] ?? 'מ')
   const name      = isStore ? offer.storeName : (offer.sellerName || `מוכר מ${offer.city}`)
   const location  = isStore ? offer.storeCity : (offer.sellerCity || offer.city)
+
+  const canContact = !!offer.uploaderId
+
+  function handleContact() {
+    if (!canContact) return
+    onNavigate?.('chat', {
+      chatContext: {
+        listingId:        offer.id,
+        sellerId:         offer.uploaderId,
+        sellerName:       name,
+        sellerCity:       offer.city        || '',
+        listingTitle:     productTitle      || offer.title || '',
+        listingPrice:     offer.price       ?? null,
+        listingCondition: offer.condition   || '',
+      },
+    })
+  }
 
   return (
     <div className={`${styles.offerCard} ${isBest ? styles.offerBest : ''}`}>
@@ -69,7 +86,9 @@ function OfferCard({ offer, isBest, onNavigate }) {
           <button
             type="button"
             className={styles.contactBtn}
-            onClick={() => onNavigate?.('chat')}
+            onClick={handleContact}
+            disabled={!canContact}
+            title={!canContact ? 'מכירת הדגמה — לא ניתן ליצור קשר' : undefined}
           >
             צור קשר
           </button>
@@ -79,7 +98,7 @@ function OfferCard({ offer, isBest, onNavigate }) {
   )
 }
 
-function OffersSection({ title, icon, offers, cheapestPrice, emptyText, onNavigate }) {
+function OffersSection({ title, icon, offers, cheapestPrice, emptyText, onNavigate, productTitle }) {
   return (
     <div className={styles.offersGroup}>
       <div className={styles.offersGroupHeader}>
@@ -90,7 +109,7 @@ function OffersSection({ title, icon, offers, cheapestPrice, emptyText, onNaviga
       {offers.length > 0 ? (
         <div className={styles.offersList}>
           {offers.map(offer => (
-            <OfferCard key={offer.id} offer={offer} isBest={offer.price === cheapestPrice} onNavigate={onNavigate} />
+            <OfferCard key={offer.id} offer={offer} isBest={offer.price === cheapestPrice} onNavigate={onNavigate} productTitle={productTitle} />
           ))}
         </div>
       ) : (
@@ -239,6 +258,7 @@ export default function ProductPage({ product, onNavigate, vinylList = [], curre
             cheapestPrice={cheapestPrice}
             emptyText="אין הצעות מחנויות לאלבום זה כרגע"
             onNavigate={onNavigate}
+            productTitle={title}
           />
 
           <OffersSection
@@ -253,6 +273,7 @@ export default function ProductPage({ product, onNavigate, vinylList = [], curre
             cheapestPrice={cheapestPrice}
             emptyText="אין מוכרים פרטיים לאלבום זה כרגע"
             onNavigate={onNavigate}
+            productTitle={title}
           />
 
           {/* Wishlist CTA */}

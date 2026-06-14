@@ -382,7 +382,8 @@
   transition: background 0.15s;
 }
 
-.contactBtn:hover { background: var(--purple-600); }
+.contactBtn:hover:not(:disabled) { background: var(--purple-600); }
+.contactBtn:disabled { opacity: 0.38; cursor: not-allowed; }
 
 /* Description */
 .descBlock { padding-bottom: var(--s-4); }
