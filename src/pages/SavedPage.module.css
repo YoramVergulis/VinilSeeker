@@ -336,3 +336,37 @@
 .btnPrimary:hover {
   background: var(--purple-600);
 }
+
+@media (max-width: 768px) {
+  .headerInner {
+    padding: var(--s-8) var(--s-5) var(--s-4);
+  }
+
+  .tabBarInner {
+    padding: 0 var(--s-5);
+  }
+
+  .body {
+    padding: var(--s-5) var(--s-4);
+  }
+
+  .row {
+    flex-wrap: wrap;
+    gap: var(--s-3);
+  }
+
+  .rowPrice {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: var(--t-h2);
+  }
+
+  .btnView {
+    padding: 6px var(--s-3);
+    font-size: var(--t-caption);
+  }
+}

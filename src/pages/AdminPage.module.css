@@ -493,3 +493,62 @@
   color: var(--ink-3);
   margin: 0;
 }
+
+@media (max-width: 768px) {
+  .adminHeaderInner {
+    padding: var(--s-4) var(--s-5);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--s-1);
+  }
+
+  .statsStrip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .statCard:last-child {
+    border-left: 1px solid var(--rule);
+  }
+
+  .statCard:nth-child(2n) {
+    border-left: none;
+  }
+
+  .tabBar {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 var(--s-4);
+  }
+
+  .tabContent {
+    padding: var(--s-4) var(--s-4) var(--s-8);
+  }
+
+  .tableToolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .table {
+    overflow-x: auto;
+  }
+
+  .tableRow,
+  .tableHead {
+    min-width: 700px;
+  }
+
+  .storesGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .statsStrip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .statValue {
+    font-size: var(--t-h3);
+  }
+}

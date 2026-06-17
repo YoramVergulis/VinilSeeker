@@ -107,3 +107,23 @@
   color: var(--rule);
   transition: color 0.18s, transform 0.18s;
 }
+
+@media (max-width: 768px) {
+  .header {
+    padding: var(--s-8) var(--s-5);
+  }
+
+  .body {
+    padding: var(--s-6) var(--s-4);
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: var(--t-h2);
+  }
+}

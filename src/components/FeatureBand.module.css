@@ -127,3 +127,31 @@
   border-radius: var(--r-full);
   background: var(--vinyl-black);
 }
+
+@media (max-width: 900px) {
+  .wrap {
+    padding: 0 var(--s-6);
+  }
+
+  .band {
+    grid-template-columns: 1fr;
+  }
+
+  .text {
+    padding: var(--s-8) var(--s-6);
+  }
+
+  .visual {
+    min-height: 220px;
+  }
+}
+
+@media (max-width: 480px) {
+  .wrap {
+    padding: 0 var(--s-4);
+  }
+
+  .heading {
+    font-size: 28px;
+  }
+}

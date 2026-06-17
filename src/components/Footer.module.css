@@ -100,3 +100,27 @@
   font-size: var(--t-caption);
   color: var(--purple-200);
 }
+
+@media (max-width: 768px) {
+  .footer {
+    padding: var(--s-10) var(--s-5) var(--s-6);
+  }
+
+  .grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s-8);
+  }
+}
+
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: var(--s-6);
+  }
+
+  .bottom {
+    flex-direction: column;
+    gap: var(--s-2);
+    text-align: center;
+  }
+}

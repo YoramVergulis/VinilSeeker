@@ -31,15 +31,16 @@ function formatTime(iso) {
 }
 
 export default function ChatPage({ onNavigate, currentUser, onLogout, chatContext }) {
-  const [conversations, setConversations] = useState([])
-  const [selectedId,    setSelectedId]    = useState(null)
-  const [messages,      setMessages]      = useState([])
-  const [input,         setInput]         = useState('')
-  const [searchQuery,   setSearchQuery]   = useState('')
-  const [loadingConvs,  setLoadingConvs]  = useState(true)
-  const [loadingMsgs,   setLoadingMsgs]   = useState(false)
-  const [sending,       setSending]       = useState(false)
-  const [chatError,     setChatError]     = useState('')
+  const [conversations,      setConversations]      = useState([])
+  const [selectedId,         setSelectedId]         = useState(null)
+  const [messages,           setMessages]           = useState([])
+  const [input,              setInput]              = useState('')
+  const [searchQuery,        setSearchQuery]        = useState('')
+  const [loadingConvs,       setLoadingConvs]       = useState(true)
+  const [loadingMsgs,        setLoadingMsgs]        = useState(false)
+  const [sending,            setSending]            = useState(false)
+  const [chatError,          setChatError]          = useState('')
+  const [mobileSidebarOpen,  setMobileSidebarOpen]  = useState(true)
   const messagesBoxRef  = useRef(null)
   const unsubscribeRef  = useRef(null)
 
@@ -161,6 +162,7 @@ export default function ChatPage({ onNavigate, currentUser, onLogout, chatContex
       : [localConv, ...convs]
     setConversations(merged)
     setSelectedId(convId)
+    setMobileSidebarOpen(false)
   }
 
   async function loadMsgs(convId) {
@@ -178,6 +180,7 @@ export default function ChatPage({ onNavigate, currentUser, onLogout, chatContex
 
   function handleSelect(id) {
     setSelectedId(id)
+    setMobileSidebarOpen(false)
   }
 
   async function handleSend() {
@@ -218,7 +221,7 @@ export default function ChatPage({ onNavigate, currentUser, onLogout, chatContex
       <div className={styles.chatShell}>
 
         {/* ── Sidebar ── */}
-        <aside className={styles.sidebar}>
+        <aside className={`${styles.sidebar} ${mobileSidebarOpen ? styles.mobileSidebarVisible : styles.mobileSidebarHidden}`}>
           <div className={styles.sidebarHeader}>
             <h2 className={styles.sidebarTitle}>שיחות</h2>
             <div className={styles.searchWrap}>
@@ -280,11 +283,21 @@ export default function ChatPage({ onNavigate, currentUser, onLogout, chatContex
 
         {/* ── Conversation panel ── */}
         {selected ? (
-          <div className={styles.convPanel}>
+          <div className={`${styles.convPanel} ${!mobileSidebarOpen ? styles.mobileConvPanelVisible : styles.mobileConvPanelHidden}`}>
 
             {/* Header */}
             <div className={styles.convHeader}>
               <div className={styles.convHeaderTop}>
+                <button
+                  type="button"
+                  className={styles.mobileBackBtn}
+                  onClick={() => setMobileSidebarOpen(true)}
+                  aria-label="חזור לשיחות"
+                >
+                  <svg viewBox="0 0 20 20" fill="none" width="20" height="20">
+                    <path d="M9 4l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
                 <Avatar name={selected.otherName} size={42} />
                 <div className={styles.convHeaderInfo}>
                   <span className={styles.convHeaderName}>{selected.otherName}</span>
@@ -396,7 +409,7 @@ export default function ChatPage({ onNavigate, currentUser, onLogout, chatContex
 
           </div>
         ) : !loadingConvs ? (
-          <div className={styles.noConv}>
+          <div className={`${styles.noConv} ${!mobileSidebarOpen ? styles.mobileConvPanelVisible : styles.mobileConvPanelHidden}`}>
             {chatError ? (
               <div className={styles.chatErrorBox}>
                 <svg viewBox="0 0 16 16" fill="none" width="16" height="16" aria-hidden="true">

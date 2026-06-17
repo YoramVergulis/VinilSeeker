@@ -578,3 +578,27 @@
 }
 
 .discogsDismiss:hover { background: var(--cream-deep); }
+
+@media (max-width: 768px) {
+  .titleBar {
+    padding: var(--s-6) var(--s-5);
+  }
+
+  .formWrap {
+    padding: var(--s-6) var(--s-4) var(--s-12);
+  }
+
+  .twoCol {
+    grid-template-columns: 1fr;
+  }
+
+  .conditionPill {
+    padding: 8px 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pageTitle {
+    font-size: var(--t-h3);
+  }
+}

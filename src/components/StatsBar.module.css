@@ -29,3 +29,18 @@
   color: var(--ink-2);
   margin-top: var(--s-1);
 }
+
+@media (max-width: 600px) {
+  .bar {
+    padding: var(--s-5) var(--s-4);
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--s-4);
+  }
+
+  .num {
+    font-size: 28px;
+  }
+}

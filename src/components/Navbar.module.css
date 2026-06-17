@@ -184,3 +184,141 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* ── Hamburger ── */
+.hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink);
+  padding: 6px;
+  border-radius: var(--r-sm);
+  transition: background 0.15s;
+  margin-right: auto;
+}
+
+.hamburger:hover {
+  background: var(--cream-deep);
+}
+
+/* ── Mobile overlay + menu ── */
+.mobileOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(15, 8, 20, 0.4);
+}
+
+.mobileMenu {
+  display: none;
+  position: fixed;
+  top: 68px;
+  right: 0;
+  left: 0;
+  z-index: 45;
+  background: var(--cream);
+  border-bottom: 1px solid var(--rule);
+  box-shadow: var(--shadow-lg);
+  padding: var(--s-4) var(--s-5) var(--s-6);
+  flex-direction: column;
+}
+
+.mobileLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mobileLink {
+  font-family: var(--font-body);
+  font-size: var(--t-body);
+  font-weight: 500;
+  color: var(--ink);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 12px var(--s-2);
+  text-align: right;
+  border-radius: var(--r-sm);
+  transition: background 0.12s, color 0.12s;
+}
+
+.mobileLink:hover {
+  background: var(--cream-deep);
+  color: var(--purple-700);
+}
+
+.mobileLinkActive {
+  color: var(--purple-700);
+  font-weight: 700;
+}
+
+.mobileDivider {
+  height: 1px;
+  background: var(--rule);
+  margin: var(--s-3) 0;
+}
+
+.mobileActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.mobilePrimary {
+  font-family: var(--font-body);
+  font-size: var(--t-body);
+  font-weight: 700;
+  background: var(--purple-700);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-full);
+  padding: 13px var(--s-5);
+  cursor: pointer;
+  margin-top: var(--s-2);
+  transition: background 0.15s;
+}
+
+.mobilePrimary:hover {
+  background: var(--purple-600);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .nav {
+    padding: 0 var(--s-5);
+    gap: var(--s-3);
+  }
+
+  .links {
+    display: none;
+  }
+
+  .desktopOnly {
+    display: none !important;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .mobileOverlay {
+    display: block;
+  }
+
+  .mobileMenu {
+    display: flex;
+  }
+
+  .avatarName {
+    display: none;
+  }
+
+  .avatarBtn {
+    padding: 4px;
+  }
+}

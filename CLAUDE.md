@@ -821,6 +821,57 @@ CREATE POLICY "msg_update" ON message
 
 **Status at end of session:** Browser back/forward works across all pages. Refresh stays on current page (including product, search, chat). All domain references updated to vinilseeker.com. `vercel.json` added — must be deployed to Vercel for the refresh fix to work on the live site.
 
+### Session 14 — 2026-06-17
+**Goal:** Make all pages and components mobile-responsive
+
+**Files updated (JSX):**
+- `src/components/Navbar.jsx` — added `menuOpen` state; hamburger button (SVG ☰/✕ toggle); `closeMenu()` + `nav()` helpers route all links through; desktop-only class on "יציאה"/"התחברות"/"פרסם תקליט +" buttons; mobile overlay + dropdown menu with all nav links, divider, auth/profile/logout actions, upload primary button
+- `src/pages/ChatPage.jsx` — added `mobileSidebarOpen` state (default `true`); `handleSelect` + `handleChatContext` set it to `false` (show conversation); sidebar/convPanel get mobile show/hide classes; back button (RTL-correct right-pointing chevron SVG) in convHeader to return to sidebar
+
+**Files updated (CSS — all new `@media` blocks):**
+
+| File | Key changes |
+|---|---|
+| `Navbar.module.css` | `.hamburger` shown on mobile; `.links` + `.desktopOnly` hidden; `.mobileOverlay` + `.mobileMenu` dropdown; `.avatarName` hidden |
+| `Footer.module.css` | grid `1fr 1fr` at 768px → `1fr` at 480px; bottom bar stacks vertically |
+| `HeroSection.module.css` | grid → 1 col at 900px; `.art` hidden; heading scales 44px → 34px |
+| `StatsBar.module.css` | grid `repeat(2, 1fr)` at 600px; num font-size 28px |
+| `FeaturedSection.module.css` | grid 2 cols at 900px → 1 col at 480px |
+| `GenreSection.module.css` | grid 3 cols at 900px → 2 cols at 480px |
+| `HowItWorksSection.module.css` | grid → 1 col at 900px; card padding reduced |
+| `FeatureBand.module.css` | band grid → 1 col at 900px; heading 28px at 480px |
+| `SectionHeader.module.css` | title → `--t-h3` at 480px; margin-bottom reduced |
+| `AuthPage.module.css` | page grid → 1fr; artPanel hidden; height → auto min-height; twoCol → 1 col |
+| `SearchPage.module.css` | filters scroll horizontally (overflow-x auto, no-wrap); grid 2 cols → 1 col |
+| `ProductPage.module.css` | main grid → 1fr; coverCol static; similarGrid 2 cols → 1 col; prices + title scale down |
+| `UploadPage.module.css` | twoCol → 1 col; reduced paddings; conditionPill smaller |
+| `ProfilePage.module.css` | headerInner stacks; editGrid → 1 col; listings grid 2 cols → 1 col |
+| `ChatPage.module.css` | chatShell → 1 col; sidebar + convPanel `position:absolute;inset:0`; toggle via `.mobileSidebarVisible/Hidden` + `.mobileConvPanelVisible/Hidden`; back button shown |
+| `AdminPage.module.css` | statsStrip → 2 cols; tabBar scrolls; table overflow-x auto; storesGrid → 1 col |
+| `SavedPage.module.css` | row flex-wrap; all paddings reduced |
+| `BlogPage.module.css` | featured → 1 col; grid 2 cols → 1 col |
+| `LegalPage.module.css` | body grid → 1 col; toc position static |
+| `HowPage.module.css` | reduced hero/body padding |
+| `RarePage.module.css` | grid 2 cols → 1 col; reduced paddings |
+| `ContactPage.module.css` | layout grid → 1 col; reduced paddings |
+| `PricingPage.module.css` | reduced hero/body padding |
+| `SellerGuidePage.module.css` | reduced hero/body padding |
+| `CategoriesPage.module.css` | grid → 1 col at 768px |
+| `StoresPage.module.css` | reduced header padding (grid already uses `auto-fill minmax` — inherently responsive) |
+
+**Breakpoints used:** 900px (multi-column grids), 768px (main mobile breakpoint), 600px (stats bar), 480px (small phones — font sizes, 1-col grids)
+
+**Mobile Navbar pattern:**
+- Desktop: logo | center nav links | right actions (all inline)
+- Mobile: logo | hamburger → taps open fullscreen overlay with all links stacked + auth actions at bottom
+- All navigation through `nav(page, opts)` helper → calls `onNavigate` + `closeMenu()`
+
+**Mobile Chat pattern:**
+- Desktop: `300px sidebar | 1fr conversation` grid (both visible)
+- Mobile: `position: absolute; inset: 0` on both panels; toggle which is on top via `mobileSidebarOpen` state; back button in conversation header returns to sidebar
+
+**Status at end of session:** All 19 pages and all shared components are fully mobile-responsive. Build: 122 modules, zero errors.
+
 ---
 
 ## Rules for Claude in This Project

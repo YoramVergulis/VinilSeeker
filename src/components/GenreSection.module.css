@@ -69,3 +69,28 @@
 .chip:hover .count {
   color: var(--purple-200);
 }
+
+@media (max-width: 900px) {
+  .section {
+    padding: var(--s-12) var(--s-6) 0;
+  }
+
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .section {
+    padding: var(--s-10) var(--s-4) 0;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .chip {
+    padding: 16px var(--s-2);
+  }
+}

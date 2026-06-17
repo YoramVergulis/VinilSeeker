@@ -39,3 +39,13 @@
 .link:hover {
   color: var(--purple-900);
 }
+
+@media (max-width: 480px) {
+  .title {
+    font-size: var(--t-h3);
+  }
+
+  .head {
+    margin-bottom: var(--s-4);
+  }
+}

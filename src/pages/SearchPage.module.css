@@ -361,3 +361,58 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+@media (max-width: 900px) {
+  .searchHeader {
+    padding: var(--s-5) var(--s-5);
+  }
+
+  .filtersBar {
+    padding: var(--s-3) var(--s-5);
+  }
+
+  .filtersWrap {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: var(--s-4);
+    padding-bottom: var(--s-1);
+  }
+
+  .filterGroup {
+    flex-wrap: nowrap;
+  }
+
+  .filterPills {
+    flex-wrap: nowrap;
+  }
+
+  .resultsWrap {
+    padding: var(--s-5) var(--s-5) var(--s-12);
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--s-4);
+  }
+
+  .discogsDivider {
+    padding: var(--s-5) var(--s-5) var(--s-3);
+  }
+}
+
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .resultsHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--s-3);
+  }
+
+  .sortSelect {
+    width: 100%;
+  }
+}

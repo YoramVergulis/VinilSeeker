@@ -539,3 +539,71 @@
   max-width: 420px;
   text-align: center;
 }
+
+/* ── Mobile back button (hidden on desktop) ── */
+.mobileBackBtn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--purple-700);
+  padding: 4px;
+  border-radius: var(--r-sm);
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.mobileBackBtn:hover {
+  background: var(--cream-deep);
+}
+
+@media (max-width: 768px) {
+  .chatShell {
+    grid-template-columns: 1fr;
+    position: relative;
+  }
+
+  .sidebar {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    width: 100%;
+  }
+
+  .mobileSidebarVisible {
+    display: flex;
+  }
+
+  .mobileSidebarHidden {
+    display: none;
+  }
+
+  .convPanel {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+  }
+
+  .mobileConvPanelVisible {
+    display: flex;
+  }
+
+  .mobileConvPanelHidden {
+    display: none;
+  }
+
+  .mobileBackBtn {
+    display: flex;
+  }
+
+  .noConv {
+    position: absolute;
+    inset: 0;
+  }
+
+  .msgRow {
+    max-width: 85%;
+  }
+}

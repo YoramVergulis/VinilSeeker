@@ -422,3 +422,34 @@
   text-transform: uppercase;
   letter-spacing: 0.07em;
 }
+
+@media (max-width: 768px) {
+  .page {
+    grid-template-columns: 1fr;
+    height: auto;
+    min-height: calc(100vh - 68px);
+  }
+
+  .artPanel {
+    display: none;
+  }
+
+  .formPanel {
+    padding: var(--s-8) var(--s-5);
+  }
+
+  .formCard {
+    margin-top: var(--s-4);
+    margin-bottom: var(--s-4);
+  }
+}
+
+@media (max-width: 480px) {
+  .twoCol {
+    grid-template-columns: 1fr;
+  }
+
+  .heading {
+    font-size: var(--t-h3);
+  }
+}

@@ -165,3 +165,12 @@
 .contactBtn:hover {
   background: var(--purple-600);
 }
+
+@media (max-width: 768px) {
+  .header {
+    padding: var(--s-8) var(--s-5);
+  }
+}
+@media (max-width: 480px) {
+  .title { font-size: var(--t-h2); }
+}

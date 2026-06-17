@@ -678,6 +678,75 @@
   font-family: var(--font-body);
 }
 
+@media (max-width: 900px) {
+  .main {
+    grid-template-columns: 1fr;
+    padding: var(--s-6) var(--s-5);
+    gap: var(--s-6);
+  }
+
+  .coverCol {
+    position: static;
+    max-width: 360px;
+  }
+
+  .breadcrumb {
+    padding: var(--s-3) var(--s-5);
+  }
+
+  .similar {
+    padding: var(--s-8) var(--s-5) var(--s-12);
+  }
+
+  .similarGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--s-4);
+  }
+
+  .title {
+    font-size: var(--t-h2);
+  }
+
+  .price {
+    font-size: 38px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main {
+    padding: var(--s-5) var(--s-4);
+  }
+
+  .breadcrumb {
+    padding: var(--s-2) var(--s-4);
+  }
+
+  .coverCol {
+    max-width: 100%;
+  }
+
+  .similarGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .similar {
+    padding: var(--s-6) var(--s-4) var(--s-10);
+  }
+
+  .sellerCard {
+    flex-wrap: wrap;
+  }
+
+  .offerRow {
+    flex-wrap: wrap;
+    gap: var(--s-3);
+  }
+
+  .offerRight {
+    align-items: flex-start;
+  }
+}
+
 /* ── Tracklist ───────────────────────────────────────────── */
 .tracklist {
   padding-bottom: var(--s-4);
