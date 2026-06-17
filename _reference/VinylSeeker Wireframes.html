@@ -1,0 +1,2176 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VinylSeeker — Wireframes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Special+Elite&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #1a1a1a; font-family: 'Caveat', cursive; color: #222; }
+
+  /* Screen nav tabs */
+  .screen-nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: #111; border-bottom: 2px solid #333;
+    display: flex; gap: 0; overflow-x: auto; padding: 0 12px;
+  }
+  .screen-nav button {
+    font-family: 'Caveat', cursive; font-size: 15px; font-weight: 600;
+    color: #888; background: none; border: none; cursor: pointer;
+    padding: 12px 18px; white-space: nowrap; border-bottom: 3px solid transparent;
+    transition: all 0.15s;
+  }
+  .screen-nav button.active { color: #fff; border-bottom-color: #fff; }
+  .screen-nav button:hover { color: #ccc; }
+
+  .screens-wrapper { padding-top: 48px; }
+
+  .screen-panel { display: none; padding: 32px; min-height: calc(100vh - 48px); }
+  .screen-panel.active { display: block; }
+
+  /* Wireframe canvas */
+  .wf-canvas {
+    background: #f5f3ef;
+    border: 2px solid #888;
+    border-radius: 4px;
+    position: relative;
+    font-family: 'Caveat', cursive;
+    direction: rtl;
+  }
+
+  /* Wireframe primitives */
+  .wf-box {
+    border: 2px solid #555;
+    background: #e8e5df;
+    border-radius: 2px;
+    position: relative;
+  }
+  .wf-box.dashed { border-style: dashed; background: #ede9e2; }
+  .wf-img {
+    border: 2px solid #555;
+    background: #ddd;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .wf-img::before, .wf-img::after {
+    content: ''; position: absolute;
+    background: #aaa; height: 2px;
+  }
+  .wf-img::before { width: 100%; transform: rotate(var(--deg, 30deg)); }
+  .wf-img::after { width: 100%; transform: rotate(calc(-1 * var(--deg, 30deg))); }
+
+  .wf-line { height: 10px; background: #bbb; border-radius: 2px; }
+  .wf-line.sm { height: 8px; }
+  .wf-line.lg { height: 14px; }
+
+  .wf-btn {
+    border: 2px solid #444;
+    background: #e0ddd7;
+    border-radius: 2px;
+    padding: 6px 14px;
+    font-family: 'Caveat', cursive;
+    font-size: 15px;
+    font-weight: 700;
+    color: #222;
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: default;
+  }
+  .wf-btn.filled { background: #444; color: #f5f3ef; }
+  .wf-btn.ghost { background: transparent; border-style: dashed; }
+  .wf-btn.outline { background: transparent; }
+  .wf-btn.wide { width: 100%; }
+
+  .wf-input {
+    border: 2px solid #555;
+    background: #fff;
+    border-radius: 2px;
+    padding: 7px 10px;
+    font-family: 'Caveat', cursive;
+    font-size: 14px;
+    color: #888;
+    width: 100%;
+  }
+  .wf-input.error { border-color: #333; border-style: dashed; }
+
+  .wf-label { font-size: 13px; font-weight: 700; color: #444; margin-bottom: 3px; display: block; }
+
+  .wf-pill {
+    display: inline-flex; align-items: center;
+    border: 2px solid #555; border-radius: 20px;
+    padding: 2px 10px; font-size: 13px; font-weight: 600;
+    background: #e8e5df; color: #333;
+  }
+  .wf-pill.active { background: #444; color: #f5f3ef; }
+  .wf-pill.sm { font-size: 11px; padding: 1px 7px; }
+
+  /* Annotation styles */
+  .ann {
+    font-family: 'Caveat', cursive;
+    font-size: 12px;
+    color: #666;
+    font-style: italic;
+    display: flex; align-items: flex-start; gap: 4px;
+  }
+  .ann-arrow { color: #555; font-style: normal; font-size: 14px; }
+  .ann-box {
+    border: 1.5px dashed #999;
+    border-radius: 3px;
+    padding: 4px 8px;
+    background: rgba(255,255,255,0.6);
+    font-family: 'Caveat', cursive;
+    font-size: 12px;
+    color: #555;
+    font-style: italic;
+  }
+
+  /* Auth note */
+  .auth-note {
+    font-family: 'Caveat', cursive;
+    font-size: 12px;
+    color: #666;
+    background: #f0ede7;
+    border: 1.5px dashed #aaa;
+    border-radius: 3px;
+    padding: 3px 8px;
+    font-style: italic;
+  }
+
+  /* Error / empty states */
+  .state-box {
+    border: 2px dashed #888;
+    background: #ede9e2;
+    border-radius: 4px;
+    padding: 16px;
+  }
+  .state-box.error-state { border-color: #555; background: #e8e5df; }
+
+  /* Section header */
+  .wf-section-title {
+    font-size: 16px; font-weight: 700; color: #333;
+    border-bottom: 2px solid #555; padding-bottom: 4px; margin-bottom: 10px;
+  }
+
+  /* Screen title badge */
+  .screen-badge {
+    display: inline-block;
+    background: #333; color: #f5f3ef;
+    font-family: 'Caveat', cursive; font-size: 18px; font-weight: 700;
+    padding: 6px 16px; border-radius: 2px; margin-bottom: 16px;
+  }
+  .screen-badge span { opacity: 0.6; font-size: 14px; margin-right: 8px; }
+
+  .access-badge {
+    display: inline-block;
+    border: 2px solid #888; background: #e8e5df;
+    font-family: 'Caveat', cursive; font-size: 13px;
+    padding: 2px 10px; border-radius: 2px; margin-bottom: 16px; margin-right: 8px;
+    color: #555;
+  }
+
+  /* Divider */
+  .wf-divider { border: none; border-top: 2px solid #bbb; margin: 8px 0; }
+
+  /* Grid helpers */
+  .flex { display: flex; }
+  .flex-col { display: flex; flex-direction: column; }
+  .gap4 { gap: 4px; } .gap6 { gap: 6px; } .gap8 { gap: 8px; }
+  .gap10 { gap: 10px; } .gap12 { gap: 12px; } .gap16 { gap: 16px; }
+  .gap20 { gap: 20px; } .gap24 { gap: 24px; }
+  .items-center { align-items: center; }
+  .items-start { align-items: flex-start; }
+  .justify-between { justify-content: space-between; }
+  .justify-center { justify-content: center; }
+  .flex1 { flex: 1; }
+  .w100 { width: 100%; }
+
+  /* Checkbox / Radio */
+  .wf-check {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 14px; color: #333;
+  }
+  .wf-check-box {
+    width: 14px; height: 14px; border: 2px solid #555;
+    background: #fff; flex-shrink: 0; border-radius: 1px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .wf-check-box.checked::after { content: '✓'; font-size: 10px; color: #333; }
+  .wf-radio-dot {
+    width: 14px; height: 14px; border: 2px solid #555;
+    background: #fff; flex-shrink: 0; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .wf-radio-dot.checked::after { content: '●'; font-size: 8px; color: #333; }
+
+  /* Circle placeholder */
+  .wf-circle {
+    border: 2px solid #555; background: #e0ddd7; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: #888;
+  }
+
+  /* Sticky note style annotations */
+  .sticky-note {
+    background: #f5f0d8; border: 1.5px solid #ccc;
+    font-family: 'Caveat', cursive; font-size: 12px; color: #555;
+    padding: 6px 10px; border-radius: 2px;
+    transform: rotate(-1deg);
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    font-style: italic;
+  }
+
+  /* Rating stars */
+  .wf-stars { color: #888; font-size: 14px; letter-spacing: 1px; }
+
+  /* Scrollable area indicator */
+  .scroll-hint {
+    font-family: 'Caveat', cursive; font-size: 11px; color: #999;
+    text-align: center; padding: 4px; border-top: 1px dashed #ccc;
+    font-style: italic;
+  }
+
+  /* Sketch border on canvas */
+  .sketch-border {
+    box-shadow: 3px 3px 0 #888, -1px -1px 0 #aaa;
+  }
+
+  /* Mobile annotation panel */
+  .mobile-ann {
+    background: #f0ede7; border: 2px solid #aaa; border-radius: 4px;
+    padding: 12px; font-family: 'Caveat', cursive; font-size: 13px; color: #444;
+  }
+  .mobile-ann-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; color: #333; }
+</style>
+</head>
+<body>
+
+<nav class="screen-nav" id="screenNav"></nav>
+
+<div class="screens-wrapper" id="screensWrapper"></div>
+
+<script type="text/babel">
+
+// ─── Shared Primitives ───────────────────────────────────────────────────────
+
+const ImgBox = ({ w, h, label, style = {} }) => (
+  <div className="wf-img" style={{ width: w, height: h, flexShrink: 0, ...style }}>
+    <span style={{ fontSize: 11, color: '#888', zIndex: 1, background: '#ddd', padding: '0 3px', fontFamily: 'Caveat, cursive' }}>{label || '[ img ]'}</span>
+  </div>
+);
+
+const Line = ({ w = '100%', style = {} }) => (
+  <div className="wf-line" style={{ width: w, ...style }} />
+);
+
+const Lines = ({ count = 3, style = {} }) => (
+  <div className="flex-col gap4" style={style}>
+    {Array.from({ length: count }).map((_, i) => (
+      <div key={i} className="wf-line" style={{ width: i === count - 1 ? '70%' : '100%' }} />
+    ))}
+  </div>
+);
+
+const Btn = ({ label, type = '', style = {}, ann }) => (
+  <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', gap: 3 }}>
+    <div className={`wf-btn ${type}`} style={style}>{label}</div>
+    {ann && <div className="ann" style={{ fontSize: 11 }}><span className="ann-arrow">↳</span>{ann}</div>}
+  </div>
+);
+
+const Input = ({ label, placeholder = '', error, style = {} }) => (
+  <div className="flex-col gap4" style={style}>
+    {label && <span className="wf-label">{label}</span>}
+    <div className={`wf-input ${error ? 'error' : ''}`} style={{ color: '#aaa' }}>{placeholder || '_ _ _ _ _ _ _ _'}</div>
+    {error && <div style={{ fontSize: 11, color: '#555', fontStyle: 'italic', fontFamily: 'Caveat, cursive' }}>⚠ {error}</div>}
+  </div>
+);
+
+const Ann = ({ text, style = {} }) => (
+  <div className="ann" style={style}><span className="ann-arrow">↳</span>{text}</div>
+);
+
+const AuthNote = ({ text }) => (
+  <div className="auth-note">{text}</div>
+);
+
+const Pill = ({ label, active, sm }) => (
+  <div className={`wf-pill ${active ? 'active' : ''} ${sm ? 'sm' : ''}`}>{label}</div>
+);
+
+const SectionTitle = ({ children }) => (
+  <div className="wf-section-title">{children}</div>
+);
+
+const Divider = () => <hr className="wf-divider" />;
+
+const Check = ({ label, checked }) => (
+  <div className="wf-check">
+    <div className={`wf-check-box ${checked ? 'checked' : ''}`}></div>
+    <span>{label}</span>
+  </div>
+);
+
+const Radio = ({ label, checked }) => (
+  <div className="wf-check">
+    <div className={`wf-radio-dot ${checked ? 'checked' : ''}`}></div>
+    <span>{label}</span>
+  </div>
+);
+
+const Circle = ({ size = 40, label, style = {} }) => (
+  <div className="wf-circle" style={{ width: size, height: size, ...style }}>
+    {label && <span style={{ fontSize: 12 }}>{label}</span>}
+  </div>
+);
+
+// Mobile phone frame — used to show how each screen adapts on a small viewport
+const MobileFrame = ({ children, label }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+    <div style={{
+      width: 240,
+      height: 470,
+      background: '#222',
+      borderRadius: 28,
+      padding: '8px 6px',
+      boxShadow: '3px 3px 0 #888',
+      position: 'relative',
+    }}>
+      {/* Notch */}
+      <div style={{
+        position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)',
+        width: 60, height: 14, background: '#222', borderRadius: '0 0 10px 10px', zIndex: 2,
+      }}/>
+      <div style={{
+        width: '100%', height: '100%',
+        background: '#f5f3ef',
+        borderRadius: 22,
+        overflow: 'hidden',
+        direction: 'rtl',
+        position: 'relative',
+        fontFamily: 'Caveat, cursive',
+      }}>
+        {children}
+      </div>
+    </div>
+    {label && <div style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: '#888', fontStyle: 'italic' }}>📱 {label}</div>}
+  </div>
+);
+
+// Mobile primitives — smaller scale
+const MLine = ({ w = '100%', h = 6, style = {} }) => (
+  <div style={{ width: w, height: h, background: '#bbb', borderRadius: 2, ...style }} />
+);
+const MBox = ({ children, style = {}, dashed }) => (
+  <div style={{ border: `1.5px ${dashed ? 'dashed' : 'solid'} #555`, background: '#e8e5df', borderRadius: 2, ...style }}>{children}</div>
+);
+const MBtn = ({ label, filled, style = {} }) => (
+  <div style={{
+    border: '1.5px solid #444', background: filled ? '#444' : '#e0ddd7',
+    color: filled ? '#f5f3ef' : '#222', borderRadius: 2,
+    padding: '4px 8px', fontSize: 10, fontWeight: 700, fontFamily: 'Caveat, cursive',
+    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+    ...style
+  }}>{label}</div>
+);
+const MImg = ({ h = 50, label = '[ img ]' }) => (
+  <div style={{
+    border: '1.5px solid #555', background: '#ddd', height: h, width: '100%',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontSize: 9, color: '#888', fontFamily: 'Caveat, cursive', position: 'relative', overflow: 'hidden',
+  }}>
+    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ position: 'absolute', width: '141%', height: 1.5, background: '#aaa', transform: 'rotate(30deg)' }}/>
+      <div style={{ position: 'absolute', width: '141%', height: 1.5, background: '#aaa', transform: 'rotate(-30deg)' }}/>
+    </div>
+    <span style={{ background: '#ddd', padding: '0 3px', zIndex: 1 }}>{label}</span>
+  </div>
+);
+const MNav = () => (
+  <div style={{ background: '#e0ddd7', borderBottom: '1.5px solid #555', padding: '6px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div style={{ fontSize: 14, fontWeight: 700, color: '#222' }}>☰</div>
+    <div style={{ background: '#ccc', padding: '2px 6px', fontSize: 10, fontWeight: 700, borderRadius: 1 }}>🎵 VinylSeeker</div>
+  </div>
+);
+const MPill = ({ label, active }) => (
+  <div style={{
+    border: '1.5px solid #555', borderRadius: 10, padding: '0 6px',
+    fontSize: 9, fontWeight: 600, fontFamily: 'Caveat, cursive',
+    background: active ? '#444' : '#e8e5df', color: active ? '#f5f3ef' : '#333',
+    display: 'inline-flex', whiteSpace: 'nowrap'
+  }}>{label}</div>
+);
+
+// Broken vinyl placeholder — for error states
+// In the design phase this becomes a real broken vinyl illustration
+const BrokenVinyl = ({ size = 64 }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+    <svg width={size} height={size} viewBox="0 0 64 64" style={{ display: 'block' }}>
+      {/* Vinyl disc */}
+      <circle cx="32" cy="32" r="30" fill="#d8d5cf" stroke="#555" strokeWidth="2"/>
+      {/* Label circle */}
+      <circle cx="32" cy="32" r="10" fill="#bbb" stroke="#555" strokeWidth="1.5"/>
+      {/* Center hole */}
+      <circle cx="32" cy="32" r="3" fill="#f5f3ef" stroke="#555" strokeWidth="1"/>
+      {/* Grooves */}
+      <circle cx="32" cy="32" r="20" fill="none" stroke="#aaa" strokeWidth="1" strokeDasharray="2 3"/>
+      <circle cx="32" cy="32" r="15" fill="none" stroke="#aaa" strokeWidth="1" strokeDasharray="2 3"/>
+      {/* Crack lines */}
+      <line x1="14" y1="10" x2="38" y2="42" stroke="#555" strokeWidth="2.5" strokeLinecap="round"/>
+      <line x1="38" y1="42" x2="50" y2="36" stroke="#555" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="38" y1="42" x2="34" y2="58" stroke="#555" strokeWidth="1.5" strokeLinecap="round"/>
+      {/* Chip */}
+      <polygon points="14,10 22,8 16,18" fill="#e8e5df" stroke="#555" strokeWidth="1.5"/>
+    </svg>
+    <div style={{ fontFamily: 'Caveat, cursive', fontSize: 10, color: '#888', fontStyle: 'italic', textAlign: 'center' }}>
+      [ broken vinyl — ממחיש שגיאה ]
+    </div>
+  </div>
+);
+
+// ─── Shared Navbar ────────────────────────────────────────────────────────────
+
+const NavbarLoggedOut = () => (
+  <div className="wf-box" style={{ padding: '10px 16px', marginBottom: 0, borderBottom: '2px solid #555', background: '#e0ddd7' }}>
+    <div className="flex items-center justify-between w100">
+      <div className="flex items-center gap16">
+        <Btn label="התחברות" ann="→ Login Page" />
+        <Btn label="הרשמה חינם" type="filled" ann="→ Register Page" />
+      </div>
+      <div className="flex items-center gap24">
+        <span style={{ fontSize: 14, color: '#555' }}>חיפוש</span>
+        <span style={{ fontSize: 14, color: '#555' }}>מוכרים</span>
+        <span style={{ fontSize: 14, color: '#555' }}>אודות</span>
+        <div className="wf-box" style={{ padding: '4px 12px', background: '#ccc', fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 16, color: '#222' }}>
+          🎵 VinylSeeker
+        </div>
+      </div>
+    </div>
+    <AuthNote text="מצב מחובר: מציג אייקון Avatar + כפתור Wishlist במקום כפתורי כניסה/הרשמה" />
+  </div>
+);
+
+const NavbarLoggedIn = () => (
+  <div className="wf-box" style={{ padding: '10px 16px', marginBottom: 0, borderBottom: '2px solid #555', background: '#e0ddd7' }}>
+    <div className="flex items-center justify-between w100">
+      <div className="flex items-center gap16">
+        <div className="flex items-center gap8">
+          <Circle size={32} label="👤" />
+          <div style={{ fontSize: 13, fontFamily: 'Caveat, cursive', color: '#555' }}>▾</div>
+          <Ann text="→ Profile dropdown" style={{ fontSize: 11 }} />
+        </div>
+        <div className="flex items-center gap6">
+          <div className="wf-btn outline" style={{ fontSize: 13 }}>♡ Wishlist <span style={{ background: '#444', color: '#f5f3ef', borderRadius: '50%', padding: '0 5px', fontSize: 11 }}>3</span></div>
+          <Ann text="→ Wishlist Page" style={{ fontSize: 11 }} />
+        </div>
+      </div>
+      <div className="flex items-center gap24">
+        <span style={{ fontSize: 14, color: '#555' }}>חיפוש</span>
+        <span style={{ fontSize: 14, color: '#555' }}>מוכרים</span>
+        <span style={{ fontSize: 14, color: '#555' }}>אודות</span>
+        <div className="wf-box" style={{ padding: '4px 12px', background: '#ccc', fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 16, color: '#222' }}>
+          🎵 VinylSeeker
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// ─── SCREEN 1: Landing Page ───────────────────────────────────────────────────
+
+const Screen1 = () => (
+  <div>
+    <div className="screen-badge"><span>מסך 1</span>דף הבית — ציבורי</div>
+    <div className="access-badge">🔓 ציבורי — ללא התחברות</div>
+    <div className="wf-canvas sketch-border" style={{ width: 1100, margin: '0 auto' }}>
+      {/* Navbar */}
+      <NavbarLoggedOut />
+
+      {/* Hero */}
+      <div style={{ padding: '40px 60px', background: '#eceae4', borderBottom: '2px solid #ccc', textAlign: 'right' }}>
+        <div className="flex justify-center" style={{ marginBottom: 16 }}>
+          <Pill label="✦ עכשיו עם מלאי חנויות ישראליות" />
+        </div>
+        <div style={{ textAlign: 'center', marginBottom: 20 }}>
+          <div className="wf-line lg" style={{ width: '60%', margin: '0 auto 8px', height: 28 }} />
+          <div className="wf-line lg" style={{ width: '45%', margin: '0 auto 16px', height: 28 }} />
+          <Lines count={3} style={{ width: '50%', margin: '0 auto 24px' }} />
+        </div>
+        {/* Search bar */}
+        <div className="flex items-center gap8 justify-center">
+          <Btn label="חיפוש" type="filled" ann="→ Search Page עם תוצאות" />
+          <div className="wf-input" style={{ width: 380, fontSize: 14, color: '#aaa' }}>חפש אמן, אלבום, קטלוג...</div>
+        </div>
+      </div>
+
+      {/* Stats bar */}
+      <div className="flex justify-center gap8" style={{ padding: '16px 60px', borderBottom: '2px solid #ccc', background: '#e8e5df' }}>
+        {[['12,400+', 'תקליטים'], ['38', 'חנויות'], ['850+', 'מוכרים פרטיים']].map(([num, label], i) => (
+          <div key={i} className="flex items-center gap8">
+            {i > 0 && <div style={{ width: 1, height: 36, background: '#aaa' }} />}
+            <div style={{ textAlign: 'center', fontFamily: 'Caveat, cursive' }}>
+              <div style={{ fontSize: 22, fontWeight: 700, color: '#222' }}>{num}</div>
+              <div style={{ fontSize: 13, color: '#666' }}>{label}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Features */}
+      <div style={{ padding: '32px 60px', borderBottom: '2px solid #ccc' }}>
+        <div className="flex gap20">
+          {['חיפוש מאוחד', 'איסוף מקומי', 'התראות מחיר'].map((title, i) => (
+            <div key={i} className="wf-box flex-col gap8" style={{ flex: 1, padding: 16, textAlign: 'center' }}>
+              <Circle size={44} style={{ margin: '0 auto' }} />
+              <div className="wf-line" style={{ width: '60%', margin: '0 auto', height: 14 }} />
+              <Lines count={3} />
+              <Ann text="לא ניתן ללחיצה" style={{ justifyContent: 'center', fontSize: 11 }} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* CTA */}
+      <div style={{ padding: '32px 60px', textAlign: 'center', background: '#e8e5df', borderBottom: '2px solid #ccc' }}>
+        <div className="wf-line lg" style={{ width: '40%', margin: '0 auto 8px', height: 20 }} />
+        <div className="wf-line" style={{ width: '30%', margin: '0 auto 20px' }} />
+        <Btn label="התחל לחפש ←" type="filled" ann="→ Register Page" style={{ fontSize: 16, padding: '10px 28px' }} />
+      </div>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between" style={{ padding: '16px 60px', background: '#d8d5cf', borderTop: '2px solid #bbb' }}>
+        <Line w={200} />
+        <div className="wf-box" style={{ padding: '4px 12px', background: '#bbb', fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 15 }}>🎵 VinylSeeker</div>
+      </div>
+    </div>
+
+    {/* Mobile wireframe */}
+    <div style={{ display: 'flex', justifyContent: 'center', marginTop: 32 }}>
+      <MobileFrame label="דף הבית במובייל">
+        <MNav />
+        <div style={{ padding: 10, background: '#eceae4', borderBottom: '1.5px solid #ccc' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6 }}><MPill label="✦ עכשיו עם מלאי חנויות" /></div>
+          <MLine w="80%" h={10} style={{ margin: '0 auto 4px' }} />
+          <MLine w="60%" h={10} style={{ margin: '0 auto 8px' }} />
+          <MLine w="90%" h={4} style={{ margin: '0 auto 3px' }} />
+          <MLine w="70%" h={4} style={{ margin: '0 auto 8px' }} />
+          <MBox style={{ background: '#fff', padding: '4px 8px', fontSize: 9, color: '#aaa', marginBottom: 6 }}>חפש... 🔍</MBox>
+          <MBtn label="חיפוש" filled style={{ width: '100%' }} />
+        </div>
+        <div style={{ padding: 8, background: '#e8e5df', borderBottom: '1.5px solid #ccc', display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {[['12,400+', 'תקליטים'], ['38', 'חנויות'], ['850+', 'מוכרים']].map(([n, l], i) => (
+            <div key={i} style={{ textAlign: 'center', borderBottom: i < 2 ? '1px dashed #bbb' : 'none', paddingBottom: 2 }}>
+              <div style={{ fontSize: 12, fontWeight: 700 }}>{n}</div>
+              <div style={{ fontSize: 9, color: '#666' }}>{l}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{ padding: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {['חיפוש מאוחד', 'איסוף מקומי', 'התראות מחיר'].map((t, i) => (
+            <MBox key={i} style={{ padding: 6, textAlign: 'center' }}>
+              <div style={{ width: 18, height: 18, borderRadius: '50%', border: '1.5px solid #555', margin: '0 auto 3px', background: '#e0ddd7' }} />
+              <MLine w="60%" h={5} style={{ margin: '0 auto 3px' }} />
+              <MLine w="90%" h={3} style={{ margin: '0 auto 2px' }} />
+              <MLine w="70%" h={3} style={{ margin: '0 auto' }} />
+            </MBox>
+          ))}
+        </div>
+        <div style={{ padding: 8, background: '#e8e5df', textAlign: 'center' }}>
+          <MLine w="70%" h={6} style={{ margin: '0 auto 6px' }} />
+          <MBtn label="התחל לחפש ←" filled />
+        </div>
+      </MobileFrame>
+    </div>
+  </div>
+);
+
+// ─── SCREEN 2: Login / Register ───────────────────────────────────────────────
+
+const Screen2 = () => {
+  const [tab, setTab] = React.useState('login');
+  return (
+    <div>
+      <div className="screen-badge"><span>מסך 2</span>כניסה / הרשמה — ציבורי</div>
+      <div className="access-badge">🔓 ציבורי</div>
+      <div className="wf-canvas sketch-border" style={{ width: 1100, margin: '0 auto' }}>
+        <NavbarLoggedOut />
+        <div style={{ padding: '48px 0', display: 'flex', justifyContent: 'center', background: '#eceae4', minHeight: 600 }}>
+          <div className="wf-box" style={{ width: 420, padding: '28px 32px' }}>
+            {/* Logo */}
+            <div style={{ textAlign: 'center', marginBottom: 20 }}>
+              <div className="wf-box" style={{ display: 'inline-block', padding: '6px 20px', background: '#ccc', fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 18 }}>🎵 VinylSeeker</div>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex" style={{ borderBottom: '2px solid #bbb', marginBottom: 20 }}>
+              {['login', 'register'].map(t => (
+                <div key={t} onClick={() => setTab(t)} style={{
+                  flex: 1, textAlign: 'center', padding: '8px 0',
+                  fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 16,
+                  cursor: 'pointer', color: tab === t ? '#222' : '#888',
+                  borderBottom: tab === t ? '3px solid #333' : '3px solid transparent'
+                }}>
+                  {t === 'login' ? 'כניסה' : 'הרשמה'}
+                </div>
+              ))}
+            </div>
+
+            {tab === 'login' ? (
+              <div className="flex-col gap12">
+                <Input label="אימייל" placeholder="your@email.com" />
+                <Input label="סיסמה" placeholder="••••••••" />
+                <div style={{ textAlign: 'left' }}>
+                  <span style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: '#555', textDecoration: 'underline', cursor: 'pointer' }}>שכחת סיסמה?</span>
+                  <Ann text="→ Forgot Password Page" style={{ fontSize: 11 }} />
+                </div>
+                <Btn label="כניסה" type="filled wide" style={{ padding: '10px', fontSize: 16, width: '100%', justifyContent: 'center' }} ann="הצלחה → Search Page" />
+                <div style={{ textAlign: 'center', fontFamily: 'Caveat, cursive', fontSize: 13, color: '#888' }}>— או —</div>
+                <Btn label="Continue with Google" type="outline wide" style={{ width: '100%', justifyContent: 'center', fontSize: 14 }} ann="→ completes login flow" />
+
+                {/* Error state */}
+                <div className="state-box error-state">
+                  <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 14, marginBottom: 6 }}>⚠ מצב שגיאה:</div>
+                  <Input label="" placeholder="••••••••" error="אימייל או סיסמה שגויים" />
+                </div>
+              </div>
+            ) : (
+              <div className="flex-col gap12">
+                <Input label="שם תצוגה" placeholder="השם שלך" />
+                <Input label="אימייל" placeholder="your@email.com" error="כתובת אימייל לא תקינה" />
+                <Input label="סיסמה" placeholder="••••••••" />
+                <div className="flex-col gap4">
+                  <span className="wf-label">עיר</span>
+                  <div className="wf-input" style={{ color: '#aaa' }}>בחר עיר ▾</div>
+                </div>
+                <Btn label="צור חשבון" type="filled wide" style={{ padding: '10px', fontSize: 16, width: '100%', justifyContent: 'center' }} ann="הצלחה → Dashboard" />
+                <div style={{ textAlign: 'center', fontFamily: 'Caveat, cursive', fontSize: 13, color: '#888' }}>— או —</div>
+                <Btn label="Continue with Google" type="outline wide" style={{ width: '100%', justifyContent: 'center', fontSize: 14 }} ann="→ completes register flow" />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 32 }}>
+        <MobileFrame label="כניסה במובייל">
+          <MNav />
+          <div style={{ padding: 12, background: '#eceae4', minHeight: '100%' }}>
+            <div style={{ background: '#ccc', padding: '3px 8px', fontSize: 10, fontWeight: 700, textAlign: 'center', borderRadius: 1, marginBottom: 12 }}>🎵 VinylSeeker</div>
+            <div style={{ display: 'flex', borderBottom: '1.5px solid #bbb', marginBottom: 10 }}>
+              <div style={{ flex: 1, textAlign: 'center', padding: '4px 0', fontSize: 11, fontWeight: 700, borderBottom: '2px solid #333' }}>כניסה</div>
+              <div style={{ flex: 1, textAlign: 'center', padding: '4px 0', fontSize: 11, fontWeight: 700, color: '#888' }}>הרשמה</div>
+            </div>
+            <div style={{ fontSize: 9, fontWeight: 700, marginBottom: 2 }}>אימייל</div>
+            <MBox style={{ background: '#fff', padding: '4px 6px', fontSize: 9, color: '#aaa', marginBottom: 6 }}>your@email.com</MBox>
+            <div style={{ fontSize: 9, fontWeight: 700, marginBottom: 2 }}>סיסמה</div>
+            <MBox style={{ background: '#fff', padding: '4px 6px', fontSize: 9, color: '#aaa', marginBottom: 4 }}>••••••••</MBox>
+            <div style={{ fontSize: 9, color: '#555', textDecoration: 'underline', textAlign: 'left', marginBottom: 8 }}>שכחת סיסמה?</div>
+            <MBtn label="כניסה" filled style={{ width: '100%', padding: '5px', marginBottom: 6 }} />
+            <div style={{ textAlign: 'center', fontSize: 9, color: '#888', marginBottom: 6 }}>— או —</div>
+            <MBtn label="Continue with Google" style={{ width: '100%', padding: '5px', background: 'transparent' }} />
+          </div>
+        </MobileFrame>
+      </div>
+    </div>
+  );
+};
+
+// ─── SCREEN 3: Search Page ────────────────────────────────────────────────────
+
+const RecordCard = ({ badge = 'חדש', city = 'ת"א' }) => (
+  <div className="wf-box flex-col gap8" style={{ padding: 12, cursor: 'pointer', position: 'relative' }}>
+    <ImgBox w="100%" h={120} label="שער אלבום" />
+    <div className="wf-line sm" style={{ width: '70%' }} />
+    <div className="wf-line" style={{ width: '90%', height: 12 }} />
+    <div className="flex items-center justify-between">
+      <Pill label={badge} sm />
+      <Pill label={city} sm />
+    </div>
+    <div className="wf-line lg" style={{ width: '40%', height: 16 }} />
+    <Ann text="לחיצה → דף המוצר" style={{ fontSize: 10 }} />
+  </div>
+);
+
+const Screen3 = () => (
+  <div>
+    <div className="screen-badge"><span>מסך 3</span>דף חיפוש — מחובר</div>
+    <div className="access-badge">🔒 דורש התחברות — גישה לפילטרים מלאים</div>
+    <div className="wf-canvas sketch-border" style={{ width: 1100, margin: '0 auto' }}>
+      <NavbarLoggedIn />
+
+      {/* Search header */}
+      <div style={{ padding: '16px 24px', borderBottom: '2px solid #ccc', background: '#eceae4' }}>
+        <div className="flex items-center gap8 w100" style={{ marginBottom: 10 }}>
+          <Btn label="חיפוש" type="filled" ann="→ מרענן תוצאות" />
+          <div className="wf-input" style={{ color: '#aaa' }}>חפש אמן, אלבום, קטלוג... 🔍</div>
+        </div>
+        <div className="flex gap8">
+          {['הכל', 'ויניל', 'CD', 'יד שנייה', 'חנויות', 'נדיר'].map((p, i) => (
+            <Pill key={i} label={p} active={i === 0} />
+          ))}
+        </div>
+      </div>
+
+      {/* Two-column layout */}
+      <div className="flex" style={{ minHeight: 600 }}>
+        {/* Left Sidebar (RTL = right side visually but left in code) */}
+        <div className="wf-box flex-col gap16" style={{ width: 220, padding: 16, borderLeft: '2px solid #ccc', flexShrink: 0, background: '#e8e5df' }}>
+          <SectionTitle>פילטרים</SectionTitle>
+
+          <div>
+            <div className="wf-label">מחיר (₪)</div>
+            <div style={{ height: 16, background: '#ccc', borderRadius: 8, margin: '8px 0', position: 'relative' }}>
+              <div style={{ position: 'absolute', right: '10%', left: '30%', height: '100%', background: '#888', borderRadius: 8 }} />
+              <div style={{ position: 'absolute', right: '10%', width: 14, height: 14, background: '#fff', border: '2px solid #555', borderRadius: '50%', top: 1 }} />
+              <div style={{ position: 'absolute', left: '30%', width: 14, height: 14, background: '#fff', border: '2px solid #555', borderRadius: '50%', top: 1 }} />
+            </div>
+            <div className="flex justify-between" style={{ fontSize: 12, color: '#666', fontFamily: 'Caveat, cursive' }}>
+              <span>₪500</span><span>₪50</span>
+            </div>
+          </div>
+
+          <div className="flex-col gap6">
+            <div className="wf-label">פורמט</div>
+            <Check label='ויניל 12"' checked /><Check label='ויניל 7"' checked />
+            <Check label="CD" /><Check label="קסטה" />
+          </div>
+
+          <div className="flex-col gap6">
+            <div className="wf-label">מצב</div>
+            <Check label="חדש" checked /><Check label="VG+ יד שנייה" checked />
+            <Check label="VG יד שנייה" /><Check label="Good" />
+          </div>
+
+          <div className="flex-col gap6">
+            <div className="wf-label">מיקום</div>
+            <Check label="תל אביב" checked /><Check label="ירושלים" />
+            <Check label="חיפה" /><Check label="פתח תקווה" />
+          </div>
+
+          <Ann text="שינוי פילטר → תוצאות מתעדכנות" />
+          <AuthNote text="פילטרים מלאים: מחובר בלבד" />
+        </div>
+
+        {/* Main results */}
+        <div className="flex-col flex1" style={{ padding: 20 }}>
+          <div className="flex items-center justify-between" style={{ marginBottom: 14 }}>
+            <div className="flex items-center gap8">
+              <span style={{ fontFamily: 'Caveat, cursive', fontSize: 14, color: '#555' }}>מיון:</span>
+              <div className="wf-input" style={{ width: 160, color: '#555' }}>מחיר: מהזול ליקר ▾</div>
+            </div>
+            <div style={{ fontFamily: 'Caveat, cursive', fontSize: 14, color: '#666' }}>נמצאו [X] תוצאות עבור "[query]"</div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+            {[['חדש','ת"א'], ['יד שנייה','ירושלים'], ['נדיר','חיפה'], ['חדש','ת"א'], ['VG+','פ"ת'], ['יד שנייה','ת"א']].map(([badge, city], i) => (
+              <RecordCard key={i} badge={badge} city={city} />
+            ))}
+          </div>
+
+          <Divider />
+          {/* Empty state */}
+          <div className="state-box" style={{ marginTop: 16, textAlign: 'center', padding: 28 }}>
+            <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 15, marginBottom: 4 }}>מצב ריק — Empty State</div>
+            <div style={{ display: 'flex', justifyContent: 'center', margin: '8px auto' }}><BrokenVinyl size={56} /></div>
+            <div className="wf-line" style={{ width: 200, margin: '8px auto' }} />
+            <div style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: '#666', marginTop: 6 }}>
+              "נסה שם אמן אחר או הרחב את פילטרי המחיר"
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="scroll-hint">↕ גלילה לתוצאות נוספות</div>
+    </div>
+    <div style={{ display: 'flex', justifyContent: 'center', marginTop: 32 }}>
+      <MobileFrame label="חיפוש במובייל — סיידבר → bottom sheet">
+        <MNav />
+        <div style={{ padding: 8, background: '#eceae4', borderBottom: '1.5px solid #ccc' }}>
+          <MBox style={{ background: '#fff', padding: '4px 6px', fontSize: 9, color: '#aaa', marginBottom: 6 }}>חפש... 🔍</MBox>
+          <div style={{ display: 'flex', gap: 4, overflow: 'hidden' }}>
+            <MPill label="הכל" active /><MPill label="ויניל" /><MPill label="CD" /><MPill label="יד 2" />
+          </div>
+        </div>
+        <div style={{ padding: '6px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px dashed #ccc' }}>
+          <MBtn label="⚙ פילטרים" />
+          <div style={{ fontSize: 9, color: '#666' }}>X תוצאות</div>
+        </div>
+        <div style={{ padding: 8, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+          {[1, 2, 3, 4].map(i => (
+            <MBox key={i} style={{ padding: 4 }}>
+              <MImg h={50} label="שער" />
+              <MLine w="70%" h={4} style={{ margin: '3px 0' }} />
+              <MLine w="90%" h={3} style={{ marginBottom: 2 }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <MPill label="חדש" /><MLine w={20} h={6} />
+              </div>
+            </MBox>
+          ))}
+        </div>
+        <div style={{ borderTop: '1.5px dashed #aaa', padding: '4px 8px', fontSize: 9, color: '#888', textAlign: 'center', fontStyle: 'italic' }}>
+          ↑ לחיצה על "פילטרים" → bottom sheet
+        </div>
+      </MobileFrame>
+    </div>
+  </div>
+);
+
+// ─── SCREEN 4: Product / Listing Page ────────────────────────────────────────
+
+const Screen4 = () => (
+  <div>
+    <div className="screen-badge"><span>מסך 4</span>דף מוצר / מכירה — ציבורי</div>
+    <div className="access-badge">🔓 ציבורי — Wishlist/Alert דורש כניסה</div>
+    <div className="wf-canvas sketch-border" style={{ width: 1100, margin: '0 auto' }}>
+      <NavbarLoggedIn />
+
+      {/* Breadcrumb */}
+      <div style={{ padding: '8px 24px', background: '#e8e5df', borderBottom: '1px solid #ccc', fontFamily: 'Caveat, cursive', fontSize: 13, color: '#666', direction: 'rtl' }}>
+        <span style={{ textDecoration: 'underline', cursor: 'pointer' }}>חיפוש</span>
+        <span style={{ margin: '0 6px' }}>›</span>
+        <span style={{ textDecoration: 'underline' }}>[Artist]</span>
+        <span style={{ margin: '0 6px' }}>›</span>
+        <span>[Album Name]</span>
+        <Ann text="לחיצה על 'חיפוש' → Search Page" style={{ display: 'inline-flex', marginRight: 12, fontSize: 11 }} />
+      </div>
+
+      {/* Two-column layout */}
+      <div className="flex gap20" style={{ padding: '24px 24px' }}>
+        {/* Left column (in RTL = left in code, appears right visually) */}
+        <div className="flex-col gap16" style={{ width: 280, flexShrink: 0 }}>
+          <ImgBox w={280} h={280} label="שער אלבום" />
+          <div className="flex gap6" style={{ flexWrap: 'wrap' }}>
+            {['ויניל 12"', 'VG+', 'לחיצה ראשונה', 'רוק'].map((t, i) => <Pill key={i} label={t} sm />)}
+          </div>
+
+          {/* Price History Chart */}
+          <div className="wf-box" style={{ padding: 12 }}>
+            <SectionTitle>היסטוריית מחיר — 6 חודשים</SectionTitle>
+            <div className="wf-box" style={{ height: 100, background: '#e0ddd7', position: 'relative', overflow: 'hidden' }}>
+              <svg width="100%" height="100%" viewBox="0 0 200 80" preserveAspectRatio="none">
+                <polyline points="10,60 40,45 70,55 100,30 140,20 180,25" fill="none" stroke="#555" strokeWidth="2.5" strokeLinecap="round"/>
+                <polyline points="10,60 40,45 70,55 100,30 140,20 180,25" fill="none" stroke="#aaa" strokeWidth="6" opacity="0.2"/>
+              </svg>
+            </div>
+            <div className="flex justify-between" style={{ marginTop: 4, fontFamily: 'Caveat, cursive', fontSize: 11, color: '#888' }}>
+              {['נוב', 'דצמ', 'ינו', 'פבר', 'מרץ', 'אפר'].map(m => <span key={m}>{m}</span>)}
+            </div>
+          </div>
+        </div>
+
+        {/* Right column */}
+        <div className="flex-col flex1 gap12">
+          <div className="wf-line lg" style={{ height: 28, width: '80%' }} />
+          <div className="wf-line" style={{ height: 18, width: '50%' }} />
+
+          <div className="flex gap10" style={{ flexWrap: 'wrap' }}>
+            {['שנה: 1973', 'לייבל: ____', 'ז\'אנר: רוק', 'פורמט: ויניל'].map((m, i) => (
+              <div key={i} style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: '#555', borderBottom: '1px dashed #aaa', paddingBottom: 2 }}>{m}</div>
+            ))}
+          </div>
+
+          <Divider />
+          <SectionTitle>מוכרים זמינים — [X] הצעות</SectionTitle>
+
+          {/* Seller cards */}
+          {[
+            { badge: 'מחיר הכי טוב', name: 'יוסי כהן', type: 'מוכר פרטי', condition: 'VG+', best: true },
+            { name: 'רקורד תל אביב', type: 'חנות מאושרת', condition: 'חדש', best: false },
+            { name: 'מוסיקה לכל', type: 'חנות מאושרת', condition: 'חדש', best: false },
+          ].map((seller, i) => (
+            <div key={i} className="wf-box" style={{ padding: 12, border: seller.best ? '2px solid #444' : undefined }}>
+              {seller.best && <Pill label="⭐ מחיר הכי טוב" active sm />}
+              <div className="flex items-center justify-between" style={{ marginTop: seller.best ? 8 : 0 }}>
+                <div className="flex-col gap4">
+                  <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 15 }}>{seller.name}</div>
+                  <div style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: '#666' }}>{seller.type} · ★★★★☆ · תל אביב</div>
+                  <Pill label={seller.condition} sm />
+                </div>
+                <div className="flex-col gap6 items-center">
+                  <div className="wf-line lg" style={{ width: 80, height: 22 }} />
+                  <Btn label="צור קשר" type="filled" ann="→ מגלה פרטי מוכר" style={{ fontSize: 13 }} />
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {/* Action bar */}
+          <div className="flex gap8" style={{ marginTop: 8 }}>
+            <div className="flex-col gap4 flex1">
+              <Btn label="♡ הוסף ל-Wishlist" type="outline wide" style={{ width: '100%', justifyContent: 'center' }} ann="מנותק: → Login | מחובר: שמירה → כפתור 'נשמר ✓'" />
+            </div>
+            <div className="flex-col gap4 flex1">
+              <Btn label="🔔 התראת מחיר" type="ghost wide" style={{ width: '100%', justifyContent: 'center' }} ann="→ פותח modal לקביעת מחיר יעד" />
+            </div>
+          </div>
+          <AuthNote text="שני הכפתורים: מנותק → Redirect to Login Page" />
+
+          {/* Error state */}
+          <div className="state-box error-state" style={{ marginTop: 12, textAlign: 'center' }}>
+            <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 14, marginBottom: 8 }}>⚠ מצב שגיאה — מכירה לא זמינה:</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}><BrokenVinyl size={56} /></div>
+            <div style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: '#666', marginBottom: 10 }}>"המכירה הזו כבר נמכרה"</div>
+            <Btn label="מצא דומים" type="outline" ann="→ Search Page עם שאילתא זהה" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style={{ display: 'flex', justifyContent: 'center', marginTop: 32 }}>
+      <MobileFrame label="דף מוצר במובייל — תמונה למעלה, מוכרים למטה">
+        <MNav />
+        <div style={{ padding: '4px 8px', background: '#e8e5df', fontSize: 9, color: '#666', borderBottom: '1px solid #ccc' }}>חיפוש › [Artist] › [Album]</div>
+        <div style={{ padding: 8 }}>
+          <MImg h={140} label="שער אלבום" />
+          <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', margin: '6px 0' }}>
+            <MPill label='ויניל 12"' /><MPill label="VG+" /><MPill label="רוק" />
+          </div>
+          <MLine w="80%" h={9} style={{ marginBottom: 3 }} />
+          <MLine w="50%" h={6} style={{ marginBottom: 8 }} />
+          <div style={{ fontSize: 10, fontWeight: 700, borderBottom: '1.5px solid #555', paddingBottom: 2, marginBottom: 4 }}>מוכרים — X הצעות</div>
+          {[true, false, false].map((best, i) => (
+            <MBox key={i} style={{ padding: 5, marginBottom: 4, border: best ? '2px solid #444' : undefined }}>
+              {best && <MPill label="⭐ הכי טוב" active />}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: best ? 3 : 0 }}>
+                <div style={{ flex: 1 }}>
+                  <MLine w="70%" h={5} style={{ marginBottom: 2 }} />
+                  <MLine w="50%" h={3} />
+                </div>
+                <MBtn label="צור קשר" filled />
+              </div>
+            </MBox>
+          ))}
+          <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
+            <MBtn label="♡ Wishlist" style={{ flex: 1, justifyContent: 'center' }} />
+            <MBtn label="🔔 התראה" style={{ flex: 1, justifyContent: 'center' }} />
+          </div>
+        </div>
+      </MobileFrame>
+    </div>
+  </div>
+);
+
+// ─── SCREEN 5: Upload Listing ─────────────────────────────────────────────────
+
+const Screen5 = () => (
+  <div>
+    <div className="screen-badge"><span>מסך 5</span>העלאת מכירה — מחובר</div>
+    <div className="access-badge">🔒 דורש התחברות</div>
+    <AuthNote text="לא מחובר → Redirect to Login Page" />
+    <div className="wf-canvas sketch-border" style={{ width: 1100, margin: '0 auto', marginTop: 8 }}>
+      <NavbarLoggedIn />
+      <div style={{ padding: '24px 0', textAlign: 'center', borderBottom: '2px solid #ccc', background: '#eceae4' }}>
+        <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 22, color: '#222' }}>מכור תקליט</div>
+      </div>
+
+      {/* Form */}
+      <div style={{ maxWidth: 600, margin: '0 auto', padding: '28px 24px' }}>
+
+        {/* Error banner */}
+        <div className="state-box error-state" style={{ marginBottom: 16 }}>
+          <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 13 }}>⚠ שגיאת העלאה:</div>
+          <div style={{ fontFamily: 'Caveat, cursive', fontSize: 12, color: '#666' }}>"ההעלאה נכשלה. נסה שוב."</div>
+        </div>
+
+        {/* Photo upload */}
+        <div className="wf-section-title" style={{ marginBottom: 10 }}>1. תמונה</div>
+        <div className="wf-box dashed" style={{ height: 140, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: 4, border: '2px dashed #888' }}>
+          <Circle size={40} label="📷" style={{ marginBottom: 8 }} />
+          <div style={{ fontFamily: 'Caveat, cursive', fontSize: 15, fontWeight: 600, marginBottom: 4 }}>העלה תמונה</div>
+          <div style={{ fontFamily: 'Caveat, cursive', fontSize: 12, color: '#888' }}>עד 5MB, JPG או PNG</div>
+          <Ann text="לחיצה → file picker נפתח" style={{ fontSize: 11 }} />
+        </div>
+        <div className="state-box error-state" style={{ marginBottom: 20 }}>
+          <div style={{ fontFamily: 'Caveat, cursive', fontSize: 12 }}>⚠ שגיאת שדה: "יש להעלות לפחות תמונה אחת"</div>
+        </div>
+
+        {/* Record details */}
+        <div className="wf-section-title" style={{ marginBottom: 10 }}>2. פרטי התקליט</div>
+        <div className="flex-col gap10" style={{ marginBottom: 20 }}>
+          <Input label="שם האמן" />
+          <Input label="שם האלבום" />
+          <div className="flex gap10">
+            <div className="flex-col gap4 flex1">
+              <span className="wf-label">פורמט</span>
+              <div className="wf-input" style={{ color: '#aaa' }}>ויניל 12" ▾</div>
+            </div>
+            <Input label="שנה" style={{ flex: 1 }} />
+          </div>
+        </div>
+
+        {/* Condition */}
+        <div className="wf-section-title" style={{ marginBottom: 10 }}>3. מצב</div>
+        <div className="flex gap10" style={{ marginBottom: 6 }}>
+          {['חדש', 'VG+', 'VG', 'Good', 'Fair'].map((c, i) => (
+            <Radio key={i} label={c} checked={i === 1} />
+          ))}
+        </div>
+        <div style={{ fontFamily: 'Caveat, cursive', fontSize: 12, color: '#888', marginBottom: 20, fontStyle: 'italic' }}>
+          VG+ = סימני שריטה קלים, מנגן בצורה מושלמת
+        </div>
+
+        {/* Price & location */}
+        <div className="wf-section-title" style={{ marginBottom: 10 }}>4. מחיר ומיקום</div>
+        <div className="flex gap10" style={{ marginBottom: 20 }}>
+          <Input label="מחיר מבוקש (₪)" style={{ flex: 1 }} />
+          <div className="flex-col gap4 flex1">
+            <span className="wf-label">עיר לאיסוף</span>
+            <div className="wf-input" style={{ color: '#aaa' }}>בחר עיר ▾</div>
+          </div>
+        </div>
+
+        {/* Description */}
+        <div className="wf-section-title" style={{ marginBottom: 10 }}>5. תיאור (אופציונלי)</div>
+        <div style={{ marginBottom: 4 }}>
+          <div className="wf-input" style={{ height: 80, color: '#aaa', alignItems: 'flex-start', display: 'flex' }}>הערות נוספות (אופציונלי)...</div>
+        </div>
+        <div style={{ fontFamily: 'Caveat, cursive', fontSize: 12, color: '#888', textAlign: 'left', marginBottom: 24 }}>0 / 300</div>
+
+        {/* Submit */}
+        <div className="flex-col gap8">
+          <Btn label="פרסם מכירה" type="filled wide" style={{ width: '100%', justifyContent: 'center', padding: '12px', fontSize: 17 }} ann="הצלחה → דף המוצר החדש" />
+          <div style={{ textAlign: 'center', fontFamily: 'Caveat, cursive', fontSize: 13, color: '#888', textDecoration: 'underline', cursor: 'pointer' }}>ביטול (חזרה)</div>
+          <Ann text="→ Browser back" style={{ justifyContent: 'center', fontSize: 11 }} />
+        </div>
+
+        <Divider />
+
+        {/* Success state */}
+        <div className="state-box" style={{ marginTop: 16, textAlign: 'center', padding: 24 }}>
+          <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 15, marginBottom: 8 }}>✅ מצב הצלחה:</div>
+          <Circle size={52} label="✓" style={{ margin: '0 auto 8px' }} />
+          <div className="wf-line" style={{ width: 200, margin: '8px auto' }} />
+          <div style={{ fontFamily: 'Caveat, cursive', fontSize: 14, color: '#555', marginBottom: 10 }}>"המכירה שלך פעילה!"</div>
+          <Btn label="צפה במכירה" type="filled" ann="→ Product Page" />
+        </div>
+      </div>
+    </div>
+    <div style={{ display: 'flex', justifyContent: 'center', marginTop: 32 }}>
+      <MobileFrame label="העלאת מכירה במובייל — טור יחיד">
+        <MNav />
+        <div style={{ padding: '8px 10px', textAlign: 'center', background: '#eceae4', borderBottom: '1.5px solid #ccc', fontSize: 12, fontWeight: 700 }}>מכור תקליט</div>
+        <div style={{ padding: 10 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, borderBottom: '1.5px solid #555', paddingBottom: 2, marginBottom: 4 }}>1. תמונה</div>
+          <MBox dashed style={{ height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: '#888', marginBottom: 8 }}>+ העלה תמונה</MBox>
+          <div style={{ fontSize: 10, fontWeight: 700, borderBottom: '1.5px solid #555', paddingBottom: 2, marginBottom: 4 }}>2. פרטים</div>
+          <MBox style={{ background: '#fff', padding: '3px 6px', fontSize: 9, color: '#aaa', marginBottom: 4 }}>שם האמן</MBox>
+          <MBox style={{ background: '#fff', padding: '3px 6px', fontSize: 9, color: '#aaa', marginBottom: 4 }}>שם האלבום</MBox>
+          <MBox style={{ background: '#fff', padding: '3px 6px', fontSize: 9, color: '#aaa', marginBottom: 4 }}>פורמט ▾</MBox>
+          <MBox style={{ background: '#fff', padding: '3px 6px', fontSize: 9, color: '#aaa', marginBottom: 8 }}>שנה</MBox>
+          <div style={{ fontSize: 10, fontWeight: 700, borderBottom: '1.5px solid #555', paddingBottom: 2, marginBottom: 4 }}>3. מצב</div>
+          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 8 }}>
+            <MPill label="חדש" /><MPill label="VG+" active /><MPill label="VG" /><MPill label="Good" />
+          </div>
+          <div style={{ fontSize: 10, fontWeight: 700, borderBottom: '1.5px solid #555', paddingBottom: 2, marginBottom: 4 }}>4. מחיר ועיר</div>
+          <MBox style={{ background: '#fff', padding: '3px 6px', fontSize: 9, color: '#aaa', marginBottom: 4 }}>₪ מחיר</MBox>
+          <MBox style={{ background: '#fff', padding: '3px 6px', fontSize: 9, color: '#aaa', marginBottom: 8 }}>עיר ▾</MBox>
+          <MBtn label="פרסם מכירה" filled style={{ width: '100%', padding: '6px' }} />
+        </div>
+      </MobileFrame>
+    </div>
+  </div>
+);
+
+// ─── SCREEN 6: Wishlist Page ──────────────────────────────────────────────────
+
+const WishlistRow = ({ sold }) => (
+  <div className="wf-box flex items-center gap12" style={{ padding: '10px 14px', marginBottom: 8 }}>
+    <ImgBox w={60} h={60} label="כריכה" style={{ flexShrink: 0 }} />
+    <div className="flex-col gap4 flex1">
+      <div className="wf-line" style={{ width: '60%', height: 14 }} />
+      <div className="wf-line sm" style={{ width: '40%' }} />
+      <div className="flex gap6">
+        <Pill label='ויניל 12"' sm /><Pill label="VG+" sm />
+      </div>
+    </div>
+    <div className="wf-line lg" style={{ width: 70, height: 18, flexShrink: 0 }} />
+    <Btn label="צפה" ann="→ Listing Page" style={{ fontSize: 13, flexShrink: 0 }} />
+    <div className="wf-btn outline" style={{ fontSize: 16, padding: '4px 10px', flexShrink: 0 }}>✕</div>
+    <Ann text="→ מסיר שורה" style={{ fontSize: 10 }} />
+  </div>
+);
+
+const AlertRow = () => (
+  <div className="wf-box flex items-center gap12" style={{ padding: '10px 14px', marginBottom: 8 }}>
+    <div className="flex-col gap4 flex1">
+      <div className="wf-line" style={{ width: '60%', height: 14 }} />
+      <div className="wf-line sm" style={{ width: '40%' }} />
+      <div style={{ fontFamily: 'Caveat, cursive', fontSize: 12, color: '#666' }}>
+        התרעה כאשר מחיר יורד מתחת ל: 
+        <div className="wf-input" style={{ display: 'inline-block', width: 70, fontSize: 13, padding: '1px 6px', marginRight: 4 }}>₪150</div>
+        <Ann text="inline edit" style={{ display: 'inline-flex', fontSize: 10 }} />
+      </div>
+    </div>
+    <div className="flex-col gap4 items-center" style={{ flexShrink: 0 }}>
+      <Pill label="פעיל" active sm />
+      <div style={{ fontFamily: 'Caveat, cursive', fontSize: 11, color: '#888' }}>מחיר נוכחי: ₪220</div>
+    </div>
+    <div className="wf-btn outline" style={{ fontSize: 16, padding: '4px 10px', flexShrink: 0 }}>✕</div>
+  </div>
+);
+
+const Screen6 = () => {
+  const [tab, setTab] = React.useState('saved');
+  return (
+    <div>
+      <div className="screen-badge"><span>מסך 6</span>Wishlist — מחובר</div>
+      <div className="access-badge">🔒 דורש התחברות</div>
+      <div className="wf-canvas sketch-border" style={{ width: 1100, margin: '0 auto' }}>
+        <NavbarLoggedIn />
+
+        <div style={{ padding: '20px 24px 0', borderBottom: '2px solid #ccc', background: '#eceae4' }}>
+          <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 22, marginBottom: 12, textAlign: 'right' }}>הרשימה שלי</div>
+          <div className="flex" style={{ borderBottom: '2px solid #bbb' }}>
+            {['saved', 'alerts'].map(t => (
+              <div key={t} onClick={() => setTab(t)} style={{
+                padding: '8px 20px', cursor: 'pointer',
+                fontFamily: 'Caveat, cursive', fontSize: 16, fontWeight: 700,
+                color: tab === t ? '#222' : '#888',
+                borderBottom: tab === t ? '3px solid #333' : '3px solid transparent'
+              }}>
+                {t === 'saved' ? 'פריטים שמורים (5)' : 'התראות מחיר (2)'}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ padding: '20px 24px', minHeight: 400 }}>
+          {tab === 'saved' ? (
+            <div>
+              <WishlistRow />
+              <WishlistRow />
+              <WishlistRow />
+
+              <Divider />
+              {/* Empty state */}
+              <div className="state-box" style={{ marginTop: 20, textAlign: 'center', padding: 28 }}>
+                <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 15, marginBottom: 8 }}>מצב ריק — Empty State</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}><BrokenVinyl size={56} /></div>
+                <div style={{ fontFamily: 'Caveat, cursive', fontSize: 14, color: '#666', marginBottom: 12 }}>
+                  "עוד לא שמרת תקליטים — חפש כדי להוסיף לרשימה שלך"
+                </div>
+                <Btn label="עבור לחיפוש" type="filled" ann="→ Search Page" />
+              </div>
+            </div>
+          ) : (
+            <div>
+              <AlertRow />
+              <AlertRow />
+
+              <Divider />
+              {/* Empty state alerts */}
+              <div className="state-box" style={{ marginTop: 20, textAlign: 'center', padding: 28 }}>
+                <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 15, marginBottom: 8 }}>מצב ריק — Empty State</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}><BrokenVinyl size={56} /></div>
+                <div style={{ fontFamily: 'Caveat, cursive', fontSize: 14, color: '#666' }}>
+                  "אין התראות מחיר"
+                </div>
+                <div style={{ fontFamily: 'Caveat, cursive', fontSize: 12, color: '#999', marginTop: 6 }}>
+                  "פתח כל דף תקליט ולחץ 'התראת מחיר' כדי לקבל עדכונים"
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 32 }}>
+        <MobileFrame label="Wishlist במובייל — שורות קומפקטיות">
+          <MNav />
+          <div style={{ padding: 8 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>הרשימה שלי</div>
+            <div style={{ display: 'flex', borderBottom: '1.5px solid #bbb', marginBottom: 8 }}>
+              <div style={{ flex: 1, textAlign: 'center', padding: '3px 0', fontSize: 10, fontWeight: 700, borderBottom: '2px solid #333' }}>שמורים (5)</div>
+              <div style={{ flex: 1, textAlign: 'center', padding: '3px 0', fontSize: 10, fontWeight: 700, color: '#888' }}>התראות (2)</div>
+            </div>
+            {[1, 2, 3, 4].map(i => (
+              <MBox key={i} style={{ padding: 5, marginBottom: 5, display: 'flex', gap: 6, alignItems: 'center' }}>
+                <div style={{ flexShrink: 0 }}><MImg h={36} label="" /></div>
+                <div style={{ flex: 1 }}>
+                  <MLine w="70%" h={5} style={{ marginBottom: 2 }} />
+                  <MLine w="50%" h={3} style={{ marginBottom: 2 }} />
+                  <MLine w="30%" h={6} />
+                </div>
+                <div style={{ fontSize: 12, fontWeight: 700 }}>✕</div>
+              </MBox>
+            ))}
+          </div>
+        </MobileFrame>
+      </div>
+    </div>
+  );
+};
+
+// ─── SCREEN 7: Forgot Password ────────────────────────────────────────────────
+
+const Screen7 = () => {
+  const [step, setStep] = React.useState(1);
+  return (
+    <div>
+      <div className="screen-badge"><span>מסך</span>שכחתי סיסמה — ציבורי</div>
+      <div className="access-badge">🔓 ציבורי</div>
+      <div className="wf-canvas sketch-border" style={{ width: 1100, margin: '0 auto' }}>
+        <NavbarLoggedOut />
+        <div style={{ padding: '48px 0', display: 'flex', justifyContent: 'center', background: '#eceae4', minHeight: 600 }}>
+          <div className="wf-box" style={{ width: 420, padding: '28px 32px' }}>
+            <div className="flex gap6" style={{ marginBottom: 18, justifyContent: 'center' }}>
+              {[1, 2, 3].map(s => (
+                <div key={s} onClick={() => setStep(s)} style={{
+                  width: 26, height: 26, borderRadius: '50%',
+                  border: '2px solid #555',
+                  background: step >= s ? '#444' : '#fff',
+                  color: step >= s ? '#f5f3ef' : '#555',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 14, cursor: 'pointer'
+                }}>{s}</div>
+              ))}
+            </div>
+            {step === 1 && (
+              <div className="flex-col gap12">
+                <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 18, textAlign: 'center' }}>שכחת סיסמה?</div>
+                <div style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: '#666', textAlign: 'center' }}>הזן את האימייל שלך ונשלח קישור לאיפוס</div>
+                <Input label="אימייל" placeholder="your@email.com" />
+                <Btn label="שלח קישור" type="filled wide" style={{ width: '100%', justifyContent: 'center', padding: '10px', fontSize: 16 }} ann="→ שלב 2" />
+                <div style={{ textAlign: 'center', fontSize: 13, color: '#555', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'Caveat, cursive' }}>← חזרה לכניסה</div>
+              </div>
+            )}
+            {step === 2 && (
+              <div className="flex-col gap12 items-center" style={{ textAlign: 'center' }}>
+                <Circle size={56} label="✉" />
+                <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 17 }}>בדוק את האימייל</div>
+                <Lines count={3} />
+                <div style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: '#666' }}>"שלחנו קישור איפוס ל-[email]"</div>
+                <Btn label="שלח שוב" type="outline" ann="הופך פעיל אחרי 60 שניות" />
+              </div>
+            )}
+            {step === 3 && (
+              <div className="flex-col gap12">
+                <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 18, textAlign: 'center' }}>סיסמה חדשה</div>
+                <Input label="סיסמה חדשה" placeholder="••••••••" />
+                <Input label="אישור סיסמה" placeholder="••••••••" error="הסיסמאות אינן תואמות" />
+                <Btn label="עדכן סיסמה" type="filled wide" style={{ width: '100%', justifyContent: 'center', padding: '10px', fontSize: 16 }} ann="→ Login Page עם הודעת הצלחה" />
+              </div>
+            )}
+            <div style={{ fontSize: 11, color: '#888', textAlign: 'center', marginTop: 12, fontFamily: 'Caveat, cursive', fontStyle: 'italic' }}>
+              לחץ על מספרי השלבים למעלה כדי לראות כל מצב
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── SCREEN 8: Profile (own + seller view) ───────────────────────────────────
+
+const Screen8 = () => {
+  const [view, setView] = React.useState('me');
+  const [section, setSection] = React.useState('personal');
+  return (
+    <div>
+      <div className="screen-badge"><span>מסך</span>פרופיל / הגדרות — מחובר</div>
+      <div className="access-badge">🔒 דורש התחברות</div>
+      <div className="flex gap8" style={{ marginBottom: 12 }}>
+        <Btn label="הפרופיל שלי" type={view === 'me' ? 'filled' : 'outline'} style={{ cursor: 'pointer' }} />
+        <div onClick={() => setView('me')} style={{ position: 'absolute', cursor: 'pointer' }}/>
+        <Btn label="פרופיל מוכר (ציבורי)" type={view === 'seller' ? 'filled' : 'outline'} />
+        <div style={{ fontFamily: 'Caveat, cursive', fontSize: 12, color: '#999', alignSelf: 'center', fontStyle: 'italic' }}>
+          ↳ לחץ למעבר בין תצוגות
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+        <button onClick={() => setView('me')} style={{ all: 'unset', cursor: 'pointer', padding: '4px 12px', border: '2px solid #444', background: view === 'me' ? '#444' : '#e0ddd7', color: view === 'me' ? '#f5f3ef' : '#222', fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 14 }}>תצוגת הבעלים</button>
+        <button onClick={() => setView('seller')} style={{ all: 'unset', cursor: 'pointer', padding: '4px 12px', border: '2px solid #444', background: view === 'seller' ? '#444' : '#e0ddd7', color: view === 'seller' ? '#f5f3ef' : '#222', fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 14 }}>תצוגת מבקר (ציבורית)</button>
+      </div>
+
+      <div className="wf-canvas sketch-border" style={{ width: 1100, margin: '0 auto' }}>
+        <NavbarLoggedIn />
+
+        {/* Profile header */}
+        <div style={{ padding: '24px 24px', background: '#eceae4', borderBottom: '2px solid #ccc' }}>
+          <div className="flex items-center gap16">
+            <Circle size={88} label="👤" />
+            <div className="flex-col gap6 flex1">
+              <div className="wf-line lg" style={{ width: '40%', height: 22 }} />
+              <div className="flex gap8 items-center">
+                <Pill label="⭐ 4.8 דירוג" sm />
+                <Pill label="חבר מאז 2024" sm />
+                <Pill label="תל אביב" sm />
+              </div>
+              <div style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: '#666' }}>
+                {view === 'me' ? '12 מכירות פעילות · 38 עסקאות בעבר' : 'מוכר פעיל · 38 עסקאות מוצלחות'}
+              </div>
+            </div>
+            {view === 'me' ? (
+              <Btn label="ערוך פרופיל" type="outline" ann="→ פותח את טופס ההגדרות" />
+            ) : (
+              <div className="flex-col gap6">
+                <Btn label="💬 שלח הודעה" type="filled" ann="→ Chat Page" />
+                <Btn label="🔔 עקוב" type="outline" ann="התראה על מכירות חדשות" />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {view === 'me' ? (
+          // ─── OWNER VIEW: Settings ───
+          <div className="flex" style={{ minHeight: 500 }}>
+            <div className="wf-box" style={{ width: 220, padding: 16, borderLeft: '2px solid #ccc', background: '#e8e5df', flexShrink: 0 }}>
+              <SectionTitle>הגדרות</SectionTitle>
+              <div className="flex-col gap6" style={{ marginTop: 8 }}>
+                {[
+                  ['personal', '👤', 'פרטים אישיים'],
+                  ['security', '🔒', 'אבטחה וסיסמה'],
+                  ['notifications', '🔔', 'התראות'],
+                  ['address', '📍', 'כתובת ואיסוף'],
+                  ['payment', '💳', 'אמצעי תשלום (לעתיד)'],
+                  ['language', '🌐', 'שפה ואזור'],
+                  ['blocked', '⛔', 'משתמשים חסומים'],
+                  ['delete', '🗑️', 'מחק חשבון'],
+                ].map(([key, icon, label]) => (
+                  <div key={key} onClick={() => setSection(key)} style={{
+                    padding: '6px 8px', borderRadius: 2,
+                    background: section === key ? '#444' : 'transparent',
+                    color: section === key ? '#f5f3ef' : (key === 'delete' ? '#a44' : '#333'),
+                    fontFamily: 'Caveat, cursive', fontSize: 14, fontWeight: 600,
+                    cursor: 'pointer'
+                  }}>{icon} {label}</div>
+                ))}
+              </div>
+            </div>
+            <div className="flex-col flex1 gap16" style={{ padding: 24 }}>
+              {section === 'personal' && (<>
+                <SectionTitle>פרטים אישיים</SectionTitle>
+                <div className="flex gap16">
+                  <div className="flex-col gap8 items-center">
+                    <Circle size={80} label="👤" />
+                    <Btn label="שנה תמונה" type="outline" />
+                  </div>
+                  <div className="flex-col flex1 gap10">
+                    <Input label="שם תצוגה" placeholder="יוסי כהן" />
+                    <Input label="אימייל" placeholder="yossi@example.com" />
+                    <Input label="טלפון (אופציונלי)" placeholder="050-..." />
+                    <div className="flex-col gap4"><span className="wf-label">עיר</span><div className="wf-input" style={{ color: '#aaa' }}>תל אביב ▾</div></div>
+                    <div className="flex-col gap4"><span className="wf-label">ביוגרפיה</span><div className="wf-input" style={{ height: 60, color: '#aaa' }}>אסיף ויניל מ-1985...</div></div>
+                  </div>
+                </div>
+                <Divider />
+                <div>
+                  <div className="wf-label" style={{ fontSize: 14, marginBottom: 8 }}>הפעל מצב מוכר</div>
+                  <div className="flex items-center gap10">
+                    <div style={{ width: 40, height: 22, background: '#444', borderRadius: 11, position: 'relative' }}>
+                      <div style={{ position: 'absolute', right: 2, top: 2, width: 18, height: 18, background: '#fff', borderRadius: '50%' }} />
+                    </div>
+                    <span style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: '#555' }}>פעיל — הפרופיל שלך גלוי לקונים פוטנציאליים</span>
+                  </div>
+                </div>
+                <div className="flex gap8"><Btn label="שמור שינויים" type="filled" ann="→ הודעת הצלחה" /><Btn label="ביטול" type="outline" /></div>
+              </>)}
+
+              {section === 'security' && (<>
+                <SectionTitle>אבטחה וסיסמה</SectionTitle>
+                <div className="wf-box" style={{ padding: 16 }}>
+                  <div className="wf-label" style={{ fontSize: 14, marginBottom: 8 }}>שינוי סיסמה</div>
+                  <div className="flex-col gap10">
+                    <Input label="סיסמה נוכחית" placeholder="••••••••" />
+                    <Input label="סיסמה חדשה" placeholder="••••••••" />
+                    <Input label="אישור סיסמה חדשה" placeholder="••••••••" />
+                    <Btn label="עדכן סיסמה" type="filled" />
+                  </div>
+                </div>
+                <Divider />
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 15 }}>אימות דו-שלבי (2FA)</div>
+                    <div style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: '#666' }}>הוסף שכבת הגנה נוספת בכניסה</div>
+                  </div>
+                  <Btn label="הפעל 2FA" type="outline" ann="→ QR + setup wizard" />
+                </div>
+                <Divider />
+                <div>
+                  <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 15, marginBottom: 8 }}>היסטוריית כניסה</div>
+                  <div className="flex-col gap6">
+                    {[['Chrome · macOS · ת״א', 'עכשיו', true], ['Safari · iPhone · ת״א', 'אתמול 18:42', false], ['Firefox · Windows · ירושלים', 'לפני 3 ימים', false]].map(([d, t, cur], i) => (
+                      <div key={i} className="wf-box" style={{ padding: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div className="flex-col gap2">
+                          <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 13 }}>{d} {cur && <Pill label="פעיל כעת" sm />}</div>
+                          <div style={{ fontFamily: 'Caveat, cursive', fontSize: 12, color: '#888' }}>{t}</div>
+                        </div>
+                        {!cur && <Btn label="התנתק" type="outline" />}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <Btn label="התנתק מכל המכשירים" type="outline" ann="→ confirmation dialog" />
+              </>)}
+
+              {section === 'notifications' && (<>
+                <SectionTitle>התראות</SectionTitle>
+                <div className="flex-col gap10">
+                  {[
+                    ['התראות אימייל', null, true],
+                    ['הודעות חדשות מקונים/מוכרים', '_', true],
+                    ['התראות מחיר מ-Wishlist', '_', true],
+                    ['פריט חדש מצא התאמה לחיפוש', '_', false],
+                    ['עדכונים שיווקיים ומבצעים', '_', false],
+                    ['התראות Push (דפדפן/מובייל)', null, true],
+                    ['הודעות חדשות', '_', true],
+                    ['ירידת מחיר על Wishlist', '_', true],
+                  ].map(([label, indent, on], i) => (
+                    <div key={i} className="flex items-center justify-between" style={{ paddingRight: indent ? 24 : 0, borderTop: !indent ? '1px solid #ccc' : 'none', paddingTop: !indent ? 10 : 0 }}>
+                      <div style={{ fontFamily: 'Caveat, cursive', fontSize: !indent ? 15 : 13, fontWeight: !indent ? 700 : 500, color: '#333' }}>{label}</div>
+                      <div style={{ width: 36, height: 20, background: on ? '#444' : '#bbb', borderRadius: 10, position: 'relative', cursor: 'pointer' }}>
+                        <div style={{ position: 'absolute', [on ? 'right' : 'left']: 2, top: 2, width: 16, height: 16, background: '#fff', borderRadius: '50%' }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <Divider />
+                <div>
+                  <div className="wf-label" style={{ fontSize: 14, marginBottom: 6 }}>תדירות סיכום אימייל</div>
+                  <div className="flex gap8">
+                    <Radio label="אף פעם" /><Radio label="יומי" checked /><Radio label="שבועי" />
+                  </div>
+                </div>
+              </>)}
+
+              {section === 'address' && (<>
+                <SectionTitle>כתובת ואיסוף</SectionTitle>
+                <div className="flex-col gap10">
+                  <div className="wf-box" style={{ padding: 12, border: '2px solid #444' }}>
+                    <div className="flex justify-between items-center" style={{ marginBottom: 6 }}>
+                      <div className="flex gap6 items-center"><div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 15 }}>הבית</div><Pill label="ברירת מחדל" active sm /></div>
+                      <div className="flex gap6"><Btn label="ערוך" type="outline" /><Btn label="מחק" type="outline" /></div>
+                    </div>
+                    <div style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: '#444' }}>רחוב דיזנגוף 123, תל אביב</div>
+                    <div style={{ fontFamily: 'Caveat, cursive', fontSize: 12, color: '#888' }}>נקודת איסוף ציבורית: בית קפה 'ארומה' ברחוב</div>
+                  </div>
+                  <div className="wf-box" style={{ padding: 12 }}>
+                    <div className="flex justify-between items-center" style={{ marginBottom: 6 }}>
+                      <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 15 }}>העבודה</div>
+                      <div className="flex gap6"><Btn label="קבע כברירת מחדל" type="outline" /><Btn label="ערוך" type="outline" /><Btn label="מחק" type="outline" /></div>
+                    </div>
+                    <div style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: '#444' }}>רוטשילד 45, תל אביב</div>
+                  </div>
+                  <Btn label="+ הוסף כתובת חדשה" type="ghost" />
+                </div>
+                <Divider />
+                <div>
+                  <div className="wf-label" style={{ fontSize: 14, marginBottom: 8 }}>העדפות פגישה</div>
+                  <div className="flex-col gap6">
+                    <Check label="מקומות ציבוריים בלבד (קפה, רכבת)" checked />
+                    <Check label="זמין לערבים ובסופי שבוע" checked />
+                    <Check label="מוכן לשליחה בדואר רשום (תשלום מראש)" />
+                  </div>
+                </div>
+              </>)}
+
+              {section === 'payment' && (<>
+                <SectionTitle>אמצעי תשלום</SectionTitle>
+                <div className="state-box" style={{ padding: 28, textAlign: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><BrokenVinyl size={60} /></div>
+                  <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 16, marginBottom: 6 }}>מודל מסחרי עתידי</div>
+                  <div style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: '#666', marginBottom: 12, maxWidth: 380, margin: '0 auto 12px' }}>
+                    "כרגע VinilSeeker היא פלטפורמת קישור בלבד — תשלומים מתבצעים ישירות בין הקונה למוכר בעסקת איסוף. אנחנו עובדים על אינטגרציה עתידית."
+                  </div>
+                  <Btn label="הירשם להתראה" type="outline" ann="→ נשלח אימייל כשהפיצ'ר מוכן" />
+                </div>
+                <Divider />
+                <div style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: '#888', fontStyle: 'italic' }}>
+                  ↳ בעתיד: שדות לכרטיס אשראי / Bit / PayPal / חשבונית מס
+                </div>
+                <div className="wf-box dashed" style={{ padding: 14, opacity: 0.5 }}>
+                  <div className="flex-col gap10">
+                    <Input label="מספר כרטיס" placeholder="•••• •••• •••• ••••" />
+                    <div className="flex gap10">
+                      <Input label="תוקף" placeholder="MM/YY" style={{ flex: 1 }} />
+                      <Input label="CVV" placeholder="•••" style={{ flex: 1 }} />
+                    </div>
+                  </div>
+                </div>
+              </>)}
+
+              {section === 'language' && (<>
+                <SectionTitle>שפה ואזור</SectionTitle>
+                <div className="flex-col gap16">
+                  <div>
+                    <div className="wf-label" style={{ fontSize: 14, marginBottom: 8 }}>שפת ממשק</div>
+                    <div className="flex-col gap6">
+                      <Radio label="עברית (Hebrew) — RTL" checked />
+                      <Radio label="English — LTR" />
+                      <Radio label="العربية (Arabic) — RTL · בקרוב" />
+                    </div>
+                  </div>
+                  <Divider />
+                  <div>
+                    <div className="wf-label" style={{ fontSize: 14, marginBottom: 8 }}>מטבע תצוגה</div>
+                    <div className="flex gap8">
+                      <Radio label="₪ שקל (ILS)" checked />
+                      <Radio label="$ USD" />
+                      <Radio label="€ EUR" />
+                    </div>
+                  </div>
+                  <Divider />
+                  <div>
+                    <div className="wf-label" style={{ fontSize: 14, marginBottom: 8 }}>אזור זמן</div>
+                    <div className="wf-input" style={{ color: '#444', maxWidth: 280 }}>(GMT+3) ישראל — Asia/Jerusalem ▾</div>
+                  </div>
+                  <Divider />
+                  <div>
+                    <div className="wf-label" style={{ fontSize: 14, marginBottom: 8 }}>פורמט תאריך</div>
+                    <div className="flex gap8">
+                      <Radio label="DD/MM/YYYY" checked />
+                      <Radio label="MM/DD/YYYY" />
+                      <Radio label="YYYY-MM-DD" />
+                    </div>
+                  </div>
+                </div>
+              </>)}
+
+              {section === 'blocked' && (<>
+                <SectionTitle>משתמשים חסומים</SectionTitle>
+                <div style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: '#666', marginBottom: 8 }}>
+                  משתמשים חסומים לא יכולים לשלוח לך הודעות, לראות את המכירות שלך, או ליצור איתך קשר.
+                </div>
+                <div className="flex-col gap8">
+                  {[
+                    ['ספאם משתמש', 'spam@bad.com', 'נחסם 02/05/26'],
+                    ['?? משתמש לא מזוהה', 'unknown@x.co', 'נחסם 28/04/26'],
+                  ].map(([n, e, d], i) => (
+                    <div key={i} className="wf-box" style={{ padding: 10, display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <Circle size={36} label="👤" />
+                      <div className="flex-col flex1 gap2">
+                        <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 14 }}>{n}</div>
+                        <div style={{ fontFamily: 'Caveat, cursive', fontSize: 12, color: '#888' }}>{e} · {d}</div>
+                      </div>
+                      <Btn label="בטל חסימה" type="outline" ann="→ confirmation" />
+                    </div>
+                  ))}
+                </div>
+                <Divider />
+                <div className="state-box" style={{ padding: 22, textAlign: 'center' }}>
+                  <div style={{ fontFamily: 'Caveat, cursive', fontSize: 13, fontWeight: 700, marginBottom: 4 }}>מצב ריק (אין חסומים)</div>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6 }}><BrokenVinyl size={48} /></div>
+                  <div style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: '#666' }}>"אף אחד לא חסום. תהנה מהקהילה!"</div>
+                </div>
+              </>)}
+
+              {section === 'delete' && (<>
+                <SectionTitle>אזור מסוכן — מחיקת חשבון</SectionTitle>
+                <div className="state-box error-state" style={{ padding: 18, borderColor: '#a55', borderWidth: 2.5 }}>
+                  <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 16, color: '#722', marginBottom: 8 }}>⚠ פעולה בלתי הפיכה</div>
+                  <div style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: '#444', marginBottom: 10, lineHeight: 1.6 }}>
+                    מחיקת החשבון תסיר לצמיתות את הפרופיל, כל המכירות הפעילות, היסטוריית השיחות, וה-Wishlist שלך. לא ניתן לשחזר.
+                  </div>
+                  <div className="flex-col gap6" style={{ marginBottom: 12 }}>
+                    <Check label="אני מבין שכל המכירות הפעילות שלי יוסרו" />
+                    <Check label="אני מבין שהשיחות עם קונים/מוכרים יימחקו" />
+                    <Check label="אני מבין שלא ניתן לשחזר את החשבון" />
+                  </div>
+                  <Input label='הקלד "מחק את החשבון שלי" לאישור' placeholder='מחק את החשבון שלי' />
+                  <div className="flex gap8" style={{ marginTop: 10 }}>
+                    <div className="wf-btn" style={{ background: '#a44', color: '#fff', border: '2px solid #722', fontFamily: 'Caveat, cursive', fontWeight: 700 }}>מחק את החשבון לצמיתות</div>
+                    <Btn label="ביטול" type="outline" />
+                  </div>
+                </div>
+                <Divider />
+                <div>
+                  <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 14, marginBottom: 6 }}>חלופות:</div>
+                  <div className="flex gap8">
+                    <Btn label="ייצא את הנתונים שלי (GDPR)" type="outline" ann="→ download zip" />
+                    <Btn label="השבת זמנית במקום למחוק" type="outline" ann="→ הסתר פרופיל ל-90 יום" />
+                  </div>
+                </div>
+              </>)}
+            </div>
+          </div>
+        ) : (
+          // ─── SELLER VIEW: public storefront ───
+          <div className="flex-col" style={{ padding: 24, gap: 16 }}>
+            <div className="flex items-center justify-between">
+              <SectionTitle>המכירות שלי ([X] פריטים)</SectionTitle>
+              <div className="flex gap8 items-center">
+                <span style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: '#555' }}>מיון:</span>
+                <div className="wf-input" style={{ width: 140, color: '#555' }}>הכי חדשים ▾</div>
+                <div className="flex gap4">
+                  <Pill label="הכל" active /><Pill label='ויניל' /><Pill label="CD" />
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
+              {[1,2,3,4,5,6,7,8].map(i => (
+                <div key={i} className="wf-box flex-col gap6" style={{ padding: 10, cursor: 'pointer' }}>
+                  <ImgBox w="100%" h={110} label="שער" />
+                  <div className="wf-line sm" style={{ width: '70%' }} />
+                  <div className="wf-line" style={{ width: '90%', height: 12 }} />
+                  <div className="flex justify-between items-center">
+                    <Pill label="VG+" sm />
+                    <div className="wf-line lg" style={{ width: 40, height: 14 }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Ann text="לחיצה על כרטיס → Product Page של אותה מכירה" />
+            <Divider />
+            <div>
+              <SectionTitle>ביקורות מקונים ([N])</SectionTitle>
+              <div className="flex-col gap10" style={{ marginTop: 8 }}>
+                {[1,2].map(i => (
+                  <div key={i} className="wf-box" style={{ padding: 12 }}>
+                    <div className="flex items-center gap8" style={{ marginBottom: 6 }}>
+                      <Circle size={32} label="👤" />
+                      <div className="flex-col gap2">
+                        <div className="wf-line sm" style={{ width: 80 }} />
+                        <div className="wf-stars">★★★★★</div>
+                      </div>
+                      <div style={{ fontFamily: 'Caveat, cursive', fontSize: 11, color: '#888', marginRight: 'auto' }}>לפני שבועיים</div>
+                    </div>
+                    <Lines count={2} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 32, flexWrap: 'wrap' }}>
+        <MobileFrame label="פרופיל מוכר (ציבורי) במובייל">
+          <MNav />
+          <div style={{ padding: 10, textAlign: 'center', borderBottom: '1.5px solid #ccc', background: '#eceae4' }}>
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#e0ddd7', border: '1.5px solid #555', margin: '0 auto 6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>👤</div>
+            <MLine w="50%" h={8} style={{ margin: '0 auto 4px' }} />
+            <div style={{ display: 'flex', gap: 3, justifyContent: 'center' }}>
+              <MPill label="⭐ 4.8" /><MPill label="ת״א" />
+            </div>
+          </div>
+          <div style={{ display: 'flex', borderBottom: '1.5px solid #bbb' }}>
+            <div style={{ flex: 1, textAlign: 'center', padding: '4px 0', fontSize: 10, fontWeight: 700, borderBottom: '2px solid #333' }}>מכירות</div>
+            <div style={{ flex: 1, textAlign: 'center', padding: '4px 0', fontSize: 10, fontWeight: 700, color: '#888' }}>ביקורות</div>
+          </div>
+          <div style={{ padding: 8, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+            {[1,2,3,4].map(i => (
+              <MBox key={i} style={{ padding: 4 }}>
+                <MImg h={48} label="" />
+                <MLine w="80%" h={4} style={{ margin: '3px 0 2px' }} />
+                <MLine w="40%" h={6} />
+              </MBox>
+            ))}
+          </div>
+        </MobileFrame>
+
+        <MobileFrame label="הגדרות במובייל — תפריט רשימה">
+          <div style={{ background: '#e0ddd7', borderBottom: '1.5px solid #555', padding: '6px 8px', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ fontSize: 14, fontWeight: 700 }}>←</div>
+            <div style={{ flex: 1, fontSize: 12, fontWeight: 700 }}>הגדרות</div>
+          </div>
+          <div style={{ padding: 6, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {[
+              ['👤', 'פרטים אישיים'],
+              ['🔒', 'אבטחה וסיסמה'],
+              ['🔔', 'התראות'],
+              ['📍', 'כתובת ואיסוף'],
+              ['💳', 'אמצעי תשלום'],
+              ['🌐', 'שפה ואזור'],
+              ['⛔', 'משתמשים חסומים'],
+            ].map(([i, l], k) => (
+              <div key={k} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 8px', borderBottom: '1px solid #ddd', fontSize: 11, fontFamily: 'Caveat, cursive' }}>
+                <span>{i} {l}</span>
+                <span style={{ color: '#888' }}>›</span>
+              </div>
+            ))}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 8px', fontSize: 11, color: '#a44', fontFamily: 'Caveat, cursive', fontWeight: 700 }}>
+              <span>🗑️ מחק חשבון</span>
+              <span>›</span>
+            </div>
+            <div style={{ fontSize: 9, color: '#888', fontStyle: 'italic', textAlign: 'center', marginTop: 6, fontFamily: 'Caveat, cursive' }}>
+              ↳ לחיצה על שורה → מסך מלא של אותה הגדרה
+            </div>
+          </div>
+        </MobileFrame>
+
+        <MobileFrame label="הגדרה ספציפית במובייל (התראות)">
+          <div style={{ background: '#e0ddd7', borderBottom: '1.5px solid #555', padding: '6px 8px', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ fontSize: 14, fontWeight: 700 }}>←</div>
+            <div style={{ flex: 1, fontSize: 12, fontWeight: 700 }}>🔔 התראות</div>
+          </div>
+          <div style={{ padding: 8 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, marginBottom: 4 }}>אימייל</div>
+            {[['הודעות', true], ['התראות מחיר', true], ['התאמות חיפוש', false], ['שיווק', false]].map(([l, on], i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0', borderBottom: '1px solid #ddd', fontSize: 10, fontFamily: 'Caveat, cursive' }}>
+                <span>{l}</span>
+                <div style={{ width: 26, height: 14, background: on ? '#444' : '#bbb', borderRadius: 7, position: 'relative' }}>
+                  <div style={{ position: 'absolute', [on ? 'right' : 'left']: 1, top: 1, width: 12, height: 12, background: '#fff', borderRadius: '50%' }} />
+                </div>
+              </div>
+            ))}
+            <div style={{ fontSize: 10, fontWeight: 700, margin: '8px 0 4px' }}>Push</div>
+            {[['הודעות', true], ['ירידת מחיר', true]].map(([l, on], i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0', borderBottom: '1px solid #ddd', fontSize: 10, fontFamily: 'Caveat, cursive' }}>
+                <span>{l}</span>
+                <div style={{ width: 26, height: 14, background: on ? '#444' : '#bbb', borderRadius: 7, position: 'relative' }}>
+                  <div style={{ position: 'absolute', [on ? 'right' : 'left']: 1, top: 1, width: 12, height: 12, background: '#fff', borderRadius: '50%' }} />
+                </div>
+              </div>
+            ))}
+            <MBtn label="שמור" filled style={{ width: '100%', marginTop: 10, padding: '5px' }} />
+          </div>
+        </MobileFrame>
+      </div>
+    </div>
+  );
+};
+
+// ─── SCREEN 9: Chat ──────────────────────────────────────────────────────────
+
+const Screen9 = () => (
+  <div>
+    <div className="screen-badge"><span>מסך</span>צ'אט עם מוכר — מחובר</div>
+    <div className="access-badge">🔒 דורש התחברות (יד שנייה בלבד)</div>
+    <AuthNote text="צ'אט מוצג רק עבור מכירות יד שנייה — חנויות יוצרים קשר דרך כפתור 'צור קשר'" />
+    <div className="wf-canvas sketch-border" style={{ width: 1100, margin: '0 auto', marginTop: 8 }}>
+      <NavbarLoggedIn />
+
+      <div className="flex" style={{ height: 600 }}>
+        {/* Conversations sidebar */}
+        <div className="wf-box flex-col" style={{ width: 280, borderLeft: '2px solid #ccc', background: '#e8e5df', flexShrink: 0 }}>
+          <div style={{ padding: 12, borderBottom: '2px solid #ccc' }}>
+            <SectionTitle>שיחות</SectionTitle>
+            <div className="wf-input" style={{ marginTop: 8, color: '#aaa' }}>חפש בשיחות... 🔍</div>
+          </div>
+          <div className="flex-col" style={{ overflow: 'auto' }}>
+            {[
+              { active: true, unread: 2, name: 'יוסי כהן', listing: 'Pink Floyd - The Wall', preview: 'מתי תוכל לאסוף?', time: '14:32' },
+              { active: false, unread: 0, name: 'רינה לוי', listing: 'Beatles - Abbey Road', preview: 'תודה רבה! נשמח לעוד...', time: '12:15' },
+              { active: false, unread: 1, name: 'דני אבן', listing: 'Miles Davis - Kind of Blue', preview: 'האם המחיר עוד פתוח?', time: 'אתמול' },
+              { active: false, unread: 0, name: 'שרה גולן', listing: 'Led Zeppelin IV', preview: 'נהדר, נתראה ביום ראשון', time: 'שישי' },
+            ].map((c, i) => (
+              <div key={i} style={{
+                padding: 12, borderBottom: '1px solid #ccc', cursor: 'pointer',
+                background: c.active ? '#d8d5cf' : 'transparent',
+                borderRight: c.active ? '4px solid #444' : '4px solid transparent'
+              }}>
+                <div className="flex items-center gap8">
+                  <Circle size={36} label="👤" />
+                  <div className="flex-col flex1 gap2" style={{ minWidth: 0 }}>
+                    <div className="flex justify-between items-center">
+                      <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 14 }}>{c.name}</div>
+                      <div style={{ fontFamily: 'Caveat, cursive', fontSize: 11, color: '#888' }}>{c.time}</div>
+                    </div>
+                    <div style={{ fontFamily: 'Caveat, cursive', fontSize: 11, color: '#666', fontStyle: 'italic' }}>על: {c.listing}</div>
+                    <div className="flex justify-between items-center">
+                      <div style={{ fontFamily: 'Caveat, cursive', fontSize: 12, color: '#444', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 160 }}>{c.preview}</div>
+                      {c.unread > 0 && <div style={{ background: '#444', color: '#f5f3ef', fontSize: 10, fontWeight: 700, borderRadius: '50%', width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Caveat, cursive' }}>{c.unread}</div>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+            <div className="state-box" style={{ margin: 12, padding: 14, textAlign: 'center' }}>
+              <div style={{ fontFamily: 'Caveat, cursive', fontSize: 12, color: '#666', fontWeight: 700 }}>מצב ריק — Empty State</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 6 }}><BrokenVinyl size={40} /></div>
+              <div style={{ fontFamily: 'Caveat, cursive', fontSize: 11, color: '#888', marginTop: 4 }}>"אין שיחות עדיין"</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Active conversation */}
+        <div className="flex-col flex1" style={{ background: '#f5f3ef' }}>
+          {/* Conv header — listing reference */}
+          <div className="wf-box" style={{ padding: 12, borderBottom: '2px solid #ccc', background: '#eceae4' }}>
+            <div className="flex items-center gap10">
+              <Circle size={42} label="👤" />
+              <div className="flex-col flex1 gap2">
+                <div className="wf-line lg" style={{ width: 120, height: 14 }} />
+                <div style={{ fontFamily: 'Caveat, cursive', fontSize: 12, color: '#666' }}>פעיל לפני 5 דקות · ⭐ 4.7</div>
+              </div>
+              <Btn label="צפה בפרופיל" type="outline" ann="→ Profile (seller view)" />
+            </div>
+            <Divider />
+            <div className="flex items-center gap10">
+              <ImgBox w={48} h={48} label="" style={{ flexShrink: 0 }} />
+              <div className="flex-col flex1 gap2">
+                <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 14 }}>על: Pink Floyd — The Wall (1979)</div>
+                <div className="flex gap6">
+                  <Pill label='ויניל 12"' sm /><Pill label="VG+" sm /><div className="wf-line lg" style={{ width: 60, height: 16 }} />
+                </div>
+              </div>
+              <Btn label="צפה במכירה" ann="→ Product Page" />
+            </div>
+          </div>
+
+          {/* Messages */}
+          <div className="flex-col gap10" style={{ flex: 1, padding: 16, overflow: 'auto' }}>
+            <div style={{ textAlign: 'center', fontFamily: 'Caveat, cursive', fontSize: 11, color: '#999', fontStyle: 'italic' }}>היום — 14:20</div>
+
+            {/* Their msg */}
+            <div className="flex gap8 items-start">
+              <Circle size={28} label="👤" />
+              <div className="wf-box" style={{ padding: '8px 12px', maxWidth: 360, background: '#e8e5df' }}>
+                <div style={{ fontFamily: 'Caveat, cursive', fontSize: 14, color: '#222' }}>שלום, האם התקליט עדיין זמין?</div>
+                <div style={{ fontFamily: 'Caveat, cursive', fontSize: 10, color: '#888', textAlign: 'left', marginTop: 4 }}>14:20</div>
+              </div>
+            </div>
+
+            {/* My msg */}
+            <div className="flex gap8 items-start" style={{ flexDirection: 'row-reverse' }}>
+              <div className="wf-box" style={{ padding: '8px 12px', maxWidth: 360, background: '#444', color: '#f5f3ef', border: '2px solid #333' }}>
+                <div style={{ fontFamily: 'Caveat, cursive', fontSize: 14 }}>כן, זמין! במצב מצוין</div>
+                <div style={{ fontFamily: 'Caveat, cursive', fontSize: 10, color: '#bbb', textAlign: 'left', marginTop: 4 }}>14:25 ✓✓</div>
+              </div>
+            </div>
+
+            {/* Their msg w/ image */}
+            <div className="flex gap8 items-start">
+              <Circle size={28} label="👤" />
+              <div className="wf-box" style={{ padding: 6, maxWidth: 240, background: '#e8e5df' }}>
+                <ImgBox w={220} h={140} label="תמונה ששלח" />
+                <div style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: '#222', marginTop: 4 }}>זה הכיסוי הפנימי גם?</div>
+                <div style={{ fontFamily: 'Caveat, cursive', fontSize: 10, color: '#888', textAlign: 'left', marginTop: 2 }}>14:30</div>
+              </div>
+            </div>
+
+            <div className="flex gap8 items-start">
+              <Circle size={28} label="👤" />
+              <div className="wf-box" style={{ padding: '8px 12px', maxWidth: 360, background: '#e8e5df' }}>
+                <div style={{ fontFamily: 'Caveat, cursive', fontSize: 14, color: '#222' }}>מתי תוכל לאסוף? אני בדיזנגוף.</div>
+                <div style={{ fontFamily: 'Caveat, cursive', fontSize: 10, color: '#888', textAlign: 'left', marginTop: 4 }}>14:32</div>
+              </div>
+            </div>
+
+            {/* Typing indicator */}
+            <div className="flex gap8 items-center">
+              <Circle size={28} label="👤" />
+              <div style={{ fontFamily: 'Caveat, cursive', fontSize: 12, color: '#888', fontStyle: 'italic' }}>מקליד... ●●●</div>
+            </div>
+          </div>
+
+          {/* Composer */}
+          <div className="wf-box" style={{ padding: 12, borderTop: '2px solid #ccc', background: '#eceae4' }}>
+            <div className="flex items-end gap8">
+              <Btn label="📎" type="outline" ann="→ צרף תמונה" />
+              <div className="wf-input" style={{ flex: 1, color: '#aaa', minHeight: 36 }}>הקלד הודעה...</div>
+              <Btn label="שלח ←" type="filled" ann="Enter שולח · Shift+Enter שורה חדשה" />
+            </div>
+            <div style={{ fontFamily: 'Caveat, cursive', fontSize: 11, color: '#888', marginTop: 6, fontStyle: 'italic', textAlign: 'center' }}>
+              ⚠ אזהרה: ההודעות אינן מוצפנות מקצה לקצה. אל תשתף פרטי תשלום.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style={{ display: 'flex', justifyContent: 'center', marginTop: 32 }}>
+      <MobileFrame label="צ'אט במובייל — שיחה אחת בכל פעם">
+        <div style={{ background: '#e0ddd7', borderBottom: '1.5px solid #555', padding: '6px 8px', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div style={{ fontSize: 14, fontWeight: 700 }}>←</div>
+          <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#bbb', border: '1.5px solid #555' }}/>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 11, fontWeight: 700 }}>יוסי כהן</div>
+            <div style={{ fontSize: 9, color: '#666' }}>פעיל עכשיו</div>
+          </div>
+        </div>
+        <MBox style={{ margin: 6, padding: 5, display: 'flex', gap: 5, alignItems: 'center', background: '#eceae4' }}>
+          <MImg h={32} label="" />
+          <div style={{ flex: 1 }}>
+            <MLine w="80%" h={4} style={{ marginBottom: 2 }} />
+            <MLine w="50%" h={5} />
+          </div>
+        </MBox>
+        <div style={{ flex: 1, padding: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ alignSelf: 'flex-start', maxWidth: '70%' }}>
+            <MBox style={{ padding: '4px 6px', fontSize: 9 }}>שלום, זמין?</MBox>
+          </div>
+          <div style={{ alignSelf: 'flex-end', maxWidth: '70%' }}>
+            <div style={{ background: '#444', color: '#f5f3ef', padding: '4px 6px', fontSize: 9, borderRadius: 2, border: '1.5px solid #333' }}>כן, במצב מצוין!</div>
+          </div>
+          <div style={{ alignSelf: 'flex-start', maxWidth: '70%' }}>
+            <MBox style={{ padding: '4px 6px', fontSize: 9 }}>מתי לאסוף?</MBox>
+          </div>
+        </div>
+        <div style={{ padding: 6, borderTop: '1.5px solid #ccc', background: '#eceae4', display: 'flex', gap: 4 }}>
+          <MBtn label="📎" />
+          <MBox style={{ flex: 1, padding: '3px 6px', fontSize: 9, color: '#aaa', background: '#fff' }}>הקלד...</MBox>
+          <MBtn label="←" filled />
+        </div>
+      </MobileFrame>
+    </div>
+  </div>
+);
+
+// ─── SCREEN 10: Admin Panel ──────────────────────────────────────────────────
+
+const Screen10 = () => {
+  const [tab, setTab] = React.useState('listings');
+  return (
+    <div>
+      <div className="screen-badge"><span>מסך</span>פאנל ניהול — Admin</div>
+      <div className="access-badge">🔒 גישת אדמין בלבד — דורש הרשאת super-user</div>
+      <AuthNote text="משתמש ללא הרשאת אדמין → 403 / Redirect to Search Page" />
+      <div className="wf-canvas sketch-border" style={{ width: 1100, margin: '0 auto', marginTop: 8 }}>
+        <NavbarLoggedIn />
+
+        <div style={{ padding: '16px 24px', background: '#333', color: '#f5f3ef', borderBottom: '2px solid #555' }}>
+          <div className="flex items-center justify-between">
+            <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 22 }}>⚙ פאנל ניהול</div>
+            <div style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: '#bbb' }}>מחובר כ: admin@vinilseeker.co.il</div>
+          </div>
+        </div>
+
+        {/* Stat cards */}
+        <div style={{ padding: 16, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, borderBottom: '2px solid #ccc', background: '#e8e5df' }}>
+          {[
+            ['סה"כ משתמשים', '4,832', '+18 השבוע'],
+            ['מכירות פעילות', '1,247', '+62 היום'],
+            ['דיווחים פתוחים', '7', 'דורש טיפול ⚠'],
+            ['הכנסות (חודש)', '—', 'אין מודל מסחרי'],
+          ].map(([title, num, sub], i) => (
+            <div key={i} className="wf-box" style={{ padding: 12, textAlign: 'center' }}>
+              <div style={{ fontFamily: 'Caveat, cursive', fontSize: 12, color: '#666' }}>{title}</div>
+              <div style={{ fontFamily: 'Caveat, cursive', fontSize: 24, fontWeight: 700, color: '#222', margin: '4px 0' }}>{num}</div>
+              <div style={{ fontFamily: 'Caveat, cursive', fontSize: 11, color: '#555', fontStyle: 'italic' }}>{sub}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Tabs */}
+        <div className="flex" style={{ borderBottom: '2px solid #ccc', background: '#eceae4' }}>
+          {[['listings', 'מכירות (1,247)'], ['users', 'משתמשים (4,832)'], ['reports', 'דיווחים (7) ⚠'], ['stores', 'חנויות (38)']].map(([id, label]) => (
+            <div key={id} onClick={() => setTab(id)} style={{
+              padding: '10px 18px', cursor: 'pointer',
+              fontFamily: 'Caveat, cursive', fontSize: 15, fontWeight: 700,
+              color: tab === id ? '#222' : '#888',
+              borderBottom: tab === id ? '3px solid #333' : '3px solid transparent'
+            }}>{label}</div>
+          ))}
+        </div>
+
+        {/* Tab content */}
+        <div style={{ padding: 16 }}>
+          {tab === 'listings' && (
+            <div>
+              <div className="flex items-center gap8" style={{ marginBottom: 12 }}>
+                <div className="wf-input" style={{ flex: 1, color: '#aaa' }}>חפש מכירה לפי שם / מוכר / קטלוג... 🔍</div>
+                <div className="wf-input" style={{ width: 130, color: '#555' }}>סטטוס: הכל ▾</div>
+                <Btn label="ייצא CSV" type="outline" />
+              </div>
+              {/* Table */}
+              <div className="wf-box" style={{ padding: 0, overflow: 'hidden' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '40px 1fr 1fr 90px 100px 100px 110px 130px', background: '#d8d5cf', padding: '8px 10px', fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 13, borderBottom: '2px solid #555', alignItems: 'center', gap: 8 }}>
+                  <Check label="" />
+                  <span>תקליט</span>
+                  <span>מוכר</span>
+                  <span>מצב</span>
+                  <span>מחיר</span>
+                  <span>נוצר</span>
+                  <span>סטטוס</span>
+                  <span>פעולות</span>
+                </div>
+                {[
+                  { title: 'Pink Floyd — DSOTM', seller: 'יוסי כהן', cond: 'VG+', price: '₪220', date: '08/05', status: 'פעיל', flagged: false },
+                  { title: 'Beatles — Abbey Road', seller: 'רינה לוי', cond: 'חדש', price: '₪380', date: '07/05', status: 'פעיל', flagged: false },
+                  { title: 'Miles Davis — Kind of Blue', seller: 'דני אבן', cond: 'VG', price: '₪95', date: '07/05', status: 'מדווח', flagged: true },
+                  { title: 'Led Zeppelin IV', seller: 'שרה גולן', cond: 'VG+', price: '₪290', date: '06/05', status: 'נמכר', flagged: false },
+                  { title: '(אלבום מוסר)', seller: '???', cond: '—', price: '—', date: '06/05', status: 'מוסר', flagged: true },
+                ].map((row, i) => (
+                  <div key={i} style={{
+                    display: 'grid', gridTemplateColumns: '40px 1fr 1fr 90px 100px 100px 110px 130px',
+                    padding: '8px 10px', borderBottom: i < 4 ? '1px solid #ccc' : 'none',
+                    background: row.flagged ? '#f0e0d8' : 'transparent',
+                    alignItems: 'center', gap: 8, fontFamily: 'Caveat, cursive', fontSize: 13
+                  }}>
+                    <Check label="" />
+                    <div className="flex items-center gap6">
+                      <div style={{ width: 28, height: 28, background: '#ddd', border: '1.5px solid #555', flexShrink: 0 }}/>
+                      <span>{row.title}</span>
+                    </div>
+                    <span>{row.seller}</span>
+                    <Pill label={row.cond} sm />
+                    <span style={{ fontWeight: 700 }}>{row.price}</span>
+                    <span style={{ color: '#666' }}>{row.date}</span>
+                    <Pill label={row.status} active={row.flagged} sm />
+                    <div className="flex gap4">
+                      <div className="wf-btn outline" style={{ fontSize: 11, padding: '2px 6px' }}>צפה</div>
+                      <div className="wf-btn outline" style={{ fontSize: 11, padding: '2px 6px' }}>ערוך</div>
+                      <div className="wf-btn" style={{ fontSize: 11, padding: '2px 6px', background: '#a55', color: '#fff', border: '2px solid #844' }}>הסר</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* Bulk actions */}
+              <div className="flex items-center gap8" style={{ marginTop: 12, padding: 10, background: '#e0ddd7', border: '2px dashed #888' }}>
+                <span style={{ fontFamily: 'Caveat, cursive', fontSize: 13, fontWeight: 700 }}>0 פריטים נבחרו · פעולות:</span>
+                <Btn label="הסר נבחרים" type="outline" />
+                <Btn label="אישור נבחרים" type="outline" />
+                <Btn label="העבר לבדיקה" type="outline" />
+              </div>
+              {/* Pagination */}
+              <div className="flex justify-center gap6" style={{ marginTop: 16 }}>
+                {['‹', '1', '2', '3', '...', '125', '›'].map((p, i) => (
+                  <div key={i} className={`wf-btn ${p === '1' ? 'filled' : 'outline'}`} style={{ minWidth: 28, padding: '4px 8px', fontSize: 13 }}>{p}</div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {tab === 'users' && (
+            <div>
+              <div className="flex items-center gap8" style={{ marginBottom: 12 }}>
+                <div className="wf-input" style={{ flex: 1, color: '#aaa' }}>חפש משתמש לפי שם / אימייל... 🔍</div>
+                <div className="wf-input" style={{ width: 140, color: '#555' }}>סוג: הכל ▾</div>
+              </div>
+              <div className="wf-box" style={{ padding: 0 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '40px 40px 1fr 1fr 80px 100px 100px 130px', background: '#d8d5cf', padding: '8px 10px', fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 13, borderBottom: '2px solid #555', alignItems: 'center', gap: 8 }}>
+                  <Check label="" />
+                  <span></span>
+                  <span>שם</span>
+                  <span>אימייל</span>
+                  <span>סוג</span>
+                  <span>הצטרף</span>
+                  <span>סטטוס</span>
+                  <span>פעולות</span>
+                </div>
+                {[
+                  ['יוסי כהן', 'yossi@example.com', 'מוכר', '01/2024', 'פעיל'],
+                  ['רינה לוי', 'rina@example.com', 'קונה', '03/2024', 'פעיל'],
+                  ['חנות רקורד ת״א', 'shop@records.co.il', 'חנות', '11/2023', 'מאומת'],
+                  ['??? משתמש', 'spam@bad.com', 'קונה', '08/05', 'חסום'],
+                ].map((row, i) => (
+                  <div key={i} style={{
+                    display: 'grid', gridTemplateColumns: '40px 40px 1fr 1fr 80px 100px 100px 130px',
+                    padding: '8px 10px', borderBottom: i < 3 ? '1px solid #ccc' : 'none',
+                    alignItems: 'center', gap: 8, fontFamily: 'Caveat, cursive', fontSize: 13,
+                    background: row[4] === 'חסום' ? '#f0e0d8' : 'transparent'
+                  }}>
+                    <Check label="" />
+                    <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#ddd', border: '1.5px solid #555' }}/>
+                    <span>{row[0]}</span>
+                    <span style={{ color: '#666' }}>{row[1]}</span>
+                    <Pill label={row[2]} sm />
+                    <span style={{ color: '#666' }}>{row[3]}</span>
+                    <Pill label={row[4]} active={row[4] === 'חסום'} sm />
+                    <div className="flex gap4">
+                      <div className="wf-btn outline" style={{ fontSize: 11, padding: '2px 6px' }}>צפה</div>
+                      <div className="wf-btn outline" style={{ fontSize: 11, padding: '2px 6px' }}>חסום</div>
+                      <div className="wf-btn outline" style={{ fontSize: 11, padding: '2px 6px' }}>...</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {tab === 'reports' && (
+            <div className="flex-col gap10">
+              {[
+                { reporter: 'רינה לוי', target: 'מכירה: Miles Davis - Kind of Blue', reason: 'תיאור מטעה', status: 'פתוח', priority: 'גבוה' },
+                { reporter: 'דני אבן', target: 'משתמש: spam@bad.com', reason: 'ספאם / הודעות לא רצויות', status: 'פתוח', priority: 'בינוני' },
+                { reporter: 'יוסי כהן', target: 'מכירה: (אלבום מוסר)', reason: 'מצב התקליט שונה מהמתואר', status: 'בטיפול', priority: 'בינוני' },
+              ].map((r, i) => (
+                <div key={i} className="wf-box" style={{ padding: 12, borderRight: r.priority === 'גבוה' ? '4px solid #844' : '4px solid #888' }}>
+                  <div className="flex items-center justify-between" style={{ marginBottom: 6 }}>
+                    <div className="flex gap6 items-center">
+                      <Pill label={`עדיפות: ${r.priority}`} active={r.priority === 'גבוה'} sm />
+                      <Pill label={r.status} sm />
+                    </div>
+                    <div style={{ fontFamily: 'Caveat, cursive', fontSize: 12, color: '#888' }}>לפני 2 שעות</div>
+                  </div>
+                  <div style={{ fontFamily: 'Caveat, cursive', fontSize: 14, fontWeight: 700, marginBottom: 4 }}>{r.target}</div>
+                  <div style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: '#444' }}>סיבה: {r.reason}</div>
+                  <div style={{ fontFamily: 'Caveat, cursive', fontSize: 12, color: '#666', marginTop: 4 }}>דווח על ידי: {r.reporter}</div>
+                  <div className="flex gap6" style={{ marginTop: 8 }}>
+                    <Btn label="חקור" type="filled" ann="→ פותח את הפריט המדווח" />
+                    <Btn label="פתור — תקין" type="outline" />
+                    <Btn label="הסר את הפריט" type="outline" />
+                    <Btn label="חסום משתמש" type="outline" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {tab === 'stores' && (
+            <div>
+              <div className="flex items-center gap8" style={{ marginBottom: 12 }}>
+                <div className="wf-input" style={{ flex: 1, color: '#aaa' }}>חפש חנות... 🔍</div>
+                <Btn label="+ הוסף חנות חדשה" type="filled" />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+                {[
+                  { name: 'רקורד תל אביב', city: 'תל אביב', items: 482, status: 'מאומת' },
+                  { name: 'מוסיקה לכל', city: 'ירושלים', items: 215, status: 'מאומת' },
+                  { name: 'Vinyl Heaven', city: 'חיפה', items: 138, status: 'בהמתנה' },
+                  { name: 'הכל בויניל', city: 'פתח תקווה', items: 92, status: 'מאומת' },
+                ].map((s, i) => (
+                  <div key={i} className="wf-box" style={{ padding: 12 }}>
+                    <div className="flex items-center justify-between" style={{ marginBottom: 6 }}>
+                      <div style={{ fontFamily: 'Caveat, cursive', fontWeight: 700, fontSize: 15 }}>{s.name}</div>
+                      <Pill label={s.status} active={s.status === 'בהמתנה'} sm />
+                    </div>
+                    <div style={{ fontFamily: 'Caveat, cursive', fontSize: 13, color: '#666' }}>{s.city} · {s.items} פריטים בקטלוג</div>
+                    <div className="flex gap6" style={{ marginTop: 8 }}>
+                      <Btn label="ערוך" type="outline" />
+                      <Btn label="סנכרן מלאי" type="outline" ann="מושך מלאי מ-API של החנות" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20, fontFamily: 'Caveat, cursive', fontSize: 13, color: '#888', fontStyle: 'italic' }}>
+        📱 פאנל ניהול הוא Desktop-only — אין תצוגת מובייל
+      </div>
+    </div>
+  );
+};
+
+// ─── App Shell ────────────────────────────────────────────────────────────────
+
+const screens = [
+  { id: 's1', label: 'דף הבית', component: Screen1 },
+  { id: 's2', label: 'כניסה / הרשמה', component: Screen2 },
+  { id: 's7', label: 'שכחתי סיסמה', component: Screen7 },
+  { id: 's3', label: 'חיפוש', component: Screen3 },
+  { id: 's4', label: 'דף מוצר', component: Screen4 },
+  { id: 's5', label: 'העלאת מכירה', component: Screen5 },
+  { id: 's6', label: 'Wishlist', component: Screen6 },
+  { id: 's9', label: 'צ\'אט', component: Screen9 },
+  { id: 's8', label: 'פרופיל / הגדרות', component: Screen8 },
+  { id: 's10', label: '⚙ פאנל אדמין', component: Screen10 },
+];
+
+function App() {
+  const [active, setActive] = React.useState('s1');
+  return (
+    <>
+      <nav className="screen-nav">
+        {screens.map(s => (
+          <button key={s.id} className={active === s.id ? 'active' : ''} onClick={() => setActive(s.id)}>
+            {s.label}
+          </button>
+        ))}
+      </nav>
+      <div className="screens-wrapper">
+        {screens.map(s => (
+          <div key={s.id} className={`screen-panel ${active === s.id ? 'active' : ''}`}>
+            <s.component />
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root') || (() => {
+  const el = document.createElement('div');
+  el.id = 'root';
+  document.body.appendChild(el);
+  return el;
+})()).render(<App />);
+
+</script>
+
+<div id="root"></div>
+
+</body>
+</html>

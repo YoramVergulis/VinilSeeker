@@ -1,0 +1,43 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css">
+<style>
+.btn{font-family:var(--font-body);font-weight:600;font-size:14px;border-radius:9999px;padding:10px 22px;border:1px solid transparent;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .15s;line-height:1}
+.btn-primary{background:var(--purple-700);color:#fff}
+.btn-primary:hover{background:var(--purple-600)}
+.btn-gold{background:var(--gold-500);color:var(--purple-900)}
+.btn-gold:hover{background:var(--gold-300)}
+.btn-secondary{background:var(--cream);color:var(--purple-700);border-color:var(--purple-700)}
+.btn-secondary:hover{background:var(--purple-50)}
+.btn-ghost{background:transparent;color:var(--purple-700)}
+.btn-ghost:hover{background:var(--purple-50)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-disabled{background:var(--rule);color:var(--ink-3);cursor:not-allowed}
+.btn-sm{font-size:13px;padding:6px 14px}
+.btn-lg{font-size:16px;padding:14px 28px}
+</style></head>
+<body><div class="card"><div class="label" style="margin-bottom:14px">Buttons</div>
+
+<div class="label" style="font-size:10px;color:var(--ink-3);margin:6px 0">VARIANTS</div>
+<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px">
+  <button class="btn btn-primary">פרסם תקליט</button>
+  <button class="btn btn-gold">קנה עכשיו · ₪240</button>
+  <button class="btn btn-secondary">חיפוש מתקדם</button>
+  <button class="btn btn-ghost">ביטול</button>
+  <button class="btn btn-danger">מחק</button>
+  <button class="btn btn-disabled" disabled>לא זמין</button>
+</div>
+
+<div class="label" style="font-size:10px;color:var(--ink-3);margin:6px 0">SIZES</div>
+<div style="display:flex;gap:10px;align-items:center;margin-bottom:14px">
+  <button class="btn btn-primary btn-sm">קטן</button>
+  <button class="btn btn-primary">רגיל</button>
+  <button class="btn btn-primary btn-lg">גדול</button>
+</div>
+
+<div class="label" style="font-size:10px;color:var(--ink-3);margin:6px 0">WITH ICON</div>
+<div style="display:flex;gap:10px;align-items:center">
+  <button class="btn btn-primary"><span style="font-size:16px">＋</span> הוסף לרשימה</button>
+  <button class="btn btn-secondary">סנן <span style="font-size:14px">▼</span></button>
+  <button class="btn btn-gold"><span>♥</span> שמור במועדפים</button>
+</div>
+
+</div></body></html>

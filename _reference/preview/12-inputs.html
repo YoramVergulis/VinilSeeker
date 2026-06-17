@@ -1,0 +1,39 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css">
+<style>
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-family:var(--font-body);font-weight:600;font-size:13px;color:var(--ink)}
+.field input,.field select,.field textarea{font-family:var(--font-body);font-size:15px;color:var(--ink);background:var(--paper);border:1.5px solid var(--rule);border-radius:12px;padding:12px 14px;outline:none;transition:border .15s,box-shadow .15s;direction:rtl}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--purple-700);box-shadow:0 0 0 3px var(--purple-100)}
+.field .help{font-size:12px;color:var(--ink-3)}
+.field.error input{border-color:var(--danger);background:var(--danger-bg)}
+.field.error .help{color:var(--danger)}
+.field-row{display:flex;align-items:center;gap:10px;background:var(--paper);border:1.5px solid var(--rule);border-radius:9999px;padding:10px 18px}
+.field-row input{border:none;outline:none;background:transparent;flex:1;font-size:15px;font-family:var(--font-body);direction:rtl}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:9999px;background:var(--purple-100);color:var(--purple-700);font-size:13px;font-weight:600}
+.chip .x{cursor:pointer;opacity:.6;font-size:11px}
+</style></head>
+<body><div class="card"><div class="label" style="margin-bottom:14px">Inputs</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+  <div class="field"><label>שם האמן</label><input type="text" value="Pink Floyd" /></div>
+  <div class="field"><label>מחיר (₪)</label><input type="text" placeholder="לדוגמה: 240" /></div>
+  <div class="field"><label>ז'אנר</label><select><option>בחר ז'אנר…</option><option>רוק</option><option>ג'אז</option></select></div>
+  <div class="field error"><label>אימייל</label><input type="email" value="invalid@" /><div class="help">⚠ נא להזין אימייל תקין</div></div>
+</div>
+
+<div class="label" style="font-size:10px;color:var(--ink-3);margin:14px 0 6px">SEARCH BAR</div>
+<div class="field-row">
+  <span style="font-size:18px;color:var(--ink-3)">⌕</span>
+  <input type="text" placeholder="חפש אלבומים, אמנים, חנויות…" />
+  <button style="background:var(--purple-700);color:#fff;border:none;border-radius:9999px;padding:6px 16px;font-size:13px;font-weight:600;font-family:var(--font-body)">חפש</button>
+</div>
+
+<div class="label" style="font-size:10px;color:var(--ink-3);margin:14px 0 6px">CHIPS / TAGS</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+  <span class="chip">רוק <span class="x">✕</span></span>
+  <span class="chip">תל אביב <span class="x">✕</span></span>
+  <span class="chip">₪100–500 <span class="x">✕</span></span>
+  <span class="chip" style="background:var(--gold-500);color:var(--purple-900)">★ נדיר <span class="x">✕</span></span>
+</div>
+
+</div></body></html>

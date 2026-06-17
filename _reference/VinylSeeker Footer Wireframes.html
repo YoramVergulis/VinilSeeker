@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VinilSeeker — Footer Wireframes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #1a1a1a; font-family: 'Caveat', cursive; color: #222; }
+
+  .screen-nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: #111; border-bottom: 2px solid #333;
+    display: flex; gap: 0; overflow-x: auto; padding: 0 12px;
+  }
+  .screen-nav button {
+    font-family: 'Caveat', cursive; font-size: 14px; font-weight: 600;
+    color: #888; background: none; border: none; cursor: pointer;
+    padding: 12px 16px; white-space: nowrap; border-bottom: 3px solid transparent;
+  }
+  .screen-nav button.active { color: #fff; border-bottom-color: #fff; }
+  .screen-nav button:hover { color: #ccc; }
+  .screen-nav .sep { width: 1px; background: #333; margin: 8px 6px; flex-shrink: 0; }
+
+  .screens-wrapper { padding-top: 48px; }
+  .screen-panel { display: none; padding: 32px; min-height: calc(100vh - 48px); }
+  .screen-panel.active { display: block; }
+
+  .wf-canvas {
+    background: #f5f3ef;
+    border: 2px solid #888;
+    border-radius: 4px;
+    position: relative;
+    font-family: 'Caveat', cursive;
+    direction: rtl;
+    box-shadow: 3px 3px 0 #888, -1px -1px 0 #aaa;
+    width: 1100px;
+    margin: 0 auto;
+  }
+
+  .wf-box {
+    border: 2px solid #555;
+    background: #e8e5df;
+    border-radius: 2px;
+    position: relative;
+  }
+  .wf-box.dashed { border-style: dashed; background: #ede9e2; }
+  .wf-img {
+    border: 2px solid #555;
+    background: #ddd;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .wf-img::before, .wf-img::after {
+    content: ''; position: absolute;
+    background: #aaa; height: 2px; width: 141%;
+  }
+  .wf-img::before { transform: rotate(30deg); }
+  .wf-img::after { transform: rotate(-30deg); }
+  .wf-img > span { position: relative; z-index: 1; background: #ddd; padding: 0 4px; font-size: 11px; color: #888; }
+
+  .wf-line { height: 10px; background: #bbb; border-radius: 2px; }
+  .wf-line.sm { height: 6px; }
+  .wf-line.lg { height: 14px; }
+
+  .wf-btn {
+    border: 2px solid #444;
+    background: #e0ddd7;
+    border-radius: 2px;
+    padding: 6px 14px;
+    font-family: 'Caveat', cursive;
+    font-size: 14px;
+    font-weight: 700;
+    color: #222;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .wf-btn.filled { background: #444; color: #f5f3ef; }
+  .wf-btn.ghost { background: transparent; border-style: dashed; }
+  .wf-btn.outline { background: transparent; }
+  .wf-btn.wide { width: 100%; }
+
+  .wf-input {
+    border: 2px solid #555;
+    background: #fff;
+    border-radius: 2px;
+    padding: 7px 10px;
+    font-family: 'Caveat', cursive;
+    font-size: 13px;
+    color: #888;
+    width: 100%;
+  }
+
+  .wf-pill {
+    display: inline-flex; align-items: center;
+    border: 2px solid #555; border-radius: 20px;
+    padding: 2px 10px; font-size: 13px; font-weight: 600;
+    background: #e8e5df; color: #333;
+  }
+  .wf-pill.active { background: #444; color: #f5f3ef; }
+  .wf-pill.sm { font-size: 11px; padding: 1px 7px; }
+
+  .ann {
+    font-family: 'Caveat', cursive;
+    font-size: 12px;
+    color: #666;
+    font-style: italic;
+    display: flex; align-items: flex-start; gap: 4px;
+  }
+  .ann-arrow { color: #555; font-style: normal; font-size: 14px; }
+
+  .auth-note {
+    font-family: 'Caveat', cursive;
+    font-size: 12px;
+    color: #666;
+    background: #f0ede7;
+    border: 1.5px dashed #aaa;
+    border-radius: 3px;
+    padding: 3px 8px;
+    font-style: italic;
+    display: inline-block;
+  }
+
+  .screen-badge {
+    display: inline-block;
+    background: #333; color: #f5f3ef;
+    font-family: 'Caveat', cursive; font-size: 18px; font-weight: 700;
+    padding: 6px 16px; border-radius: 2px; margin-bottom: 12px;
+  }
+  .screen-badge span { opacity: 0.6; font-size: 14px; margin-right: 8px; }
+  .access-badge {
+    display: inline-block;
+    border: 2px solid #888; background: #e8e5df;
+    font-family: 'Caveat', cursive; font-size: 13px;
+    padding: 2px 10px; border-radius: 2px; margin-bottom: 16px; margin-right: 8px;
+    color: #555;
+  }
+
+  .wf-section-title {
+    font-size: 16px; font-weight: 700; color: #333;
+    border-bottom: 2px solid #555; padding-bottom: 4px; margin-bottom: 10px;
+  }
+  .wf-label { font-size: 13px; font-weight: 700; color: #444; margin-bottom: 3px; display: block; }
+  .wf-divider { border: none; border-top: 2px solid #bbb; margin: 8px 0; }
+
+  /* Wireframe navbar */
+  .wf-navbar {
+    padding: 10px 16px;
+    border-bottom: 2px solid #555;
+    background: #e0ddd7;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .wf-navbar .logo {
+    background: #ccc;
+    padding: 4px 12px;
+    font-weight: 700;
+    font-size: 16px;
+    border: 1.5px solid #555;
+  }
+  .wf-navbar .links { display: flex; gap: 18px; }
+  .wf-navbar .links span { font-size: 14px; color: #555; }
+  .wf-navbar .actions { display: flex; gap: 8px; }
+
+  /* Mobile frame */
+  .mobile-frame {
+    width: 240px; height: 470px;
+    background: #222;
+    border-radius: 28px;
+    padding: 8px 6px;
+    box-shadow: 3px 3px 0 #888;
+    position: relative;
+  }
+  .mobile-frame::before {
+    content: ''; position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+    width: 60px; height: 14px; background: #222; border-radius: 0 0 10px 10px; z-index: 2;
+  }
+  .mobile-screen {
+    width: 100%; height: 100%;
+    background: #f5f3ef;
+    border-radius: 22px;
+    overflow: hidden;
+    direction: rtl;
+    font-family: 'Caveat', cursive;
+  }
+  .mobile-nav {
+    background: #e0ddd7; border-bottom: 1.5px solid #555;
+    padding: 6px 8px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .mobile-nav .ham { font-size: 14px; font-weight: 700; }
+  .mobile-nav .logo { background: #ccc; padding: 2px 6px; font-size: 10px; font-weight: 700; }
+
+  .mobile-label {
+    font-family: 'Caveat', cursive;
+    font-size: 13px; color: #888; font-style: italic;
+    margin-top: 8px; text-align: center;
+  }
+
+  .flex { display: flex; }
+  .flex-col { display: flex; flex-direction: column; }
+  .gap4 { gap: 4px; } .gap6 { gap: 6px; } .gap8 { gap: 8px; }
+  .gap10 { gap: 10px; } .gap12 { gap: 12px; } .gap16 { gap: 16px; }
+  .gap20 { gap: 20px; } .gap24 { gap: 24px; }
+  .items-center { align-items: center; }
+  .justify-between { justify-content: space-between; }
+  .justify-center { justify-content: center; }
+  .flex1 { flex: 1; }
+  .w100 { width: 100%; }
+  .center { text-align: center; }
+
+  .wf-circle {
+    border: 2px solid #555; background: #e0ddd7; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #888;
+  }
+</style>
+</head>
+<body>
+
+<nav class="screen-nav">
+  <button data-page="genres" class="active">לפי ז'אנר</button>
+  <button data-page="stores">חנויות</button>
+  <button data-page="rare">תקליטים נדירים</button>
+  <span class="sep"></span>
+  <button data-page="how">איך זה עובד</button>
+  <button data-page="seller">מדריך למוכרים</button>
+  <button data-page="pricing">ייעוץ מחירים</button>
+  <span class="sep"></span>
+  <button data-page="blog">בלוג</button>
+  <button data-page="contact">צור קשר</button>
+  <button data-page="terms">תקנון</button>
+  <button data-page="privacy">פרטיות</button>
+</nav>
+
+<div class="screens-wrapper">
+
+<!-- ============================================================
+     PAGE 1: GENRES
+     ============================================================ -->
+<div class="screen-panel active" data-page="genres">
+  <div class="screen-badge"><span>מסך</span>לפי ז'אנר — ציבורי</div>
+  <span class="access-badge">🔓 ציבורי</span>
+  <div class="wf-canvas">
+    <div class="wf-navbar">
+      <div class="actions">
+        <div class="wf-btn">התחברות</div>
+        <div class="wf-btn filled">הרשמה</div>
+      </div>
+      <div class="flex items-center gap16">
+        <div class="links"><span>חיפוש</span><span>קטגוריות</span><span>חנויות</span></div>
+        <div class="logo">🎵 VinilSeeker</div>
+      </div>
+    </div>
+
+    <!-- Hero strip -->
+    <div style="padding: 30px 48px; background: #e8e5df; border-bottom: 2px solid #ccc; text-align: center;">
+      <div class="wf-line lg" style="width: 30%; margin: 0 auto 8px; height: 22px;"></div>
+      <div class="wf-line" style="width: 50%; margin: 0 auto;"></div>
+    </div>
+
+    <!-- 3×3 grid -->
+    <div style="padding: 24px 48px;">
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+        <!-- 9 genre tiles -->
+        <div class="wf-box" style="aspect-ratio: 4/3; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+          <div style="position: absolute; top: 12px; left: 12px;"><div class="wf-circle" style="width: 36px; height: 36px;">🎵</div></div>
+          <div></div>
+          <div>
+            <div class="wf-line lg" style="width: 50%; height: 18px;"></div>
+            <div class="wf-line sm" style="width: 70%; margin-top: 4px;"></div>
+          </div>
+        </div>
+        <div class="wf-box" style="aspect-ratio: 4/3; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+          <div style="position: absolute; top: 12px; left: 12px;"><div class="wf-circle" style="width: 36px; height: 36px;">🎵</div></div>
+          <div></div><div><div class="wf-line lg" style="width: 50%; height: 18px;"></div><div class="wf-line sm" style="width: 70%; margin-top: 4px;"></div></div>
+        </div>
+        <div class="wf-box" style="aspect-ratio: 4/3; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+          <div style="position: absolute; top: 12px; left: 12px;"><div class="wf-circle" style="width: 36px; height: 36px;">🎵</div></div>
+          <div></div><div><div class="wf-line lg" style="width: 50%; height: 18px;"></div><div class="wf-line sm" style="width: 70%; margin-top: 4px;"></div></div>
+        </div>
+        <div class="wf-box" style="aspect-ratio: 4/3; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+          <div style="position: absolute; top: 12px; left: 12px;"><div class="wf-circle" style="width: 36px; height: 36px;">🎵</div></div>
+          <div></div><div><div class="wf-line lg" style="width: 50%; height: 18px;"></div><div class="wf-line sm" style="width: 70%; margin-top: 4px;"></div></div>
+        </div>
+        <div class="wf-box" style="aspect-ratio: 4/3; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+          <div style="position: absolute; top: 12px; left: 12px;"><div class="wf-circle" style="width: 36px; height: 36px;">🎵</div></div>
+          <div></div><div><div class="wf-line lg" style="width: 50%; height: 18px;"></div><div class="wf-line sm" style="width: 70%; margin-top: 4px;"></div></div>
+        </div>
+        <div class="wf-box" style="aspect-ratio: 4/3; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+          <div style="position: absolute; top: 12px; left: 12px;"><div class="wf-circle" style="width: 36px; height: 36px;">🎵</div></div>
+          <div></div><div><div class="wf-line lg" style="width: 50%; height: 18px;"></div><div class="wf-line sm" style="width: 70%; margin-top: 4px;"></div></div>
+        </div>
+        <div class="wf-box" style="aspect-ratio: 4/3; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+          <div style="position: absolute; top: 12px; left: 12px;"><div class="wf-circle" style="width: 36px; height: 36px;">🎵</div></div>
+          <div></div><div><div class="wf-line lg" style="width: 50%; height: 18px;"></div><div class="wf-line sm" style="width: 70%; margin-top: 4px;"></div></div>
+        </div>
+        <div class="wf-box" style="aspect-ratio: 4/3; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+          <div style="position: absolute; top: 12px; left: 12px;"><div class="wf-circle" style="width: 36px; height: 36px;">🎵</div></div>
+          <div></div><div><div class="wf-line lg" style="width: 50%; height: 18px;"></div><div class="wf-line sm" style="width: 70%; margin-top: 4px;"></div></div>
+        </div>
+        <div class="wf-box" style="aspect-ratio: 4/3; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+          <div style="position: absolute; top: 12px; left: 12px;"><div class="wf-circle" style="width: 36px; height: 36px;">🎵</div></div>
+          <div></div><div><div class="wf-line lg" style="width: 50%; height: 18px;"></div><div class="wf-line sm" style="width: 70%; margin-top: 4px;"></div></div>
+        </div>
+      </div>
+      <div class="ann" style="margin-top: 14px;"><span class="ann-arrow">↳</span>לחיצה על אריח ז'אנר → Search Page מסונן לאותו ז'אנר</div>
+    </div>
+  </div>
+
+  <div style="display: flex; justify-content: center; margin-top: 28px;">
+    <div>
+      <div class="mobile-frame"><div class="mobile-screen">
+        <div class="mobile-nav"><div class="ham">☰</div><div class="logo">🎵 VinilSeeker</div></div>
+        <div style="padding: 10px 8px; text-align: center; background: #e8e5df; border-bottom: 1px solid #ccc;">
+          <div class="wf-line" style="width: 70%; margin: 0 auto; height: 8px;"></div>
+        </div>
+        <div style="padding: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+          <div class="wf-box" style="aspect-ratio: 1; padding: 6px; display: flex; flex-direction: column; justify-content: space-between;"><div class="wf-circle" style="width: 20px; height: 20px; align-self: start;">🎵</div><div class="wf-line" style="width: 60%; height: 5px;"></div></div>
+          <div class="wf-box" style="aspect-ratio: 1; padding: 6px; display: flex; flex-direction: column; justify-content: space-between;"><div class="wf-circle" style="width: 20px; height: 20px; align-self: start;">🎵</div><div class="wf-line" style="width: 60%; height: 5px;"></div></div>
+          <div class="wf-box" style="aspect-ratio: 1; padding: 6px; display: flex; flex-direction: column; justify-content: space-between;"><div class="wf-circle" style="width: 20px; height: 20px; align-self: start;">🎵</div><div class="wf-line" style="width: 60%; height: 5px;"></div></div>
+          <div class="wf-box" style="aspect-ratio: 1; padding: 6px; display: flex; flex-direction: column; justify-content: space-between;"><div class="wf-circle" style="width: 20px; height: 20px; align-self: start;">🎵</div><div class="wf-line" style="width: 60%; height: 5px;"></div></div>
+          <div class="wf-box" style="aspect-ratio: 1; padding: 6px; display: flex; flex-direction: column; justify-content: space-between;"><div class="wf-circle" style="width: 20px; height: 20px; align-self: start;">🎵</div><div class="wf-line" style="width: 60%; height: 5px;"></div></div>
+          <div class="wf-box" style="aspect-ratio: 1; padding: 6px; display: flex; flex-direction: column; justify-content: space-between;"><div class="wf-circle" style="width: 20px; height: 20px; align-self: start;">🎵</div><div class="wf-line" style="width: 60%; height: 5px;"></div></div>
+        </div>
+      </div></div>
+      <div class="mobile-label">📱 2 טורים</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE 2: STORES
+     ============================================================ -->
+<div class="screen-panel" data-page="stores">
+  <div class="screen-badge"><span>מסך</span>חנויות — ציבורי</div>
+  <span class="access-badge">🔓 ציבורי</span>
+  <div class="wf-canvas">
+    <div class="wf-navbar">
+      <div class="actions"><div class="wf-btn">התחברות</div><div class="wf-btn filled">הרשמה</div></div>
+      <div class="flex items-center gap16"><div class="links"><span>חיפוש</span><span>קטגוריות</span></div><div class="logo">🎵 VinilSeeker</div></div>
+    </div>
+
+    <div style="padding: 24px 48px; background: #e8e5df; border-bottom: 2px solid #ccc; text-align: center;">
+      <div class="wf-line lg" style="width: 35%; margin: 0 auto 6px; height: 20px;"></div>
+      <div class="wf-line" style="width: 50%; margin: 0 auto;"></div>
+    </div>
+
+    <!-- Filter bar -->
+    <div style="padding: 12px 24px; border-bottom: 2px solid #ccc; display: flex; gap: 8px; align-items: center;">
+      <div class="wf-input" style="flex: 1;">חפש חנות לפי שם או עיר... 🔍</div>
+      <div class="wf-input" style="width: 140px;">עיר: הכל ▾</div>
+      <div class="wf-input" style="width: 140px;">ז'אנר: הכל ▾</div>
+    </div>
+
+    <!-- Split layout -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; min-height: 540px;">
+      <!-- Map -->
+      <div class="wf-box" style="margin: 16px; padding: 16px; position: relative; background-image: linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px); background-size: 20px 20px;">
+        <div style="position: absolute; top: 8px; right: 8px; font-size: 12px; color: #888; font-family: 'Caveat', cursive; font-style: italic;">🗺 מפת ישראל</div>
+        <!-- Pins -->
+        <div style="position: absolute; top: 35%; right: 40%;">
+          <div style="width: 14px; height: 14px; border-radius: 50%; background: #444; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>
+        </div>
+        <div style="position: absolute; top: 25%; right: 50%;">
+          <div style="width: 14px; height: 14px; border-radius: 50%; background: #444; border: 2px solid #fff;"></div>
+        </div>
+        <div style="position: absolute; top: 18%; right: 35%;">
+          <div style="width: 14px; height: 14px; border-radius: 50%; background: #444; border: 2px solid #fff;"></div>
+        </div>
+        <div style="position: absolute; top: 50%; right: 45%;">
+          <div style="width: 14px; height: 14px; border-radius: 50%; background: #444; border: 2px solid #fff;"></div>
+        </div>
+        <div style="position: absolute; top: 70%; right: 38%;">
+          <div style="width: 14px; height: 14px; border-radius: 50%; background: #444; border: 2px solid #fff;"></div>
+        </div>
+        <div style="position: absolute; bottom: 8px; right: 8px;" class="ann"><span class="ann-arrow">↳</span>לחיצה על pin → בחר חנות ברשימה משמאל</div>
+      </div>
+
+      <!-- List -->
+      <div style="padding: 16px; overflow-y: auto; max-height: 540px;">
+        <div class="wf-section-title">38 חנויות זמינות</div>
+        <div class="flex-col gap10">
+          <!-- Store cards -->
+          <div class="wf-box" style="padding: 12px; display: flex; gap: 10px; border: 2.5px solid #444;">
+            <div class="wf-circle" style="width: 44px; height: 44px; flex-shrink: 0;">💿</div>
+            <div class="flex-col flex1 gap4">
+              <div class="flex items-center gap6">
+                <div class="wf-line lg" style="width: 50%; height: 14px;"></div>
+                <div class="wf-pill sm active">★ מובחר</div>
+              </div>
+              <div class="wf-line sm" style="width: 70%;"></div>
+              <div class="flex gap4"><div class="wf-pill sm">רוק</div><div class="wf-pill sm">ג'אז</div><div class="wf-pill sm">נדיר</div></div>
+            </div>
+          </div>
+          <div class="wf-box" style="padding: 12px; display: flex; gap: 10px;">
+            <div class="wf-circle" style="width: 44px; height: 44px; flex-shrink: 0;">💿</div>
+            <div class="flex-col flex1 gap4">
+              <div class="wf-line lg" style="width: 50%; height: 14px;"></div>
+              <div class="wf-line sm" style="width: 70%;"></div>
+              <div class="flex gap4"><div class="wf-pill sm">קלאסי</div><div class="wf-pill sm">ישראלי</div></div>
+            </div>
+          </div>
+          <div class="wf-box" style="padding: 12px; display: flex; gap: 10px;">
+            <div class="wf-circle" style="width: 44px; height: 44px; flex-shrink: 0;">💿</div>
+            <div class="flex-col flex1 gap4">
+              <div class="wf-line lg" style="width: 50%; height: 14px;"></div>
+              <div class="wf-line sm" style="width: 70%;"></div>
+              <div class="flex gap4"><div class="wf-pill sm">מטאל</div><div class="wf-pill sm">פאנק</div></div>
+            </div>
+          </div>
+          <div class="wf-box" style="padding: 12px; display: flex; gap: 10px;">
+            <div class="wf-circle" style="width: 44px; height: 44px; flex-shrink: 0;">💿</div>
+            <div class="flex-col flex1 gap4">
+              <div class="wf-line lg" style="width: 50%; height: 14px;"></div>
+              <div class="wf-line sm" style="width: 70%;"></div>
+              <div class="flex gap4"><div class="wf-pill sm">פופ</div></div>
+            </div>
+          </div>
+          <div class="ann"><span class="ann-arrow">↳</span>לחיצה על כרטיס חנות → Store Profile Page</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE 3: RARE
+     ============================================================ -->
+<div class="screen-panel" data-page="rare">
+  <div class="screen-badge"><span>מסך</span>תקליטים נדירים — ציבורי</div>
+  <span class="access-badge">🔓 ציבורי</span>
+  <div class="wf-canvas">
+    <div class="wf-navbar">
+      <div class="actions"><div class="wf-btn">התחברות</div><div class="wf-btn filled">הרשמה</div></div>
+      <div class="flex items-center gap16"><div class="links"><span>חיפוש</span><span>קטגוריות</span></div><div class="logo">🎵 VinilSeeker</div></div>
+    </div>
+
+    <!-- Hero -->
+    <div style="padding: 32px 48px; background: #e8e5df; border-bottom: 2px solid #ccc; display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; align-items: center;">
+      <div>
+        <div class="wf-pill sm" style="margin-bottom: 8px;">★ קולקציה ייחודית</div>
+        <div class="wf-line lg" style="width: 60%; height: 24px; margin-bottom: 8px;"></div>
+        <div class="wf-line" style="width: 90%; margin-bottom: 4px;"></div>
+        <div class="wf-line" style="width: 70%;"></div>
+      </div>
+      <div class="wf-img" style="height: 180px; transform: rotate(-3deg);"><span>תקליט נדיר</span></div>
+    </div>
+
+    <!-- Filter pills -->
+    <div style="padding: 12px 24px; border-bottom: 2px solid #ccc; display: flex; gap: 8px; flex-wrap: wrap;">
+      <div class="wf-pill active">הכל</div>
+      <div class="wf-pill">First Press</div>
+      <div class="wf-pill">חתום</div>
+      <div class="wf-pill">מהדורה מוגבלת</div>
+      <div class="wf-pill">Colored Vinyl</div>
+      <div class="wf-pill">★★★★★ בלבד</div>
+    </div>
+
+    <!-- Grid -->
+    <div style="padding: 20px 24px;">
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+        <div class="wf-box" style="padding: 10px;">
+          <div class="wf-img" style="aspect-ratio: 1; margin-bottom: 8px;"><span>שער</span></div>
+          <div class="wf-line lg" style="width: 80%; height: 14px;"></div>
+          <div class="wf-line sm" style="width: 60%; margin-top: 4px;"></div>
+          <div style="margin-top: 6px; font-size: 11px; color: #888;">★★★★★ נדירות</div>
+          <div class="flex justify-between items-center" style="margin-top: 8px; border-top: 1.5px dashed #ccc; padding-top: 6px;">
+            <div class="wf-line lg" style="width: 40px; height: 18px;"></div>
+            <div class="wf-pill sm">תל אביב</div>
+          </div>
+        </div>
+        <div class="wf-box" style="padding: 10px;">
+          <div class="wf-img" style="aspect-ratio: 1; margin-bottom: 8px;"><span>שער</span></div>
+          <div class="wf-line lg" style="width: 80%; height: 14px;"></div>
+          <div class="wf-line sm" style="width: 60%; margin-top: 4px;"></div>
+          <div style="margin-top: 6px; font-size: 11px; color: #888;">★★★★ נדירות</div>
+          <div class="flex justify-between items-center" style="margin-top: 8px; border-top: 1.5px dashed #ccc; padding-top: 6px;">
+            <div class="wf-line lg" style="width: 40px; height: 18px;"></div>
+            <div class="wf-pill sm">חיפה</div>
+          </div>
+        </div>
+        <div class="wf-box" style="padding: 10px;">
+          <div class="wf-img" style="aspect-ratio: 1; margin-bottom: 8px;"><span>שער</span></div>
+          <div class="wf-line lg" style="width: 80%; height: 14px;"></div>
+          <div class="wf-line sm" style="width: 60%; margin-top: 4px;"></div>
+          <div style="margin-top: 6px; font-size: 11px; color: #888;">★★★★★ נדירות</div>
+          <div class="flex justify-between items-center" style="margin-top: 8px; border-top: 1.5px dashed #ccc; padding-top: 6px;">
+            <div class="wf-line lg" style="width: 40px; height: 18px;"></div>
+            <div class="wf-pill sm">י-ם</div>
+          </div>
+        </div>
+        <div class="wf-box" style="padding: 10px;">
+          <div class="wf-img" style="aspect-ratio: 1; margin-bottom: 8px;"><span>שער</span></div>
+          <div class="wf-line lg" style="width: 80%; height: 14px;"></div>
+          <div class="wf-line sm" style="width: 60%; margin-top: 4px;"></div>
+          <div style="margin-top: 6px; font-size: 11px; color: #888;">★★★ נדירות</div>
+          <div class="flex justify-between items-center" style="margin-top: 8px; border-top: 1.5px dashed #ccc; padding-top: 6px;">
+            <div class="wf-line lg" style="width: 40px; height: 18px;"></div>
+            <div class="wf-pill sm">פ"ת</div>
+          </div>
+        </div>
+        <div class="wf-box" style="padding: 10px;">
+          <div class="wf-img" style="aspect-ratio: 1; margin-bottom: 8px;"><span>שער</span></div>
+          <div class="wf-line lg" style="width: 80%; height: 14px;"></div>
+          <div class="wf-line sm" style="width: 60%; margin-top: 4px;"></div>
+          <div style="margin-top: 6px; font-size: 11px; color: #888;">★★★★ נדירות</div>
+          <div class="flex justify-between items-center" style="margin-top: 8px; border-top: 1.5px dashed #ccc; padding-top: 6px;">
+            <div class="wf-line lg" style="width: 40px; height: 18px;"></div>
+            <div class="wf-pill sm">ת"א</div>
+          </div>
+        </div>
+        <div class="wf-box" style="padding: 10px;">
+          <div class="wf-img" style="aspect-ratio: 1; margin-bottom: 8px;"><span>שער</span></div>
+          <div class="wf-line lg" style="width: 80%; height: 14px;"></div>
+          <div class="wf-line sm" style="width: 60%; margin-top: 4px;"></div>
+          <div style="margin-top: 6px; font-size: 11px; color: #888;">★★★ נדירות</div>
+          <div class="flex justify-between items-center" style="margin-top: 8px; border-top: 1.5px dashed #ccc; padding-top: 6px;">
+            <div class="wf-line lg" style="width: 40px; height: 18px;"></div>
+            <div class="wf-pill sm">ב"ש</div>
+          </div>
+        </div>
+      </div>
+      <div class="ann" style="margin-top: 12px;"><span class="ann-arrow">↳</span>לחיצה על כרטיס → Product Page (אותו פורמט כמו תקליט רגיל)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE 4: HOW IT WORKS
+     ============================================================ -->
+<div class="screen-panel" data-page="how">
+  <div class="screen-badge"><span>מסך</span>איך זה עובד — ציבורי</div>
+  <span class="access-badge">🔓 ציבורי</span>
+  <div class="wf-canvas">
+    <div class="wf-navbar">
+      <div class="actions"><div class="wf-btn">התחברות</div><div class="wf-btn filled">הרשמה</div></div>
+      <div class="flex items-center gap16"><div class="links"><span>חיפוש</span><span>קטגוריות</span></div><div class="logo">🎵 VinilSeeker</div></div>
+    </div>
+
+    <div style="padding: 32px 48px; background: #e8e5df; border-bottom: 2px solid #ccc; text-align: center;">
+      <div class="wf-line lg" style="width: 35%; margin: 0 auto 8px; height: 22px;"></div>
+      <div class="wf-line" style="width: 55%; margin: 0 auto;"></div>
+    </div>
+
+    <!-- Section: For buyers -->
+    <div style="padding: 28px 48px; border-bottom: 2px solid #ccc;">
+      <div class="wf-section-title" style="font-size: 18px;">לקונים</div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px;">
+        <div class="wf-box" style="padding: 20px;">
+          <div style="font-family: 'Caveat', cursive; font-size: 36px; font-weight: 700; color: #444; line-height: 1;">1</div>
+          <div class="wf-line lg" style="width: 50%; height: 16px; margin-top: 10px;"></div>
+          <div class="wf-line sm" style="width: 90%; margin-top: 6px;"></div>
+          <div class="wf-line sm" style="width: 80%; margin-top: 4px;"></div>
+        </div>
+        <div class="wf-box" style="padding: 20px;">
+          <div style="font-family: 'Caveat', cursive; font-size: 36px; font-weight: 700; color: #444; line-height: 1;">2</div>
+          <div class="wf-line lg" style="width: 50%; height: 16px; margin-top: 10px;"></div>
+          <div class="wf-line sm" style="width: 90%; margin-top: 6px;"></div>
+          <div class="wf-line sm" style="width: 80%; margin-top: 4px;"></div>
+        </div>
+        <div class="wf-box" style="padding: 20px;">
+          <div style="font-family: 'Caveat', cursive; font-size: 36px; font-weight: 700; color: #444; line-height: 1;">3</div>
+          <div class="wf-line lg" style="width: 50%; height: 16px; margin-top: 10px;"></div>
+          <div class="wf-line sm" style="width: 90%; margin-top: 6px;"></div>
+          <div class="wf-line sm" style="width: 80%; margin-top: 4px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: For sellers -->
+    <div style="padding: 28px 48px; border-bottom: 2px solid #ccc;">
+      <div class="wf-section-title" style="font-size: 18px;">למוכרים</div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px;">
+        <div class="wf-box" style="padding: 20px;">
+          <div style="font-family: 'Caveat', cursive; font-size: 36px; font-weight: 700; color: #444; line-height: 1;">1</div>
+          <div class="wf-line lg" style="width: 50%; height: 16px; margin-top: 10px;"></div>
+          <div class="wf-line sm" style="width: 90%; margin-top: 6px;"></div>
+          <div class="wf-line sm" style="width: 80%; margin-top: 4px;"></div>
+        </div>
+        <div class="wf-box" style="padding: 20px;">
+          <div style="font-family: 'Caveat', cursive; font-size: 36px; font-weight: 700; color: #444; line-height: 1;">2</div>
+          <div class="wf-line lg" style="width: 50%; height: 16px; margin-top: 10px;"></div>
+          <div class="wf-line sm" style="width: 90%; margin-top: 6px;"></div>
+          <div class="wf-line sm" style="width: 80%; margin-top: 4px;"></div>
+        </div>
+        <div class="wf-box" style="padding: 20px;">
+          <div style="font-family: 'Caveat', cursive; font-size: 36px; font-weight: 700; color: #444; line-height: 1;">3</div>
+          <div class="wf-line lg" style="width: 50%; height: 16px; margin-top: 10px;"></div>
+          <div class="wf-line sm" style="width: 90%; margin-top: 6px;"></div>
+          <div class="wf-line sm" style="width: 80%; margin-top: 4px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Callout -->
+    <div style="padding: 24px 48px; border-bottom: 2px solid #ccc;">
+      <div class="wf-box dashed" style="padding: 20px; text-align: center;">
+        <div class="wf-line lg" style="width: 40%; height: 18px; margin: 0 auto 8px;"></div>
+        <div class="wf-line" style="width: 70%; margin: 0 auto;"></div>
+        <div class="ann" style="justify-content: center; margin-top: 8px;"><span class="ann-arrow">↳</span>קופסת הדגשה: "חינם לחלוטין · בלי עמלות"</div>
+      </div>
+    </div>
+
+    <!-- Trust -->
+    <div style="padding: 24px 48px;">
+      <div class="wf-section-title">למה לסמוך עלינו?</div>
+      <div style="padding-right: 20px;">
+        <div class="flex gap6" style="margin-top: 8px;"><span style="font-weight: 700;">•</span><div class="wf-line" style="flex: 1;"></div></div>
+        <div class="flex gap6" style="margin-top: 6px;"><span style="font-weight: 700;">•</span><div class="wf-line" style="width: 90%;"></div></div>
+        <div class="flex gap6" style="margin-top: 6px;"><span style="font-weight: 700;">•</span><div class="wf-line" style="width: 80%;"></div></div>
+        <div class="flex gap6" style="margin-top: 6px;"><span style="font-weight: 700;">•</span><div class="wf-line" style="width: 95%;"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE 5: SELLER GUIDE
+     ============================================================ -->
+<div class="screen-panel" data-page="seller">
+  <div class="screen-badge"><span>מסך</span>מדריך למוכרים — ציבורי</div>
+  <span class="access-badge">🔓 ציבורי · CTA "פרסם תקליט" → דורש כניסה</span>
+  <div class="wf-canvas">
+    <div class="wf-navbar">
+      <div class="actions"><div class="wf-btn">התחברות</div><div class="wf-btn filled">פרסם תקליט</div></div>
+      <div class="flex items-center gap16"><div class="links"><span>חיפוש</span><span>קטגוריות</span></div><div class="logo">🎵 VinilSeeker</div></div>
+    </div>
+
+    <div style="padding: 32px 48px; background: #e8e5df; border-bottom: 2px solid #ccc; text-align: center;">
+      <div class="wf-line lg" style="width: 40%; margin: 0 auto 8px; height: 22px;"></div>
+      <div class="wf-line" style="width: 60%; margin: 0 auto;"></div>
+    </div>
+
+    <!-- Article layout -->
+    <div style="max-width: 760px; margin: 0 auto; padding: 32px 24px;">
+      <!-- Section 1 -->
+      <div class="wf-section-title" style="font-size: 18px;">1. צלם נכון</div>
+      <div class="flex-col gap6" style="margin-top: 8px;">
+        <div class="wf-line"></div><div class="wf-line"></div><div class="wf-line" style="width: 80%;"></div>
+      </div>
+      <div class="flex-col gap6" style="margin-top: 10px; padding-right: 16px;">
+        <div class="flex gap6"><span>•</span><div class="wf-line" style="flex: 1;"></div></div>
+        <div class="flex gap6"><span>•</span><div class="wf-line" style="width: 90%;"></div></div>
+        <div class="flex gap6"><span>•</span><div class="wf-line" style="width: 80%;"></div></div>
+        <div class="flex gap6"><span>•</span><div class="wf-line" style="width: 85%;"></div></div>
+      </div>
+      <div class="wf-box dashed" style="padding: 12px; margin-top: 14px;">
+        <div class="ann"><span class="ann-arrow">↳</span>Callout box: "טיפ:" + טקסט הדגשה</div>
+      </div>
+
+      <!-- Section 2 -->
+      <div class="wf-section-title" style="font-size: 18px; margin-top: 24px;">2. תאר במצב נכון (Goldmine Grading)</div>
+      <div class="flex-col gap6" style="margin-top: 8px;">
+        <div class="wf-line"></div><div class="wf-line" style="width: 70%;"></div>
+      </div>
+      <!-- Grading table -->
+      <div class="wf-box" style="margin-top: 10px; padding: 0;">
+        <div style="display: grid; grid-template-columns: 100px 1fr; padding: 8px 12px; background: #d8d5cf; border-bottom: 1.5px solid #555; font-weight: 700; font-size: 13px;">
+          <span>דרגה</span><span>תיאור</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 100px 1fr; padding: 6px 12px; border-bottom: 1px solid #ccc;"><div class="wf-pill sm">Mint</div><div class="wf-line sm" style="width: 80%;"></div></div>
+        <div style="display: grid; grid-template-columns: 100px 1fr; padding: 6px 12px; border-bottom: 1px solid #ccc;"><div class="wf-pill sm">NM</div><div class="wf-line sm" style="width: 75%;"></div></div>
+        <div style="display: grid; grid-template-columns: 100px 1fr; padding: 6px 12px; border-bottom: 1px solid #ccc;"><div class="wf-pill sm">VG+</div><div class="wf-line sm" style="width: 80%;"></div></div>
+        <div style="display: grid; grid-template-columns: 100px 1fr; padding: 6px 12px; border-bottom: 1px solid #ccc;"><div class="wf-pill sm">VG</div><div class="wf-line sm" style="width: 70%;"></div></div>
+        <div style="display: grid; grid-template-columns: 100px 1fr; padding: 6px 12px;"><div class="wf-pill sm">Good</div><div class="wf-line sm" style="width: 65%;"></div></div>
+      </div>
+
+      <!-- Section 3 -->
+      <div class="wf-section-title" style="font-size: 18px; margin-top: 24px;">3. תמחר חכם</div>
+      <div class="flex-col gap6" style="margin-top: 8px;">
+        <div class="wf-line"></div>
+        <div class="wf-line" style="width: 90%;"></div>
+      </div>
+      <div class="ann" style="margin-top: 8px;"><span class="ann-arrow">↳</span>קישור פנימי → דף ייעוץ מחירים</div>
+
+      <!-- Section 4 -->
+      <div class="wf-section-title" style="font-size: 18px; margin-top: 24px;">4. תקשר מהיר</div>
+      <div class="flex-col gap6" style="margin-top: 8px;">
+        <div class="wf-line"></div>
+        <div class="wf-line" style="width: 80%;"></div>
+      </div>
+      <div class="wf-box dashed" style="padding: 12px; margin-top: 14px; background: #f0e8d8;">
+        <div class="ann"><span class="ann-arrow">↳</span>Stat callout: "מוכרים שמשיבים תוך שעה — סוגרים פי 3"</div>
+      </div>
+
+      <!-- CTA -->
+      <div style="text-align: center; margin-top: 32px;">
+        <div class="wf-btn filled" style="font-size: 16px; padding: 10px 28px;">פרסם תקליט עכשיו ←</div>
+        <div class="ann" style="justify-content: center; margin-top: 6px;"><span class="ann-arrow">↳</span>→ Upload Listing (דורש כניסה)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE 6: PRICE ADVICE
+     ============================================================ -->
+<div class="screen-panel" data-page="pricing">
+  <div class="screen-badge"><span>מסך</span>ייעוץ מחירים — ציבורי</div>
+  <span class="access-badge">🔓 ציבורי · כלי חישוב</span>
+  <div class="wf-canvas">
+    <div class="wf-navbar">
+      <div class="actions"><div class="wf-btn">התחברות</div><div class="wf-btn filled">הרשמה</div></div>
+      <div class="flex items-center gap16"><div class="links"><span>חיפוש</span><span>קטגוריות</span></div><div class="logo">🎵 VinilSeeker</div></div>
+    </div>
+
+    <div style="padding: 32px 48px; background: #e8e5df; border-bottom: 2px solid #ccc; text-align: center;">
+      <div class="wf-line lg" style="width: 35%; margin: 0 auto 8px; height: 22px;"></div>
+      <div class="wf-line" style="width: 60%; margin: 0 auto;"></div>
+    </div>
+
+    <!-- Calculator -->
+    <div style="max-width: 800px; margin: 0 auto; padding: 32px 24px;">
+      <div class="wf-section-title">חשב מחיר לתקליט שלך</div>
+      <div class="wf-box" style="padding: 20px; margin-top: 10px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="flex-col gap4">
+            <span class="wf-label">אמן</span>
+            <div class="wf-input">לדוגמה: Pink Floyd</div>
+          </div>
+          <div class="flex-col gap4">
+            <span class="wf-label">אלבום</span>
+            <div class="wf-input">לדוגמה: The Wall</div>
+          </div>
+          <div class="flex-col gap4">
+            <span class="wf-label">שנה</span>
+            <div class="wf-input">1979</div>
+          </div>
+          <div class="flex-col gap4">
+            <span class="wf-label">מצב</span>
+            <div class="wf-input">VG+ ▾</div>
+          </div>
+          <div class="flex-col gap4">
+            <span class="wf-label">פורמט</span>
+            <div class="wf-input">LP (12") ▾</div>
+          </div>
+          <div class="flex-col gap4">
+            <span class="wf-label">מהדורה</span>
+            <div class="wf-input">First Press ▾</div>
+          </div>
+        </div>
+        <div class="wf-btn filled" style="margin-top: 16px; font-size: 15px;">חשב טווח מחירים ←</div>
+      </div>
+
+      <!-- Result -->
+      <div class="wf-box" style="padding: 20px; margin-top: 16px; background: #d8d5cf;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: #666; text-transform: uppercase; margin-bottom: 6px;">טווח מחירים מומלץ</div>
+        <div class="wf-line lg" style="width: 35%; height: 28px; margin-bottom: 8px;"></div>
+        <div class="wf-line sm" style="width: 60%;"></div>
+        <hr class="wf-divider" style="margin: 14px 0;">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+          <div>
+            <div style="font-size: 11px; color: #666; margin-bottom: 4px;">מכירה מהירה</div>
+            <div class="wf-line lg" style="width: 70%; height: 18px;"></div>
+          </div>
+          <div>
+            <div style="font-size: 11px; color: #666; margin-bottom: 4px;">ערך שוק</div>
+            <div class="wf-line lg" style="width: 70%; height: 18px;"></div>
+          </div>
+          <div>
+            <div style="font-size: 11px; color: #666; margin-bottom: 4px;">תמחור גבוה</div>
+            <div class="wf-line lg" style="width: 70%; height: 18px;"></div>
+          </div>
+        </div>
+        <div class="ann" style="margin-top: 10px;"><span class="ann-arrow">↳</span>3 רמות מחיר על בסיס עסקאות עבר</div>
+      </div>
+
+      <!-- Influencing factors -->
+      <div class="wf-section-title" style="margin-top: 28px;">מה משפיע על המחיר?</div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 10px;">
+        <div class="wf-box" style="padding: 14px;">
+          <div class="wf-line lg" style="width: 70%; height: 14px;"></div>
+          <div class="wf-line sm" style="width: 100%; margin-top: 6px;"></div>
+          <div class="wf-line sm" style="width: 80%; margin-top: 4px;"></div>
+        </div>
+        <div class="wf-box" style="padding: 14px;">
+          <div class="wf-line lg" style="width: 70%; height: 14px;"></div>
+          <div class="wf-line sm" style="width: 100%; margin-top: 6px;"></div>
+          <div class="wf-line sm" style="width: 80%; margin-top: 4px;"></div>
+        </div>
+        <div class="wf-box" style="padding: 14px;">
+          <div class="wf-line lg" style="width: 70%; height: 14px;"></div>
+          <div class="wf-line sm" style="width: 100%; margin-top: 6px;"></div>
+          <div class="wf-line sm" style="width: 80%; margin-top: 4px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE 7: BLOG
+     ============================================================ -->
+<div class="screen-panel" data-page="blog">
+  <div class="screen-badge"><span>מסך</span>בלוג — ציבורי</div>
+  <span class="access-badge">🔓 ציבורי</span>
+  <div class="wf-canvas">
+    <div class="wf-navbar">
+      <div class="actions"><div class="wf-btn">התחברות</div><div class="wf-btn filled">הרשמה</div></div>
+      <div class="flex items-center gap16"><div class="links"><span>חיפוש</span><span>קטגוריות</span></div><div class="logo">🎵 VinilSeeker</div></div>
+    </div>
+
+    <div style="padding: 28px 48px; background: #e8e5df; border-bottom: 2px solid #ccc; text-align: center;">
+      <div class="wf-line lg" style="width: 30%; margin: 0 auto 6px; height: 22px;"></div>
+      <div class="wf-line" style="width: 50%; margin: 0 auto;"></div>
+    </div>
+
+    <!-- Category pills -->
+    <div style="padding: 12px 24px; border-bottom: 2px solid #ccc; display: flex; gap: 8px;">
+      <div class="wf-pill active">הכל</div>
+      <div class="wf-pill">מדריכים</div>
+      <div class="wf-pill">ראיונות</div>
+      <div class="wf-pill">היסטוריה</div>
+      <div class="wf-pill">ציוד</div>
+      <div class="wf-pill">השוואות</div>
+    </div>
+
+    <!-- Featured article -->
+    <div style="padding: 20px 24px;">
+      <div class="wf-box" style="padding: 0; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr;">
+        <div class="wf-img" style="height: 240px;"><span>תמונת כתבת השער</span></div>
+        <div style="padding: 24px;">
+          <div class="wf-pill sm active" style="margin-bottom: 8px;">★ כתבת השער</div>
+          <div class="wf-line lg" style="width: 90%; height: 20px; margin-bottom: 8px;"></div>
+          <div class="wf-line lg" style="width: 60%; height: 20px; margin-bottom: 12px;"></div>
+          <div class="wf-line"></div>
+          <div class="wf-line" style="width: 90%; margin-top: 4px;"></div>
+          <div class="wf-line" style="width: 70%; margin-top: 4px;"></div>
+          <div class="wf-line sm" style="width: 50%; margin-top: 12px;"></div>
+          <div class="ann" style="margin-top: 6px;"><span class="ann-arrow">↳</span>מחבר · תאריך · זמן קריאה</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Article grid -->
+    <div style="padding: 0 24px 28px;">
+      <div class="wf-section-title">כתבות נוספות</div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 10px;">
+        <div class="wf-box" style="padding: 0; overflow: hidden;">
+          <div class="wf-img" style="aspect-ratio: 16/10;"><span>תמונה</span></div>
+          <div style="padding: 12px;">
+            <div style="font-size: 10px; font-weight: 700; color: #888; letter-spacing: 0.08em; text-transform: uppercase;">קטגוריה</div>
+            <div class="wf-line lg" style="width: 90%; height: 14px; margin-top: 4px;"></div>
+            <div class="wf-line sm" style="width: 100%; margin-top: 4px;"></div>
+            <div class="wf-line sm" style="width: 80%; margin-top: 3px;"></div>
+            <div class="wf-line sm" style="width: 40%; margin-top: 8px;"></div>
+          </div>
+        </div>
+        <div class="wf-box" style="padding: 0; overflow: hidden;">
+          <div class="wf-img" style="aspect-ratio: 16/10;"><span>תמונה</span></div>
+          <div style="padding: 12px;">
+            <div style="font-size: 10px; font-weight: 700; color: #888; letter-spacing: 0.08em; text-transform: uppercase;">קטגוריה</div>
+            <div class="wf-line lg" style="width: 90%; height: 14px; margin-top: 4px;"></div>
+            <div class="wf-line sm" style="width: 100%; margin-top: 4px;"></div>
+            <div class="wf-line sm" style="width: 80%; margin-top: 3px;"></div>
+            <div class="wf-line sm" style="width: 40%; margin-top: 8px;"></div>
+          </div>
+        </div>
+        <div class="wf-box" style="padding: 0; overflow: hidden;">
+          <div class="wf-img" style="aspect-ratio: 16/10;"><span>תמונה</span></div>
+          <div style="padding: 12px;">
+            <div style="font-size: 10px; font-weight: 700; color: #888; letter-spacing: 0.08em; text-transform: uppercase;">קטגוריה</div>
+            <div class="wf-line lg" style="width: 90%; height: 14px; margin-top: 4px;"></div>
+            <div class="wf-line sm" style="width: 100%; margin-top: 4px;"></div>
+            <div class="wf-line sm" style="width: 80%; margin-top: 3px;"></div>
+            <div class="wf-line sm" style="width: 40%; margin-top: 8px;"></div>
+          </div>
+        </div>
+        <div class="wf-box" style="padding: 0; overflow: hidden;">
+          <div class="wf-img" style="aspect-ratio: 16/10;"><span>תמונה</span></div>
+          <div style="padding: 12px;">
+            <div style="font-size: 10px; font-weight: 700; color: #888; letter-spacing: 0.08em; text-transform: uppercase;">קטגוריה</div>
+            <div class="wf-line lg" style="width: 90%; height: 14px; margin-top: 4px;"></div>
+            <div class="wf-line sm" style="width: 100%; margin-top: 4px;"></div>
+            <div class="wf-line sm" style="width: 80%; margin-top: 3px;"></div>
+            <div class="wf-line sm" style="width: 40%; margin-top: 8px;"></div>
+          </div>
+        </div>
+        <div class="wf-box" style="padding: 0; overflow: hidden;">
+          <div class="wf-img" style="aspect-ratio: 16/10;"><span>תמונה</span></div>
+          <div style="padding: 12px;">
+            <div style="font-size: 10px; font-weight: 700; color: #888; letter-spacing: 0.08em; text-transform: uppercase;">קטגוריה</div>
+            <div class="wf-line lg" style="width: 90%; height: 14px; margin-top: 4px;"></div>
+            <div class="wf-line sm" style="width: 100%; margin-top: 4px;"></div>
+            <div class="wf-line sm" style="width: 80%; margin-top: 3px;"></div>
+            <div class="wf-line sm" style="width: 40%; margin-top: 8px;"></div>
+          </div>
+        </div>
+        <div class="wf-box" style="padding: 0; overflow: hidden;">
+          <div class="wf-img" style="aspect-ratio: 16/10;"><span>תמונה</span></div>
+          <div style="padding: 12px;">
+            <div style="font-size: 10px; font-weight: 700; color: #888; letter-spacing: 0.08em; text-transform: uppercase;">קטגוריה</div>
+            <div class="wf-line lg" style="width: 90%; height: 14px; margin-top: 4px;"></div>
+            <div class="wf-line sm" style="width: 100%; margin-top: 4px;"></div>
+            <div class="wf-line sm" style="width: 80%; margin-top: 3px;"></div>
+            <div class="wf-line sm" style="width: 40%; margin-top: 8px;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="ann" style="margin-top: 12px;"><span class="ann-arrow">↳</span>לחיצה על כרטיס → Article Page (תוכן + תגובות)</div>
+      <div class="flex justify-center gap6" style="margin-top: 16px;">
+        <div class="wf-btn outline">‹</div>
+        <div class="wf-btn filled">1</div>
+        <div class="wf-btn outline">2</div>
+        <div class="wf-btn outline">3</div>
+        <div class="wf-btn outline">›</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE 8: CONTACT
+     ============================================================ -->
+<div class="screen-panel" data-page="contact">
+  <div class="screen-badge"><span>מסך</span>צור קשר — ציבורי</div>
+  <span class="access-badge">🔓 ציבורי</span>
+  <div class="wf-canvas">
+    <div class="wf-navbar">
+      <div class="actions"><div class="wf-btn">התחברות</div><div class="wf-btn filled">הרשמה</div></div>
+      <div class="flex items-center gap16"><div class="links"><span>חיפוש</span><span>קטגוריות</span></div><div class="logo">🎵 VinilSeeker</div></div>
+    </div>
+
+    <div style="padding: 32px 48px; background: #e8e5df; border-bottom: 2px solid #ccc; text-align: center;">
+      <div class="wf-line lg" style="width: 30%; margin: 0 auto 8px; height: 22px;"></div>
+      <div class="wf-line" style="width: 55%; margin: 0 auto;"></div>
+    </div>
+
+    <!-- Split layout -->
+    <div style="padding: 28px 48px; display: grid; grid-template-columns: 1fr 1fr; gap: 28px;">
+      <!-- Form -->
+      <div class="wf-box" style="padding: 24px;">
+        <div class="wf-section-title">שלח לנו הודעה</div>
+        <div class="flex-col gap10" style="margin-top: 14px;">
+          <div class="flex-col gap4"><span class="wf-label">שם מלא</span><div class="wf-input">ישראל ישראלי</div></div>
+          <div class="flex-col gap4"><span class="wf-label">אימייל</span><div class="wf-input"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2851475d5a684d45494144064b4745">[email&#160;protected]</a></div></div>
+          <div class="flex-col gap4"><span class="wf-label">נושא</span><div class="wf-input">שאלה כללית ▾</div></div>
+          <div class="flex-col gap4"><span class="wf-label">הודעה</span><div class="wf-input" style="height: 100px;">ספר לנו במה אפשר לעזור...</div></div>
+          <div class="wf-btn filled wide" style="width: 100%; justify-content: center; padding: 10px;">שלח הודעה ←</div>
+          <div class="ann" style="justify-content: center;"><span class="ann-arrow">↳</span>הצלחה → "תודה! נחזור אליך תוך יום."</div>
+        </div>
+      </div>
+
+      <!-- Info cards -->
+      <div class="flex-col gap10">
+        <div class="wf-box" style="padding: 14px; display: flex; gap: 12px;">
+          <div class="wf-circle" style="width: 36px; height: 36px; flex-shrink: 0;">✉</div>
+          <div class="flex-col flex1 gap4">
+            <div class="wf-line lg" style="width: 50%; height: 14px;"></div>
+            <div class="wf-line sm" style="width: 80%;"></div>
+            <div class="wf-line sm" style="width: 70%;"></div>
+          </div>
+        </div>
+        <div class="wf-box" style="padding: 14px; display: flex; gap: 12px;">
+          <div class="wf-circle" style="width: 36px; height: 36px; flex-shrink: 0;">🕐</div>
+          <div class="flex-col flex1 gap4">
+            <div class="wf-line lg" style="width: 50%; height: 14px;"></div>
+            <div class="wf-line sm" style="width: 80%;"></div>
+            <div class="wf-line sm" style="width: 65%;"></div>
+          </div>
+        </div>
+        <div class="wf-box" style="padding: 14px; display: flex; gap: 12px;">
+          <div class="wf-circle" style="width: 36px; height: 36px; flex-shrink: 0;">🤝</div>
+          <div class="flex-col flex1 gap4">
+            <div class="wf-line lg" style="width: 60%; height: 14px;"></div>
+            <div class="wf-line sm" style="width: 90%;"></div>
+            <div class="wf-line sm" style="width: 70%;"></div>
+          </div>
+        </div>
+        <div class="wf-box" style="padding: 14px; display: flex; gap: 12px;">
+          <div class="wf-circle" style="width: 36px; height: 36px; flex-shrink: 0;">📍</div>
+          <div class="flex-col flex1 gap4">
+            <div class="wf-line lg" style="width: 50%; height: 14px;"></div>
+            <div class="wf-line sm" style="width: 75%;"></div>
+            <div class="wf-line sm" style="width: 50%;"></div>
+          </div>
+        </div>
+        <div class="ann"><span class="ann-arrow">↳</span>4 כרטיסי מידע: מייל · שעות · שיתופי פעולה · כתובת</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE 9: TERMS (LEGAL)
+     ============================================================ -->
+<div class="screen-panel" data-page="terms">
+  <div class="screen-badge"><span>מסך</span>תקנון — ציבורי</div>
+  <span class="access-badge">🔓 ציבורי · מסמך משפטי</span>
+  <div class="wf-canvas">
+    <div class="wf-navbar">
+      <div class="actions"><div class="wf-btn">התחברות</div><div class="wf-btn filled">הרשמה</div></div>
+      <div class="flex items-center gap16"><div class="links"><span>חיפוש</span><span>קטגוריות</span></div><div class="logo">🎵 VinilSeeker</div></div>
+    </div>
+
+    <div style="padding: 24px 48px; background: #e8e5df; border-bottom: 2px solid #ccc; text-align: center;">
+      <div class="wf-line lg" style="width: 25%; margin: 0 auto 6px; height: 20px;"></div>
+      <div class="wf-line" style="width: 50%; margin: 0 auto;"></div>
+    </div>
+
+    <!-- TOC + body layout -->
+    <div style="padding: 28px 48px; display: grid; grid-template-columns: 220px 1fr; gap: 36px;">
+      <!-- Sticky TOC -->
+      <div class="wf-box" style="padding: 16px; position: sticky; top: 60px; align-self: start;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #888; margin-bottom: 10px;">תוכן עניינים</div>
+        <div class="flex-col gap6">
+          <div style="font-size: 12px;"><span style="font-weight: 700; color: #444;">1.</span> הגדרות</div>
+          <div style="font-size: 12px;"><span style="font-weight: 700; color: #444;">2.</span> הרשמה</div>
+          <div style="font-size: 12px;"><span style="font-weight: 700; color: #444;">3.</span> פרסום מודעה</div>
+          <div style="font-size: 12px;"><span style="font-weight: 700; color: #444;">4.</span> תקשורת</div>
+          <div style="font-size: 12px;"><span style="font-weight: 700; color: #444;">5.</span> עסקאות</div>
+          <div style="font-size: 12px;"><span style="font-weight: 700; color: #444;">6.</span> אחריות</div>
+          <div style="font-size: 12px;"><span style="font-weight: 700; color: #444;">7.</span> קניין רוחני</div>
+          <div style="font-size: 12px;"><span style="font-weight: 700; color: #444;">8.</span> הסרת חשבון</div>
+          <div style="font-size: 12px;"><span style="font-weight: 700; color: #444;">9.</span> שינויים</div>
+          <div style="font-size: 12px;"><span style="font-weight: 700; color: #444;">10.</span> סמכות שיפוט</div>
+        </div>
+        <div class="ann" style="margin-top: 10px;"><span class="ann-arrow">↳</span>לחיצה → גלילה לסעיף (sticky)</div>
+      </div>
+
+      <!-- Body -->
+      <div>
+        <div style="font-size: 12px; color: #888; padding-bottom: 12px; border-bottom: 1.5px solid #ccc; margin-bottom: 16px;">עודכן: 15 במאי 2026 · גרסה 1.2</div>
+        <div class="wf-section-title" style="font-size: 18px;">1. הגדרות</div>
+        <div class="flex-col gap4" style="margin: 8px 0 24px;">
+          <div class="wf-line"></div>
+          <div class="wf-line"></div>
+          <div class="wf-line" style="width: 80%;"></div>
+        </div>
+        <div class="wf-section-title" style="font-size: 18px;">2. הרשמה לפלטפורמה</div>
+        <div class="flex-col gap4" style="margin: 8px 0 24px;">
+          <div class="wf-line"></div>
+          <div class="wf-line" style="width: 90%;"></div>
+        </div>
+        <div class="wf-section-title" style="font-size: 18px;">3. פרסום מודעה</div>
+        <div class="flex-col gap4" style="margin: 8px 0 24px;">
+          <div class="wf-line"></div>
+          <div class="wf-line"></div>
+          <div class="wf-line" style="width: 70%;"></div>
+        </div>
+        <div class="wf-section-title" style="font-size: 18px;">4. תקשורת בין משתמשים</div>
+        <div class="flex-col gap4" style="margin: 8px 0 24px;">
+          <div class="wf-line"></div>
+          <div class="wf-line" style="width: 85%;"></div>
+        </div>
+        <div class="ann"><span class="ann-arrow">↳</span>סעיפים 5–10: אותו פורמט · h3 + 2-3 פסקאות</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE 10: PRIVACY (LEGAL)
+     ============================================================ -->
+<div class="screen-panel" data-page="privacy">
+  <div class="screen-badge"><span>מסך</span>פרטיות — ציבורי</div>
+  <span class="access-badge">🔓 ציבורי · מסמך משפטי</span>
+  <div class="wf-canvas">
+    <div class="wf-navbar">
+      <div class="actions"><div class="wf-btn">התחברות</div><div class="wf-btn filled">הרשמה</div></div>
+      <div class="flex items-center gap16"><div class="links"><span>חיפוש</span><span>קטגוריות</span></div><div class="logo">🎵 VinilSeeker</div></div>
+    </div>
+
+    <div style="padding: 24px 48px; background: #e8e5df; border-bottom: 2px solid #ccc; text-align: center;">
+      <div class="wf-line lg" style="width: 30%; margin: 0 auto 6px; height: 20px;"></div>
+      <div class="wf-line" style="width: 50%; margin: 0 auto;"></div>
+    </div>
+
+    <div style="padding: 28px 48px; display: grid; grid-template-columns: 220px 1fr; gap: 36px;">
+      <div class="wf-box" style="padding: 16px; position: sticky; top: 60px; align-self: start;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #888; margin-bottom: 10px;">תוכן עניינים</div>
+        <div class="flex-col gap6">
+          <div style="font-size: 12px;"><span style="font-weight: 700; color: #444;">1.</span> איזה מידע אוספים</div>
+          <div style="font-size: 12px;"><span style="font-weight: 700; color: #444;">2.</span> למה</div>
+          <div style="font-size: 12px;"><span style="font-weight: 700; color: #444;">3.</span> עוגיות</div>
+          <div style="font-size: 12px;"><span style="font-weight: 700; color: #444;">4.</span> צד שלישי</div>
+          <div style="font-size: 12px;"><span style="font-weight: 700; color: #444;">5.</span> אבטחה</div>
+          <div style="font-size: 12px;"><span style="font-weight: 700; color: #444;">6.</span> הזכויות שלך</div>
+          <div style="font-size: 12px;"><span style="font-weight: 700; color: #444;">7.</span> שמירת מידע</div>
+          <div style="font-size: 12px;"><span style="font-weight: 700; color: #444;">8.</span> ילדים</div>
+          <div style="font-size: 12px;"><span style="font-weight: 700; color: #444;">9.</span> שינויים</div>
+          <div style="font-size: 12px;"><span style="font-weight: 700; color: #444;">10.</span> צור קשר</div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size: 12px; color: #888; padding-bottom: 12px; border-bottom: 1.5px solid #ccc; margin-bottom: 16px;">עודכן: 15 במאי 2026 · תקנות הגנת הפרטיות 2017</div>
+
+        <div class="wf-section-title" style="font-size: 18px;">1. איזה מידע אנחנו אוספים</div>
+        <div class="flex-col gap4" style="margin: 8px 0 24px;">
+          <div class="wf-line"></div>
+          <div class="wf-line"></div>
+          <div class="wf-line" style="width: 75%;"></div>
+        </div>
+
+        <div class="wf-section-title" style="font-size: 18px;">2. למה אנחנו אוספים אותו</div>
+        <div class="flex-col gap4" style="margin: 8px 0 14px;">
+          <div class="wf-line"></div>
+          <div class="wf-line" style="width: 90%;"></div>
+        </div>
+        <div class="wf-box dashed" style="padding: 14px; background: #f0e8d8; margin-bottom: 24px;">
+          <div class="ann"><span class="ann-arrow">↳</span>Callout: "בקצרה — אם זה לא חיוני, לא אוספים"</div>
+        </div>
+
+        <div class="wf-section-title" style="font-size: 18px;">3. עוגיות (Cookies)</div>
+        <div class="flex-col gap4" style="margin: 8px 0 24px;">
+          <div class="wf-line"></div>
+          <div class="wf-line" style="width: 85%;"></div>
+        </div>
+
+        <div class="ann"><span class="ann-arrow">↳</span>סעיפים 4–10: אותו פורמט</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  const buttons = document.querySelectorAll('.screen-nav button[data-page]');
+  const pages = document.querySelectorAll('.screen-panel[data-page]');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const t = btn.dataset.page;
+      buttons.forEach(b => b.classList.toggle('active', b.dataset.page === t));
+      pages.forEach(p => p.classList.toggle('active', p.dataset.page === t));
+      window.scrollTo(0, 0);
+    });
+  });
+</script>
+
+</body>
+</html>

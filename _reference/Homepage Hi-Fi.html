@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>VinilSeeker — תקליטים שאתם מחפשים</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="colors_and_type.css">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body); }
+
+  /* ---------- NAV ---------- */
+  .nav {
+    background: var(--cream);
+    border-bottom: 1px solid var(--rule);
+    padding: 16px 48px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(8px);
+    background: rgba(245, 239, 230, 0.92);
+  }
+  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .logo-disc { width: 36px; height: 36px; }
+  .logo-text { font-family: var(--font-display); font-weight: 700; font-size: 22px; color: var(--purple-900); letter-spacing: -0.01em; }
+  .nav-links { display: flex; gap: 28px; margin-right: auto; margin-left: auto; }
+  .nav-links a { font-size: 15px; font-weight: 500; color: var(--ink); text-decoration: none; padding: 6px 0; }
+  .nav-links a:hover { color: var(--purple-700); }
+  .nav-links a.active { color: var(--purple-700); border-bottom: 2px solid var(--purple-700); }
+  .nav-actions { display: flex; gap: 10px; align-items: center; }
+
+  /* ---------- BUTTONS ---------- */
+  .btn { font-family: var(--font-body); font-weight: 600; font-size: 14px; border-radius: 9999px; padding: 10px 20px; border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; line-height: 1; transition: all .15s; text-decoration: none; }
+  .btn-primary { background: var(--purple-700); color: #fff; }
+  .btn-primary:hover { background: var(--purple-600); }
+  .btn-gold { background: var(--gold-500); color: var(--purple-900); }
+  .btn-gold:hover { background: var(--gold-300); }
+  .btn-ghost { background: transparent; color: var(--purple-700); }
+  .btn-ghost:hover { background: var(--purple-50); }
+  .btn-outline { background: transparent; color: var(--purple-700); border-color: var(--purple-700); }
+  .btn-outline:hover { background: var(--purple-50); }
+  .btn-lg { font-size: 16px; padding: 14px 26px; }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    background: linear-gradient(135deg, var(--purple-700) 0%, var(--purple-900) 60%, var(--vinyl-black) 100%);
+    color: #fff;
+    padding: 80px 48px 100px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: ""; position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 3px 3px;
+    pointer-events: none;
+  }
+  .hero-grid {
+    max-width: 1280px; margin: 0 auto;
+    display: grid; grid-template-columns: 1.2fr 1fr; gap: 64px; align-items: center;
+    position: relative;
+  }
+  .hero-eyebrow {
+    font-family: var(--font-body);
+    font-weight: 600; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--gold-300); margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 64px; line-height: 1.05;
+    letter-spacing: -0.02em; margin: 0 0 20px; color: #fff;
+  }
+  .hero h1 em { font-style: italic; color: var(--gold-500); font-weight: 500; }
+  .hero p.lede {
+    font-size: 19px; line-height: 1.55; color: var(--purple-100);
+    max-width: 540px; margin: 0 0 32px;
+  }
+  .hero-search {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--cream); border-radius: 9999px;
+    padding: 8px 8px 8px 22px;
+    box-shadow: var(--shadow-lg);
+    max-width: 540px;
+  }
+  .hero-search input {
+    flex: 1; border: none; outline: none; background: transparent;
+    font-family: var(--font-body); font-size: 16px; color: var(--ink);
+    direction: rtl;
+  }
+  .hero-search input::placeholder { color: var(--ink-3); }
+  .hero-search-icon { font-size: 20px; color: var(--ink-3); }
+  .hero-cta-row { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+  .hero-quick { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+  .hero-quick span { font-size: 12px; color: var(--purple-200); }
+  .hero-quick a { font-size: 13px; color: #fff; padding: 4px 12px; border: 1px solid rgba(255,255,255,0.25); border-radius: 9999px; text-decoration: none; }
+  .hero-quick a:hover { background: rgba(255,255,255,0.08); }
+
+  /* Hero right: stacked vinyl + cover */
+  .hero-art {
+    position: relative; height: 440px;
+  }
+  .hero-art .disc {
+    position: absolute; top: 50%; left: 12%; transform: translateY(-50%);
+    width: 380px; height: 380px; border-radius: 50%;
+    background: radial-gradient(circle at 50% 50%, var(--purple-700) 0 22%, var(--vinyl-black) 23% 100%);
+    box-shadow: var(--shadow-vinyl), 0 0 0 1px rgba(217,164,65,0.08);
+    animation: spin 20s linear infinite;
+  }
+  .hero-art .disc::before {
+    content:""; position:absolute; inset: 28%; border-radius:50%;
+    background: var(--gold-500);
+    box-shadow: inset 0 0 0 1px var(--gold-700);
+  }
+  .hero-art .disc::after {
+    content:""; position:absolute; inset: 47%; border-radius:50%; background: var(--vinyl-black);
+  }
+  .hero-art .grooves {
+    position:absolute; inset:0; border-radius:50%;
+    background:
+      repeating-radial-gradient(circle at 50% 50%, transparent 0 4px, rgba(255,255,255,0.03) 4px 5px);
+  }
+  .hero-art .cover {
+    position: absolute; top: 50%; right: 8%; transform: translateY(-50%) rotate(-4deg);
+    width: 280px; height: 280px;
+    background: var(--vinyl-black);
+    border-radius: 6px;
+    box-shadow: var(--shadow-xl), 0 0 0 1px rgba(255,255,255,0.05);
+    overflow: hidden;
+  }
+  .hero-art .cover img { width:100%; height:100%; object-fit:cover; display:block; }
+  @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
+
+  /* ---------- STATS ---------- */
+  .stats {
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule);
+    padding: 32px 48px;
+  }
+  .stats-grid {
+    max-width: 1280px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px;
+  }
+  .stat-num { font-family: var(--font-display); font-weight: 700; font-size: 38px; color: var(--purple-900); line-height: 1; }
+  .stat-label { font-size: 13px; color: var(--ink-2); margin-top: 4px; }
+  .stat .accent { color: var(--gold-700); }
+
+  /* ---------- SECTION HEADER ---------- */
+  .section { max-width: 1280px; margin: 0 auto; padding: 80px 48px 0; }
+  .section-head { display: flex; align-items: end; justify-content: space-between; margin-bottom: 28px; }
+  .section-head h2 {
+    font-family: var(--font-display); font-weight: 700; font-size: 36px;
+    line-height: 1.1; color: var(--purple-900); margin: 0; letter-spacing: -0.01em;
+  }
+  .section-head .eyebrow {
+    font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--gold-700); font-weight: 700; margin-bottom: 6px;
+  }
+  .section-head .all-link {
+    font-size: 14px; font-weight: 600; color: var(--purple-700); text-decoration: none;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .section-head .all-link:hover { color: var(--purple-900); }
+
+  /* ---------- LISTING CARDS ---------- */
+  .grid-cards {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+  }
+  .card-listing {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: transform .2s, box-shadow .2s, border-color .2s;
+    text-decoration: none; color: inherit;
+    display: block;
+  }
+  .card-listing:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--purple-300);
+  }
+  .card-cover {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    background: var(--vinyl-black);
+    overflow: hidden;
+  }
+  .card-cover img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s; }
+  .card-listing:hover .card-cover img { transform: scale(1.04); }
+  .card-cover .vinyl-peek {
+    position: absolute; top: 50%; right: -50px; transform: translateY(-50%);
+    width: 140px; height: 140px; border-radius: 50%;
+    background: radial-gradient(circle, var(--vinyl-black) 0 30%, #1a0c2b 31% 100%);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    transition: right .35s;
+    z-index: 1;
+    border: 1px solid #2A1542;
+  }
+  .card-cover .vinyl-peek::after {
+    content:""; position:absolute; inset:38%; border-radius:50%; background: var(--gold-500);
+  }
+  .card-listing:hover .card-cover .vinyl-peek { right: -90px; }
+  .badge-corner {
+    position: absolute; top: 12px; right: 12px;
+    background: var(--gold-500); color: var(--purple-900);
+    font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 9999px;
+    letter-spacing: 0.04em; z-index: 2;
+  }
+  .badge-corner.dark { background: var(--vinyl-black); color: #fff; }
+  .badge-corner.burgundy { background: var(--burgundy); color: #fff; }
+  .save-btn {
+    position: absolute; top: 12px; left: 12px;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(15, 8, 20, 0.55); backdrop-filter: blur(8px);
+    color: #fff; border: none; cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2;
+  }
+  .save-btn:hover { background: var(--purple-700); }
+  .card-body { padding: 16px 18px 18px; }
+  .card-title { font-family: var(--font-display); font-weight: 700; font-size: 19px; color: var(--ink); line-height: 1.2; margin: 0 0 4px; }
+  .card-meta { font-size: 13px; color: var(--ink-2); }
+  .card-foot {
+    display: flex; align-items: end; justify-content: space-between;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--rule);
+  }
+  .card-price { font-family: var(--font-display); font-weight: 700; font-size: 24px; color: var(--purple-900); line-height: 1; }
+  .card-price-old { font-size: 12px; color: var(--ink-3); text-decoration: line-through; }
+  .card-loc { font-size: 12px; color: var(--ink-3); display: flex; align-items: center; gap: 4px; }
+
+  /* ---------- GENRES ---------- */
+  .genre-row {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px;
+    margin-top: 8px;
+  }
+  .genre-chip {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 22px 14px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--ink);
+    transition: all .2s;
+    display: block;
+  }
+  .genre-chip:hover {
+    background: var(--purple-700); color: #fff;
+    border-color: var(--purple-700);
+    transform: translateY(-2px);
+  }
+  .genre-chip .icon {
+    width: 40px; height: 40px;
+    margin: 0 auto 10px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--purple-700) 0 30%, var(--vinyl-black) 31% 100%);
+    position: relative;
+  }
+  .genre-chip .icon::after { content:""; position:absolute; inset:38%; border-radius:50%; background: var(--gold-500); }
+  .genre-chip:hover .icon { background: radial-gradient(circle, var(--gold-500) 0 30%, var(--vinyl-black) 31% 100%); }
+  .genre-chip:hover .icon::after { background: var(--cream); }
+  .genre-name { font-family: var(--font-display); font-weight: 700; font-size: 17px; }
+  .genre-count { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+  .genre-chip:hover .genre-count { color: var(--purple-200); }
+
+  /* ---------- FEATURE BAND (editorial) ---------- */
+  .feature-band {
+    margin-top: 80px;
+    background: var(--purple-900);
+    color: #fff;
+    border-radius: 24px;
+    overflow: hidden;
+    display: grid; grid-template-columns: 1.2fr 1fr;
+    align-items: stretch;
+  }
+  .feature-band-text { padding: 48px 56px; }
+  .feature-band .eyebrow { font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-500); font-weight: 700; margin-bottom: 14px; }
+  .feature-band h3 { font-family: var(--font-display); font-weight: 700; font-size: 38px; line-height: 1.1; margin: 0 0 16px; letter-spacing: -0.01em; }
+  .feature-band p { font-size: 16px; line-height: 1.6; color: var(--purple-100); margin: 0 0 24px; max-width: 460px; }
+  .feature-band-visual {
+    position: relative;
+    background: linear-gradient(135deg, var(--purple-700), var(--vinyl-black));
+    min-height: 320px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .feature-band-visual img {
+    width: 220px; height: 220px; object-fit: cover;
+    border-radius: 6px;
+    box-shadow: var(--shadow-xl);
+    transform: rotate(3deg);
+    z-index: 2; position: relative;
+  }
+  .feature-band-visual::before {
+    content: ""; position: absolute; right: 30%; top: 50%;
+    transform: translateY(-50%);
+    width: 260px; height: 260px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--gold-500) 0 8%, var(--vinyl-black) 9% 100%);
+    box-shadow: var(--shadow-vinyl);
+  }
+
+  /* ---------- HOW IT WORKS ---------- */
+  .how-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+    margin-top: 8px;
+  }
+  .how-card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 16px;
+    padding: 32px 28px;
+  }
+  .how-num {
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 48px;
+    color: var(--gold-500); line-height: 1;
+    margin-bottom: 16px;
+  }
+  .how-card h4 { font-family: var(--font-display); font-weight: 700; font-size: 22px; color: var(--purple-900); margin: 0 0 8px; }
+  .how-card p { font-size: 15px; line-height: 1.6; color: var(--ink-2); margin: 0; }
+
+  /* ---------- FOOTER ---------- */
+  .footer {
+    margin-top: 96px;
+    background: var(--vinyl-black);
+    color: var(--purple-100);
+    padding: 64px 48px 32px;
+  }
+  .footer-grid {
+    max-width: 1280px; margin: 0 auto;
+    display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 48px;
+  }
+  .footer h5 { font-family: var(--font-body); font-weight: 700; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-500); margin: 0 0 16px; }
+  .footer ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+  .footer a { color: var(--purple-100); text-decoration: none; font-size: 14px; }
+  .footer a:hover { color: var(--gold-300); }
+  .footer .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .footer .brand-text { font-family: var(--font-display); font-weight: 700; font-size: 24px; color: #fff; }
+  .footer .tag { font-size: 14px; line-height: 1.6; color: var(--purple-200); max-width: 320px; }
+  .footer-bottom {
+    max-width: 1280px; margin: 48px auto 0;
+    padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex; justify-content: space-between; font-size: 12px; color: var(--purple-200);
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav class="nav">
+  <a class="logo" href="#">
+    <svg class="logo-disc" viewBox="0 0 64 64">
+      <circle cx="32" cy="32" r="31" fill="#0F0814"/>
+      <circle cx="32" cy="32" r="22" fill="none" stroke="#2A1542" stroke-width="0.5"/>
+      <circle cx="32" cy="32" r="13" fill="#3B1F5C"/>
+      <circle cx="32" cy="32" r="2.5" fill="#D9A441"/>
+    </svg>
+    <span class="logo-text">VinilSeeker</span>
+  </a>
+  <div class="nav-links">
+    <a href="#" class="active">בית</a>
+    <a href="#">חיפוש</a>
+    <a href="#">קטגוריות</a>
+    <a href="#">חנויות</a>
+    <a href="#">איך זה עובד</a>
+  </div>
+  <div class="nav-actions">
+    <a href="#" class="btn btn-ghost">התחברות</a>
+    <a href="#" class="btn btn-primary">פרסם תקליט +</a>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-eyebrow">★ השוק הישראלי לתקליטי ויניל</div>
+      <h1>תמצאו את <em>התקליט</em> שחיפשתם<br>כל החיים.</h1>
+      <p class="lede">
+        אלפי תקליטים מקוריים ממוכרים פרטיים וחנויות מובחרות בכל הארץ.
+        רוק, ג'אז, מטאל, ישראלי ועוד — בלחיצה אחת.
+      </p>
+      <div class="hero-search">
+        <span class="hero-search-icon">⌕</span>
+        <input type="text" placeholder="חפש אלבום, אמן, או ז'אנר…">
+        <button class="btn btn-primary">חפש</button>
+      </div>
+      <div class="hero-quick">
+        <span>פופולריים:</span>
+        <a href="#">Pink Floyd</a>
+        <a href="#">Led Zeppelin</a>
+        <a href="#">ארתור</a>
+        <a href="#">מטאל</a>
+      </div>
+    </div>
+    <div class="hero-art">
+      <div class="disc"><div class="grooves"></div></div>
+      <div class="cover"><img src="assets/covers/hollywood-undead-v.png" alt="Hollywood Undead — V"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STATS ============ -->
+<section class="stats">
+  <div class="stats-grid">
+    <div class="stat"><div class="stat-num">12,400<span class="accent">+</span></div><div class="stat-label">תקליטים זמינים</div></div>
+    <div class="stat"><div class="stat-num">38</div><div class="stat-label">חנויות מובחרות</div></div>
+    <div class="stat"><div class="stat-num">850<span class="accent">+</span></div><div class="stat-label">מוכרים פרטיים</div></div>
+    <div class="stat"><div class="stat-num">4.8<span class="accent">★</span></div><div class="stat-label">דירוג ממוצע</div></div>
+  </div>
+</section>
+
+<!-- ============ FEATURED ============ -->
+<section class="section">
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">פיק השבוע</div>
+      <h2>תקליטים נבחרים השבוע</h2>
+    </div>
+    <a href="#" class="all-link">כל התקליטים ←</a>
+  </div>
+  <div class="grid-cards">
+
+    <a href="#" class="card-listing">
+      <div class="card-cover">
+        <div class="vinyl-peek"></div>
+        <span class="badge-corner">★ נדיר</span>
+        <button class="save-btn" aria-label="שמור">♡</button>
+        <img src="assets/covers/motionless-in-white.png" alt="">
+      </div>
+      <div class="card-body">
+        <div class="card-title">Scoring the End of the World</div>
+        <div class="card-meta">Motionless In White · 2022 · LP</div>
+        <div class="card-foot">
+          <div><div class="card-price">₪320</div></div>
+          <div class="card-loc">📍 תל אביב</div>
+        </div>
+      </div>
+    </a>
+
+    <a href="#" class="card-listing">
+      <div class="card-cover">
+        <div class="vinyl-peek"></div>
+        <span class="badge-corner burgundy">ויניטג'</span>
+        <button class="save-btn" aria-label="שמור">♡</button>
+        <img src="assets/covers/hollywood-undead-notes.png" alt="">
+      </div>
+      <div class="card-body">
+        <div class="card-title">Notes from the Underground</div>
+        <div class="card-meta">Hollywood Undead · 2013 · LP</div>
+        <div class="card-foot">
+          <div><div class="card-price-old">₪380</div><div class="card-price">₪290</div></div>
+          <div class="card-loc">📍 חיפה</div>
+        </div>
+      </div>
+    </a>
+
+    <a href="#" class="card-listing">
+      <div class="card-cover">
+        <div class="vinyl-peek"></div>
+        <span class="badge-corner dark">חדש בשוק</span>
+        <button class="save-btn" aria-label="שמור">♡</button>
+        <img src="assets/covers/ffdp-f8.png" alt="">
+      </div>
+      <div class="card-body">
+        <div class="card-title">F8</div>
+        <div class="card-meta">Five Finger Death Punch · 2020 · 2LP</div>
+        <div class="card-foot">
+          <div><div class="card-price">₪410</div></div>
+          <div class="card-loc">📍 ראשל"צ</div>
+        </div>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- ============ FEATURE BAND ============ -->
+<section class="section">
+  <div class="feature-band">
+    <div class="feature-band-text">
+      <div class="eyebrow">★ פינת האספנים</div>
+      <h3>האוסף השלם של Hollywood Undead — בארץ.</h3>
+      <p>כל הסטודיו אלבומים מ-2008 עד 2022, חלקם מהדורות מוגבלות שלא הופצו רשמית בישראל. עברו אצלנו אימות מוכר ומצב מוצר.</p>
+      <a href="#" class="btn btn-gold btn-lg">גלה את האוסף ←</a>
+    </div>
+    <div class="feature-band-visual">
+      <img src="assets/covers/hollywood-undead-v.png" alt="">
+    </div>
+  </div>
+</section>
+
+<!-- ============ GENRES ============ -->
+<section class="section">
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">לפי ז'אנר</div>
+      <h2>גלה לפי סגנון</h2>
+    </div>
+  </div>
+  <div class="genre-row">
+    <a href="#" class="genre-chip"><div class="icon"></div><div class="genre-name">רוק</div><div class="genre-count">3,240 תקליטים</div></a>
+    <a href="#" class="genre-chip"><div class="icon"></div><div class="genre-name">מטאל</div><div class="genre-count">1,180 תקליטים</div></a>
+    <a href="#" class="genre-chip"><div class="icon"></div><div class="genre-name">ג'אז</div><div class="genre-count">2,640 תקליטים</div></a>
+    <a href="#" class="genre-chip"><div class="icon"></div><div class="genre-name">ישראלי</div><div class="genre-count">1,890 תקליטים</div></a>
+    <a href="#" class="genre-chip"><div class="icon"></div><div class="genre-name">קלאסי</div><div class="genre-count">1,420 תקליטים</div></a>
+    <a href="#" class="genre-chip"><div class="icon"></div><div class="genre-name">בלוז</div><div class="genre-count">880 תקליטים</div></a>
+  </div>
+</section>
+
+<!-- ============ MORE FEATURED ============ -->
+<section class="section">
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">חדש על המדף</div>
+      <h2>הוספו השבוע</h2>
+    </div>
+    <a href="#" class="all-link">כל החדשים ←</a>
+  </div>
+  <div class="grid-cards">
+
+    <a href="#" class="card-listing">
+      <div class="card-cover">
+        <div class="vinyl-peek"></div>
+        <button class="save-btn" aria-label="שמור">♡</button>
+        <img src="assets/covers/ffdp-wrong-side.png" alt="">
+      </div>
+      <div class="card-body">
+        <div class="card-title">Wrong Side of Heaven Vol. 2</div>
+        <div class="card-meta">Five Finger Death Punch · 2013 · 2LP</div>
+        <div class="card-foot">
+          <div><div class="card-price">₪260</div></div>
+          <div class="card-loc">📍 פ"ת</div>
+        </div>
+      </div>
+    </a>
+
+    <a href="#" class="card-listing">
+      <div class="card-cover">
+        <div class="vinyl-peek"></div>
+        <span class="badge-corner">★ נדיר</span>
+        <button class="save-btn" aria-label="שמור">♡</button>
+        <img src="assets/covers/ffdp-way-of-fist.png" alt="">
+      </div>
+      <div class="card-body">
+        <div class="card-title">The Way of the Fist</div>
+        <div class="card-meta">Five Finger Death Punch · 2007 · LP</div>
+        <div class="card-foot">
+          <div><div class="card-price">₪480</div></div>
+          <div class="card-loc">📍 ירושלים</div>
+        </div>
+      </div>
+    </a>
+
+    <a href="#" class="card-listing">
+      <div class="card-cover">
+        <div class="vinyl-peek"></div>
+        <span class="badge-corner burgundy">מוגבל</span>
+        <button class="save-btn" aria-label="שמור">♡</button>
+        <img src="assets/covers/hollywood-undead-v.png" alt="">
+      </div>
+      <div class="card-body">
+        <div class="card-title">V (Five)</div>
+        <div class="card-meta">Hollywood Undead · 2017 · LP</div>
+        <div class="card-foot">
+          <div><div class="card-price-old">₪420</div><div class="card-price">₪340</div></div>
+          <div class="card-loc">📍 ב"ש</div>
+        </div>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="section">
+  <div class="section-head"><div>
+    <div class="eyebrow">פשוט ומהיר</div>
+    <h2>איך זה עובד</h2>
+  </div></div>
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="how-num">1</div>
+      <h4>חפש או דפדף</h4>
+      <p>מצא את התקליט הנכון לפי אמן, אלבום, ז'אנר, או דפדף בקטגוריות. כל מודעה מאומתת.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-num">2</div>
+      <h4>צור קשר עם המוכר</h4>
+      <p>שלח הודעה ישירה, שאל שאלות, ובדוק את הדירוג של המוכר ואת הביקורות שלו לפני העסקה.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-num">3</div>
+      <h4>סגרו את העסקה</h4>
+      <p>נפגשים אישית או שולחים בדואר. תשלום מועבר ביניכם — VinilSeeker חינמי לחלוטין.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div>
+      <div class="brand">
+        <svg width="40" height="40" viewBox="0 0 64 64">
+          <circle cx="32" cy="32" r="31" fill="#0F0814" stroke="#3B1F5C" stroke-width="1"/>
+          <circle cx="32" cy="32" r="13" fill="#3B1F5C"/>
+          <circle cx="32" cy="32" r="2.5" fill="#D9A441"/>
+        </svg>
+        <span class="brand-text">VinilSeeker</span>
+      </div>
+      <p class="tag">השוק הישראלי לתקליטי ויניל. מחבר אספנים, מוכרים וחנויות בכל הארץ — מ-2025.</p>
+    </div>
+    <div>
+      <h5>תקליטים</h5>
+      <ul>
+        <li><a href="#">חיפוש</a></li>
+        <li><a href="#">לפי ז'אנר</a></li>
+        <li><a href="#">חנויות</a></li>
+        <li><a href="#">תקליטים נדירים</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>מכירה</h5>
+      <ul>
+        <li><a href="#">פרסם תקליט</a></li>
+        <li><a href="#">מדריך למוכרים</a></li>
+        <li><a href="#">ייעוץ מחירים</a></li>
+        <li><a href="#">איך זה עובד</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>קהילה</h5>
+      <ul>
+        <li><a href="#">בלוג</a></li>
+        <li><a href="#">צור קשר</a></li>
+        <li><a href="#">תקנון</a></li>
+        <li><a href="#">פרטיות</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 VinilSeeker · ויניל סיקר</span>
+    <span>נבנה באהבה לתקליטים בישראל ♥</span>
+  </div>
+</footer>
+
+</body>
+</html>
