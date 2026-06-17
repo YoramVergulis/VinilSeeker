@@ -20,7 +20,7 @@ const INFO_CARDS = [
       </svg>
     ),
     title: 'אימייל',
-    lines: ['support@vinilseeker.co.il', 'נשיב תוך יום עסקים אחד'],
+    lines: ['support@vinilseeker.com', 'נשיב תוך יום עסקים אחד'],
   },
   {
     icon: (
@@ -41,7 +41,7 @@ const INFO_CARDS = [
       </svg>
     ),
     title: 'שיתופי פעולה',
-    lines: ['חנויות, אמנים ומשווקים:', 'partners@vinilseeker.co.il'],
+    lines: ['חנויות, אמנים ומשווקים:', 'partners@vinilseeker.com'],
   },
   {
     icon: (

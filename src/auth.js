@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 
-const ADMIN_EMAIL = 'admin@vinilseeker.co.il'
+const ADMIN_EMAIL = 'admin@vinilseeker.com'
 const SAVED_KEY   = 'vs_saved'
 const ALERTS_KEY  = 'vs_alerts'
 

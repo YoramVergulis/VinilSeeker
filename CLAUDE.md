@@ -782,6 +782,45 @@ CREATE POLICY "msg_update" ON message
 
 **Status at end of session:** RLS enabled and working on both chat tables. All chat operations (create conversation, send message, mark read, realtime) pass through proper security policies.
 
+### Session 13 — 2026-06-17
+**Goal:** Fix browser back button, refresh persistence, and update domain to vinilseeker.com
+
+**Files created:**
+- `vercel.json` — SPA rewrite rule: all paths serve `index.html` so Vercel doesn't 404 on direct URL access or refresh
+
+**Files updated:**
+- `src/App.jsx` — full History API integration:
+  - Added `PAGE_PATHS` (page name → `/path`) and `PATH_PAGES` (reverse map) constants
+  - All `useState` initializers are now lazy: read from `history.state` first (survives refresh), then fall back to parsing `window.location.pathname`
+  - `navigate()` now calls `history.pushState(fullState, '', '/page-name')` — back/forward button works for all 20 pages
+  - `handleLogin` and `handleLogout` also push to history
+  - `popstate` listener restores all React state (page, searchQuery, searchGenre, selectedProduct, chatContext, editTarget) when user navigates browser history
+  - `history.replaceState` on mount stamps the initial entry so even the very first page load has restoreable state
+- `src/auth.js` — ADMIN_EMAIL updated: `admin@vinilseeker.co.il` → `admin@vinilseeker.com`
+- `src/pages/ContactPage.jsx` — support + partners emails updated to `@vinilseeker.com`
+- `src/pages/PrivacyPage.jsx` — two privacy email references updated to `@vinilseeker.com`
+- `src/pages/TermsPage.jsx` — domain reference in platform definition updated to `vinilseeker.com`
+
+**How the history system works:**
+- Every `navigate('search', { query: 'Beatles' })` call pushes `{ page: 'search', searchQuery: 'Beatles', ... }` to browser history AND updates the URL to `/search`
+- On browser back/forward: `popstate` fires with the saved state → all React state restored in one pass
+- On refresh: `history.state` is preserved by the browser → lazy `useState` initializers read it → correct page renders immediately
+- On direct link to `/search`: `history.state` is null → `PATH_PAGES[window.location.pathname]` parses the URL → correct page name
+- `vercel.json` ensures Vercel serves `index.html` for `/search`, `/product`, `/chat`, etc. (without it, the server returns 404 on those paths)
+
+**Domain migration — 5 occurrences updated:**
+| File | Old | New |
+|---|---|---|
+| `src/auth.js` | `admin@vinilseeker.co.il` | `admin@vinilseeker.com` |
+| `src/pages/ContactPage.jsx` | `support@vinilseeker.co.il` | `support@vinilseeker.com` |
+| `src/pages/ContactPage.jsx` | `partners@vinilseeker.co.il` | `partners@vinilseeker.com` |
+| `src/pages/PrivacyPage.jsx` | `privacy@vinilseeker.co.il` (×2) | `privacy@vinilseeker.com` |
+| `src/pages/TermsPage.jsx` | `vinilseeker.co.il` | `vinilseeker.com` |
+
+**Note:** Admin account email changed to `admin@vinilseeker.com` — if you have an existing admin user registered with `admin@vinilseeker.co.il`, re-register with the new address to get admin access.
+
+**Status at end of session:** Browser back/forward works across all pages. Refresh stays on current page (including product, search, chat). All domain references updated to vinilseeker.com. `vercel.json` added — must be deployed to Vercel for the refresh fix to work on the live site.
+
 ---
 
 ## Rules for Claude in This Project

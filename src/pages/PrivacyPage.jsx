@@ -43,7 +43,7 @@ const SECTIONS = [
     id: 'p6', num: '6', title: 'הזכויות שלך',
     content: [
       'יש לך זכות לעיין במידע שנאסף עליך, לתקנו, ולבקש מחיקתו.',
-      'לממש זכויות אלה — צור קשר בכתובת privacy@vinilseeker.co.il.',
+      'לממש זכויות אלה — צור קשר בכתובת privacy@vinilseeker.com.',
     ],
   },
   {
@@ -67,7 +67,7 @@ const SECTIONS = [
   {
     id: 'p10', num: '10', title: 'צור קשר',
     content: [
-      'לשאלות בנושא פרטיות: privacy@vinilseeker.co.il',
+      'לשאלות בנושא פרטיות: privacy@vinilseeker.com',
       'מדיניות זו עומדת בהתאם לתקנות הגנת הפרטיות (ישראל) 2017.',
     ],
   },
