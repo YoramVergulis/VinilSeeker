@@ -747,6 +747,112 @@
   }
 }
 
+/* ── Store inventory section ── */
+.storesWithItem {
+  background: var(--paper);
+  border-top: 1px solid var(--rule);
+  padding: var(--s-10) var(--s-12);
+}
+
+.storesInner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.storesHeader {
+  margin-bottom: var(--s-6);
+}
+
+.storesEyebrow {
+  font-size: var(--t-caption);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-700);
+  margin: 0 0 var(--s-2);
+}
+
+.storesTitle {
+  font-family: var(--font-display);
+  font-size: var(--t-h3);
+  font-weight: 700;
+  color: var(--purple-900);
+  margin: 0;
+  line-height: var(--lh-tight);
+}
+
+.storesList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--s-4);
+}
+
+.storeRow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  background: var(--cream);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+}
+
+.storeRowAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-full);
+  background: var(--purple-700);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: var(--t-body-lg);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.storeRowInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.storeRowName {
+  font-weight: 700;
+  font-size: var(--t-body-sm);
+  color: var(--ink);
+}
+
+.storeRowCity {
+  font-size: var(--t-caption);
+  color: var(--ink-3);
+  margin-top: 1px;
+}
+
+.storeRowNotes {
+  font-size: var(--t-caption);
+  color: var(--ink-2);
+  margin-top: var(--s-1);
+  font-style: italic;
+}
+
+.storeRowPrice {
+  font-family: var(--font-display);
+  font-size: var(--t-body-lg);
+  font-weight: 700;
+  color: var(--gold-700);
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .storesWithItem {
+    padding: var(--s-6) var(--s-4);
+  }
+  .storesList {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ── Tracklist ───────────────────────────────────────────── */
 .tracklist {
   padding-bottom: var(--s-4);

@@ -4,6 +4,7 @@ import VinylCard from '../components/VinylCard'
 import { isSaved, toggleSaved } from '../auth'
 import { getDiscogsRelease, normalizeTracklist } from '../discogs'
 import { TRACKLISTS } from '../data/tracklists'
+import { supabase } from '../supabase'
 import styles from './ProductPage.module.css'
 
 const GENRE_LABELS = {
@@ -148,9 +149,39 @@ function Tracklist({ tracks }) {
   )
 }
 
+function StoreInventorySection({ stores }) {
+  if (!stores.length) return null
+  return (
+    <div className={styles.storesWithItem}>
+      <div className={styles.storesInner}>
+        <div className={styles.storesHeader}>
+          <p className={styles.storesEyebrow}>זמין בחנויות</p>
+          <h2 className={styles.storesTitle}>איפה ניתן למצוא</h2>
+        </div>
+        <div className={styles.storesList}>
+          {stores.map(entry => (
+            <div key={entry.id} className={styles.storeRow}>
+              <div className={styles.storeRowAvatar}>{entry.store_name?.[0] ?? 'ח'}</div>
+              <div className={styles.storeRowInfo}>
+                <div className={styles.storeRowName}>{entry.store_name}</div>
+                <div className={styles.storeRowCity}>{entry.store_city}</div>
+                {entry.notes && <div className={styles.storeRowNotes}>{entry.notes}</div>}
+              </div>
+              {entry.price != null && (
+                <div className={styles.storeRowPrice}>₪{entry.price}</div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function ProductPage({ product, onNavigate, vinylList = [], currentUser = null, onLogout }) {
-  const [saved,         setSaved]         = useState(() => isSaved(product?.id))
-  const [discogsRelease, setDiscogsRelease] = useState(null)
+  const [saved,           setSaved]           = useState(() => isSaved(product?.id))
+  const [discogsRelease,  setDiscogsRelease]  = useState(null)
+  const [storeInventory,  setStoreInventory]  = useState([])
 
   useEffect(() => { setSaved(isSaved(product?.id)) }, [product?.id])
 
@@ -161,6 +192,30 @@ export default function ProductPage({ product, onNavigate, vinylList = [], curre
       .then(setDiscogsRelease)
       .catch(() => {})
   }, [product?.discogsId])
+
+  useEffect(() => {
+    if (!product) return
+    setStoreInventory([])
+    const artist = product.artist?.toLowerCase().trim() || ''
+    const title  = product.title?.toLowerCase().trim()  || ''
+    supabase
+      .from('store_inventory')
+      .select('id, notes, price, artist, album, listing_id, store:store_id(name, city)')
+      .or(`listing_id.eq.${product.id},artist.ilike.%${artist}%`)
+      .then(({ data }) => {
+        const rows = (data || []).filter(r =>
+          r.listing_id === String(product.id) ||
+          (r.artist?.toLowerCase().includes(artist) && r.album?.toLowerCase().includes(title))
+        )
+        setStoreInventory(rows.map(r => ({
+          id:         r.id,
+          notes:      r.notes,
+          price:      r.price,
+          store_name: r.store?.name,
+          store_city: r.store?.city,
+        })))
+      })
+  }, [product?.id])
 
   if (!product) {
     return (
@@ -334,6 +389,9 @@ export default function ProductPage({ product, onNavigate, vinylList = [], curre
         </div>
 
       </div>
+
+      {/* ── Stores carrying this item ── */}
+      <StoreInventorySection stores={storeInventory} />
 
       {/* ── Similar records ── */}
       {similar.length > 0 && (
