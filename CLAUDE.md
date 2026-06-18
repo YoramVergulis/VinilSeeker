@@ -920,6 +920,69 @@ CREATE POLICY "msg_update" ON message
 
 **Status at end of session:** All 19 pages work with no regressions. Build clean. 24 issues fixed across bugs, efficiency, security, and cleanliness.
 
+### Session 16 — 2026-06-18
+**Goal:** Real store inventory from Third Ear JSON, remove all mock vinyl data
+
+**Files created:**
+- `scripts/import-third-ear.js` — Node.js ESM script: reads a JSON file, finds/inserts Third Ear in `store` table, batch-inserts 50 rows at a time into `store_inventory`; filters to music-only items (`type` contains "vinyl"/"cd"/"blu-ray"); prices rounded to integer; run with `node scripts/import-third-ear.js path/to/file.json`
+
+**Files updated:**
+- `src/App.jsx` — removed `ALL_VINYL` import; `vinylList` initializes as `[]`; `getListings()` callback no longer merges mock data — site now shows only real Supabase listings
+- `src/pages/ProductPage.jsx` — `StoreInventorySection` updated: shows `type` badge, `style` note, `url` external link ("לחנות" with arrow icon); fetch query updated to use new column names (`album_name`, `price_ils`, `store_name`, `store_city` direct — no more JOIN on `store_id`)
+- `src/pages/ProductPage.module.css` — added `.storeRowRight` (flex column, align-end), `.storeRowType` (pill badge), `.storeRowLink` (external link style)
+
+**SQL run in Supabase:**
+```sql
+-- Schema migration (store_inventory already existed with old columns)
+ALTER TABLE store_inventory RENAME COLUMN album TO album_name;
+ALTER TABLE store_inventory RENAME COLUMN price TO price_ils;
+ALTER TABLE store_inventory
+  ADD COLUMN IF NOT EXISTS url       text,
+  ADD COLUMN IF NOT EXISTS style     text,
+  ADD COLUMN IF NOT EXISTS tracks    jsonb  DEFAULT '[]',
+  ADD COLUMN IF NOT EXISTS type      text,
+  ADD COLUMN IF NOT EXISTS store_name text,
+  ADD COLUMN IF NOT EXISTS store_city text;
+ALTER TABLE store_inventory ALTER COLUMN store_id DROP NOT NULL;
+ALTER TABLE store_inventory ALTER COLUMN listing_id DROP NOT NULL;
+ALTER TABLE store_inventory ALTER COLUMN notes DROP NOT NULL;
+
+-- Disable RLS (catalog data, not user data)
+ALTER TABLE store_inventory DISABLE ROW LEVEL SECURITY;
+```
+
+**Import result:** 235 items from Third Ear (`third_ear_products.json`) imported. All with `store_name = 'Third Ear'`, `store_city = 'תל אביב'`, `store_id = NULL` (RLS blocked store table insert — store_name column used directly instead).
+
+**store_inventory column layout (current):**
+| Column | Source |
+|---|---|
+| `id` | auto (int8) |
+| `store_id` | nullable FK to `store` table |
+| `store_name` | text — denormalized store name |
+| `store_city` | text — denormalized store city |
+| `artist` | text |
+| `album_name` | text (renamed from `album`) |
+| `price_ils` | integer (renamed from `price`) |
+| `type` | text — "Vinyl (new)", "Vinyl (used)", "CD (used)", etc. |
+| `style` | text — genre/style from source |
+| `url` | text — product URL on store website |
+| `tracks` | jsonb — track list array |
+| `listing_id` | nullable uuid — link to Supabase listing |
+| `notes` | nullable text |
+
+**ProductPage store inventory matching logic:**
+- Query: `artist.ilike.%{artist}%` OR `listing_id.eq.{product.id}`
+- Client-side filter: also requires `album_name` to contain the product title
+- Section hidden when no matches found
+- Shows: store avatar initial, store name, city, type badge, style, price, external URL link
+
+**Mock data removal:**
+- `src/data/vinyl.js` still exists but is no longer imported anywhere — can be deleted if desired
+- All "צור קשר" buttons that were disabled for demo listings will no longer appear (no mock listings)
+- HomePage, SearchPage, RarePage, CategoriesPage will be empty until real listings are uploaded
+
+**Status at end of session:** 235 real Third Ear inventory items live. Mock vinyl data removed. Site is fully real-data-only.
+
 ---
 
 ## Rules for Claude in This Project

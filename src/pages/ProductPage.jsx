@@ -165,11 +165,23 @@ function StoreInventorySection({ stores }) {
               <div className={styles.storeRowInfo}>
                 <div className={styles.storeRowName}>{entry.store_name}</div>
                 <div className={styles.storeRowCity}>{entry.store_city}</div>
+                {entry.type && <span className={styles.storeRowType}>{entry.type}</span>}
+                {entry.style && <div className={styles.storeRowNotes}>{entry.style}</div>}
                 {entry.notes && <div className={styles.storeRowNotes}>{entry.notes}</div>}
               </div>
-              {entry.price != null && (
-                <div className={styles.storeRowPrice}>₪{entry.price}</div>
-              )}
+              <div className={styles.storeRowRight}>
+                {entry.price_ils != null && (
+                  <div className={styles.storeRowPrice}>₪{Math.round(entry.price_ils)}</div>
+                )}
+                {entry.url && (
+                  <a href={entry.url} target="_blank" rel="noopener noreferrer" className={styles.storeRowLink}>
+                    לחנות
+                    <svg viewBox="0 0 16 16" fill="none" width="11" height="11" aria-hidden="true">
+                      <path d="M6 3H3v10h10v-3M9 3h4m0 0v4m0-4L7 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </a>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -200,20 +212,14 @@ export default function ProductPage({ product, onNavigate, vinylList = [], curre
     const title  = product.title?.toLowerCase().trim()  || ''
     supabase
       .from('store_inventory')
-      .select('id, notes, price, artist, album, listing_id, store:store_id(name, city)')
+      .select('id, store_name, store_city, url, price_ils, artist, album_name, type, style, notes, listing_id')
       .or(`listing_id.eq.${product.id},artist.ilike.%${artist}%`)
       .then(({ data }) => {
         const rows = (data || []).filter(r =>
           r.listing_id === String(product.id) ||
-          (r.artist?.toLowerCase().includes(artist) && r.album?.toLowerCase().includes(title))
+          (r.artist?.toLowerCase().includes(artist) && r.album_name?.toLowerCase().includes(title))
         )
-        setStoreInventory(rows.map(r => ({
-          id:         r.id,
-          notes:      r.notes,
-          price:      r.price,
-          store_name: r.store?.name,
-          store_city: r.store?.city,
-        })))
+        setStoreInventory(rows)
       })
   }, [product?.id])
 

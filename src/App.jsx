@@ -19,7 +19,6 @@ import BlogPage from './pages/BlogPage'
 import ContactPage from './pages/ContactPage'
 import TermsPage from './pages/TermsPage'
 import PrivacyPage from './pages/PrivacyPage'
-import { ALL_VINYL } from './data/vinyl'
 import { supabase } from './supabase'
 import { formatUser, logout, updateUser, getListings, addListing, updateListing, checkIsAdmin } from './auth'
 
@@ -42,7 +41,7 @@ export default function App() {
   const [searchQuery,     setSearchQuery]     = useState(() => history.state?.searchQuery     || '')
   const [searchGenre,     setSearchGenre]     = useState(() => history.state?.searchGenre     || '')
   const [selectedProduct, setSelectedProduct] = useState(() => history.state?.selectedProduct || null)
-  const [vinylList,       setVinylList]       = useState([...ALL_VINYL])
+  const [vinylList,       setVinylList]       = useState([])
   const [currentUser,     setCurrentUser]     = useState(null)
   const [editTarget,      setEditTarget]      = useState(() => history.state?.editTarget      || null)
   const [chatContext,     setChatContext]      = useState(() => history.state?.chatContext     || null)
@@ -88,7 +87,7 @@ export default function App() {
       setCurrentUser(await loadUser(session?.user ?? null))
     })
     getListings().then(stored => {
-      if (stored.length > 0) setVinylList([...stored, ...ALL_VINYL])
+      if (stored.length > 0) setVinylList(stored)
     })
 
     return () => {
