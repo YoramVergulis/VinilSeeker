@@ -75,7 +75,7 @@ export default function Footer({ onNavigate }) {
       </div>
 
       <div className={styles.bottom}>
-        <span>© 2025 VinilSeeker · ויניל סיקר</span>
+        <span>© {new Date().getFullYear()} VinilSeeker · ויניל סיקר</span>
         <span>נבנה באהבה לתקליטים בישראל</span>
       </div>
     </footer>

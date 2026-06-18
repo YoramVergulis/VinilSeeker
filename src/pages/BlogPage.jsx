@@ -98,8 +98,8 @@ export default function BlogPage({ onNavigate, currentUser, onLogout }) {
   const [page,     setPage]     = useState(1)
 
   const filtered  = ARTICLES.filter(a => category === 'all' || a.category === category)
-  const featured  = ARTICLES.find(a => a.featured)
-  const rest      = filtered.filter(a => !a.featured)
+  const featured  = category === 'all' ? ARTICLES.find(a => a.featured) : null
+  const rest      = featured ? filtered.filter(a => !a.featured) : filtered
   const totalPages = Math.ceil(rest.length / ITEMS_PER_PAGE)
   const visible   = rest.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
 

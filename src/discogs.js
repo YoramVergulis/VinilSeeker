@@ -12,23 +12,26 @@ function parseArtistTitle(raw = '') {
     : { artist: raw.slice(0, sep), title: raw.slice(sep + 3) }
 }
 
+const GENRE_MAP = [
+  { test: l => l.includes('rock'),                            value: 'rock'       },
+  { test: l => l.includes('metal'),                           value: 'metal'      },
+  { test: l => l.includes('jazz'),                            value: 'jazz'       },
+  { test: l => l.includes('pop'),                             value: 'pop'        },
+  { test: l => l.includes('classic'),                         value: 'classical'  },
+  { test: l => l.includes('electro'),                         value: 'electronic' },
+  { test: l => l.includes('israel') || l.includes('middle'),  value: 'israeli'    },
+]
+
+const FORMAT_PRIORITY = ['2LP', 'LP', '12"', '7"', 'EP']
+
 function mapGenre(g = '') {
   const l = g.toLowerCase()
-  if (l.includes('rock'))                              return 'rock'
-  if (l.includes('metal'))                             return 'metal'
-  if (l.includes('jazz'))                              return 'jazz'
-  if (l.includes('pop'))                               return 'pop'
-  if (l.includes('classic'))                           return 'classical'
-  if (l.includes('electro'))                           return 'electronic'
-  if (l.includes('israel') || l.includes('middle'))   return 'israeli'
-  return null
+  return GENRE_MAP.find(m => m.test(l))?.value ?? null
 }
 
 function pickFormat(formats = []) {
-  for (const k of ['2LP', 'LP', '12"', '7"', 'EP']) {
-    if (formats.includes(k)) return k
-  }
-  return formats[0] ?? 'LP'
+  const found = FORMAT_PRIORITY.find(k => formats.includes(k))
+  return found ?? formats[0] ?? 'LP'
 }
 
 export function normalizeResult(item) {

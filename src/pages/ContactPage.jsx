@@ -69,6 +69,10 @@ export default function ContactPage({ onNavigate, currentUser, onLogout }) {
       setError('נא למלא את כל השדות הדרושים.')
       return
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setError('נא להזין כתובת אימייל תקינה.')
+      return
+    }
     setError('')
     setSubmitted(true)
   }

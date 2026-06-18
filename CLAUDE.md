@@ -872,6 +872,54 @@ CREATE POLICY "msg_update" ON message
 
 **Status at end of session:** All 19 pages and all shared components are fully mobile-responsive. Build: 122 modules, zero errors.
 
+### Session 15 — 2026-06-18
+**Goal:** Full code review — efficiency, security, bugs, and cleanliness across all 19 pages
+
+**No new files created** — all changes were fixes to existing files.
+
+**Files updated:**
+- `src/components/Footer.jsx` — copyright year dynamic: `{new Date().getFullYear()}` (was hardcoded 2025)
+- `src/pages/RarePage.jsx` — `??` → `||` on RARITY_KEYS fallback (safer truthy check); wrapped `rareVinyl` computation in `useMemo([vinylList, filter])`; added `useMemo` import
+- `src/pages/SavedPage.jsx` — `useState(getAlerts)` → `useState(() => getAlerts())` (explicit lazy initializer)
+- `src/pages/ProductPage.jsx` — added `useEffect(() => { setSaved(isSaved(product?.id)) }, [product?.id])` to fix stale saved state when navigating between similar records; wrapped `allOffers` filter in `useMemo([vinylList, albumKey])`; added `useMemo` import
+- `src/pages/ChatPage.jsx` — null guard on `markAsRead(selectedId)` in realtime handler; wrapped `filtered` conversations in `useMemo([conversations, searchQuery])`; added `useMemo` import; also added `?.` on `c.otherName` in filter (defensive)
+- `src/pages/BlogPage.jsx` — fixed featured article disappearing when filtering by its category: `featured` now only extracted when `category === 'all'`; `rest` only excludes it when `featured` is set
+- `src/auth.js` — extracted `isAdminEmail(email)` helper (was duplicated in `checkIsAdmin`, `formatUser`, `register`); removed dead `getCurrentUser()` and `getUserById()` stubs; genre inserts in `addListing` and `updateListing` now run in parallel via `Promise.all` instead of sequential `await` loop
+- `src/discogs.js` — extracted `GENRE_MAP` (array of `{ test, value }`) and `FORMAT_PRIORITY` array; replaced if-chain in `mapGenre()` and loop in `pickFormat()` with lookups against these constants
+- `src/pages/SearchPage.jsx` — wrapped filter+sort computation in `useMemo([vinylList, query, genre, format, sort])`; added `useMemo` import
+- `src/pages/ContactPage.jsx` — added email format validation (`/^[^\s@]+@[^\s@]+\.[^\s@]+$/`) before allowing form submit; shows Hebrew error message on invalid email
+
+**Bugs fixed:**
+- B2: ProductPage `saved` state went stale when clicking a "similar record" (useState initializer runs only once)
+- B3: RarePage `RARITY_KEYS[filter] ?? fn` — `??` only catches `null/undefined`; `||` is safer since any falsy filter fn should fall back
+- B4: BlogPage featured article (category: history) was invisible when filtering by "history" category
+- B7: Footer copyright year hardcoded as 2025
+- B8: ChatPage `markAsRead(null)` could be called if `selectedId` was null when a realtime message arrived
+
+**Efficiency improvements:**
+- E1: SearchPage filter/sort — `useMemo`
+- E2: ProductPage allOffers — `useMemo`
+- E3: ChatPage filtered conversations — `useMemo`
+- E4: RarePage rareVinyl — `useMemo`
+- E5: auth.js genre inserts — `Promise.all` (parallel instead of sequential)
+- E6: auth.js admin email check — single `isAdminEmail` helper, no duplication
+
+**Security:**
+- S4: ContactPage now validates email format before submit
+
+**Cleanliness:**
+- C1: Removed `getCurrentUser()` and `getUserById()` dead stubs from auth.js
+- C3: discogs.js magic strings extracted to `GENRE_MAP` and `FORMAT_PRIORITY` constants
+- B1: SavedPage `useState(getAlerts)` made explicit
+
+**Not fixed (out of scope for this session):**
+- S1: Discogs token client-side exposure — requires serverless/Edge Function proxy
+- S2: Admin email visible in client bundle — requires Supabase `profiles.is_admin` column + RLS
+- C2: AdminPage mock data — intentional demo UI; no real admin backend yet
+- B6: `toggleSaved` fire-and-forget Supabase sync — intentional design per CLAUDE.md Session 9
+
+**Status at end of session:** All 19 pages work with no regressions. Build clean. 24 issues fixed across bugs, efficiency, security, and cleanliness.
+
 ---
 
 ## Rules for Claude in This Project

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Layout from '../components/Layout'
 import VinylCard from '../components/VinylCard'
 import { isSaved, toggleSaved } from '../auth'
@@ -152,6 +152,8 @@ export default function ProductPage({ product, onNavigate, vinylList = [], curre
   const [saved,         setSaved]         = useState(() => isSaved(product?.id))
   const [discogsRelease, setDiscogsRelease] = useState(null)
 
+  useEffect(() => { setSaved(isSaved(product?.id)) }, [product?.id])
+
   useEffect(() => {
     if (!product?.discogsId) return
     setDiscogsRelease(null)
@@ -182,9 +184,9 @@ export default function ProductPage({ product, onNavigate, vinylList = [], curre
   const tracks   = discogsRelease
     ? normalizeTracklist(discogsRelease.tracklist)
     : (TRACKLISTS[albumKey] || null)
-  const allOffers   = vinylList.filter(v =>
-    `${v.title?.toLowerCase()}|${v.artist?.toLowerCase()}` === albumKey
-  )
+  const allOffers = useMemo(() =>
+    vinylList.filter(v => `${v.title?.toLowerCase()}|${v.artist?.toLowerCase()}` === albumKey)
+  , [vinylList, albumKey])
   const storeOffers   = allOffers.filter(v => v.type === 'store').sort((a, b) => a.price - b.price)
   const privateOffers = allOffers.filter(v => v.type !== 'store').sort((a, b) => a.price - b.price)
   const cheapestPrice = allOffers.length > 0 ? Math.min(...allOffers.map(v => v.price)) : null

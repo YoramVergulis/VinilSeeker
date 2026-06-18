@@ -132,7 +132,7 @@ const BellSVG = (
 export default function SavedPage({ onNavigate, vinylList = [], currentUser, onLogout }) {
   const [tab, setTab] = useState('saved')
   const [savedIds, setSavedIds] = useState([])
-  const [alerts, setAlerts] = useState(getAlerts)
+  const [alerts, setAlerts] = useState(() => getAlerts())
 
   useEffect(() => {
     getSaved().then(ids => setSavedIds(ids))

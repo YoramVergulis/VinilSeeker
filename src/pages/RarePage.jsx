@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Layout from '../components/Layout'
 import VinylCard from '../components/VinylCard'
 import styles from './RarePage.module.css'
@@ -35,11 +35,13 @@ function RarityStars({ count = 3 }) {
 export default function RarePage({ onNavigate, vinylList = [], currentUser, onLogout }) {
   const [filter, setFilter] = useState('all')
 
-  const rareVinyl = vinylList
-    .map(v => ({ ...v, rarity: v.rarity ?? (v.badge === 'rare' ? 5 : v.badge === 'limited' ? 4 : 3) }))
-    .filter(v => v.rarity >= 3)
-    .filter(RARITY_KEYS[filter] ?? (() => true))
-    .slice(0, 12)
+  const rareVinyl = useMemo(() =>
+    vinylList
+      .map(v => ({ ...v, rarity: v.rarity ?? (v.badge === 'rare' ? 5 : v.badge === 'limited' ? 4 : 3) }))
+      .filter(v => v.rarity >= 3)
+      .filter(RARITY_KEYS[filter] || (() => true))
+      .slice(0, 12)
+  , [vinylList, filter])
 
   return (
     <Layout activePage="" onNavigate={onNavigate} currentUser={currentUser} onLogout={onLogout}>

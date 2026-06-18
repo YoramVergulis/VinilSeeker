@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Layout from '../components/Layout'
 import VinylCard from '../components/VinylCard'
 import { searchDiscogs } from '../discogs'
@@ -95,23 +95,25 @@ export default function SearchPage({ query: initialQuery = '', initialGenre = ''
     }
   }
 
-  const results = vinylList
-    .filter(v => {
-      if (v.type === 'store') return false
-      if (query) {
-        const q = query.toLowerCase()
-        if (!`${v.title} ${v.artist}`.toLowerCase().includes(q)) return false
-      }
-      if (genre  !== 'all' && v.genre  !== genre)  return false
-      if (format !== 'all' && v.format !== format) return false
-      return true
-    })
-    .sort((a, b) => {
-      if (sort === 'price-asc')  return a.price - b.price
-      if (sort === 'price-desc') return b.price - a.price
-      if (sort === 'newest')     return b.year  - a.year
-      return 0
-    })
+  const results = useMemo(() =>
+    vinylList
+      .filter(v => {
+        if (v.type === 'store') return false
+        if (query) {
+          const q = query.toLowerCase()
+          if (!`${v.title} ${v.artist}`.toLowerCase().includes(q)) return false
+        }
+        if (genre  !== 'all' && v.genre  !== genre)  return false
+        if (format !== 'all' && v.format !== format) return false
+        return true
+      })
+      .sort((a, b) => {
+        if (sort === 'price-asc')  return a.price - b.price
+        if (sort === 'price-desc') return b.price - a.price
+        if (sort === 'newest')     return b.year  - a.year
+        return 0
+      })
+  , [vinylList, query, genre, format, sort])
 
   return (
     <Layout activePage="חיפוש" onNavigate={onNavigate} currentUser={currentUser} onLogout={onLogout}>

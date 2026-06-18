@@ -4,8 +4,10 @@ const ADMIN_EMAIL = 'admin@vinilseeker.com'
 const SAVED_KEY   = 'vs_saved'
 const ALERTS_KEY  = 'vs_alerts'
 
+const isAdminEmail = email => email?.toLowerCase() === ADMIN_EMAIL
+
 export function checkIsAdmin(user) {
-  return user?.isAdmin === true || user?.email?.toLowerCase() === ADMIN_EMAIL
+  return user?.isAdmin === true || isAdminEmail(user?.email)
 }
 
 export function formatUser(supabaseUser) {
@@ -16,7 +18,7 @@ export function formatUser(supabaseUser) {
     email:    supabaseUser.email,
     name:     meta.name     || '',
     city:     meta.city     || '',
-    isAdmin:  meta.isAdmin  || supabaseUser.email?.toLowerCase() === ADMIN_EMAIL,
+    isAdmin:  meta.isAdmin  || isAdminEmail(supabaseUser.email),
     joinedAt: supabaseUser.created_at,
   }
 }
@@ -29,7 +31,7 @@ export async function register(name, email, password) {
       data: {
         name,
         city: '',
-        isAdmin: email.trim().toLowerCase() === ADMIN_EMAIL,
+        isAdmin: isAdminEmail(email.trim()),
       },
     },
   })
@@ -68,12 +70,6 @@ export async function updateUser(updates) {
   }
   return formatUser(data.user)
 }
-
-// kept for backward compat — App uses onAuthStateChange instead
-export function getCurrentUser() { return null }
-
-// getUserById is not available without a profiles table — returns null for now
-export function getUserById() { return null }
 
 // --- Listings (Supabase) ---
 
@@ -164,12 +160,12 @@ export async function addListing(record) {
   if (error) throw new Error(error.message)
 
   const genreNames = record.genres?.length ? record.genres : (record.genre ? [record.genre] : [])
-  for (const name of genreNames) {
-    const genreId = await findOrCreateGenre(name)
-    if (genreId) {
-      await supabase.from('listing_genres').insert({ listing_id: listing.id, genre_id: genreId })
-    }
-  }
+  const genreIds = await Promise.all(genreNames.map(findOrCreateGenre))
+  await Promise.all(
+    genreIds.filter(Boolean).map(genreId =>
+      supabase.from('listing_genres').insert({ listing_id: listing.id, genre_id: genreId })
+    )
+  )
 
   return { ...record, id: listing.id }
 }
@@ -198,12 +194,12 @@ export async function updateListing(id, updates) {
 
   await supabase.from('listing_genres').delete().eq('listing_id', id)
   const genreNames = updates.genres?.length ? updates.genres : (updates.genre ? [updates.genre] : [])
-  for (const name of genreNames) {
-    const genreId = await findOrCreateGenre(name)
-    if (genreId) {
-      await supabase.from('listing_genres').insert({ listing_id: id, genre_id: genreId })
-    }
-  }
+  const genreIds = await Promise.all(genreNames.map(findOrCreateGenre))
+  await Promise.all(
+    genreIds.filter(Boolean).map(genreId =>
+      supabase.from('listing_genres').insert({ listing_id: id, genre_id: genreId })
+    )
+  )
 }
 
 // --- Saved items (localStorage + Supabase) ---

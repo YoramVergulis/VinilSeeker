@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import Layout from '../components/Layout'
 import styles from './ChatPage.module.css'
 import {
@@ -46,12 +46,14 @@ export default function ChatPage({ onNavigate, currentUser, onLogout, chatContex
 
   const selected = conversations.find(c => c.id === selectedId) ?? null
 
-  const filtered = searchQuery.trim()
-    ? conversations.filter(c =>
-        c.otherName.includes(searchQuery) ||
-        c.listing?.title?.includes(searchQuery)
-      )
-    : conversations
+  const filtered = useMemo(() =>
+    searchQuery.trim()
+      ? conversations.filter(c =>
+          c.otherName?.includes(searchQuery) ||
+          c.listing?.title?.includes(searchQuery)
+        )
+      : conversations
+  , [conversations, searchQuery])
 
   // ── Load conversations on mount ──
   useEffect(() => {
@@ -175,7 +177,7 @@ export default function ChatPage({ onNavigate, currentUser, onLogout, chatContex
 
   function handleNewMessage(msg) {
     setMessages(prev => prev.find(m => m.id === msg.id) ? prev : [...prev, msg])
-    if (msg.sender_id !== currentUser?.id) markAsRead(selectedId)
+    if (msg.sender_id !== currentUser?.id && selectedId) markAsRead(selectedId)
   }
 
   function handleSelect(id) {
