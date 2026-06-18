@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react'
 import Layout from '../components/Layout'
 import { STORES } from '../data/stores'
+import { supabase } from '../supabase'
 import styles from './StoresPage.module.css'
 
 const GENRE_LABELS = {
@@ -41,6 +43,20 @@ function StoreCard({ name, city, genres, desc, since }) {
 }
 
 export default function StoresPage({ onNavigate, currentUser, onLogout }) {
+  const [stores, setStores] = useState(STORES)
+
+  useEffect(() => {
+    supabase
+      .from('store')
+      .select('*')
+      .order('since', { ascending: true })
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setStores(data.map(s => ({ ...s, desc: s.description })))
+        }
+      })
+  }, [])
+
   return (
     <Layout activePage="חנויות" onNavigate={onNavigate} currentUser={currentUser} onLogout={onLogout}>
 
@@ -54,7 +70,7 @@ export default function StoresPage({ onNavigate, currentUser, onLogout }) {
 
       <div className={styles.body}>
         <div className={styles.grid}>
-          {STORES.map(store => (
+          {stores.map(store => (
             <StoreCard key={store.id} {...store} />
           ))}
         </div>

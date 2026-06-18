@@ -1,24 +1,23 @@
 import { supabase } from './supabase'
 
-const ADMIN_EMAIL = 'admin@vinilseeker.com'
-const SAVED_KEY   = 'vs_saved'
-const ALERTS_KEY  = 'vs_alerts'
-
-const isAdminEmail = email => email?.toLowerCase() === ADMIN_EMAIL
+const SAVED_KEY  = 'vs_saved'
+const ALERTS_KEY = 'vs_alerts'
 
 export function checkIsAdmin(user) {
-  return user?.isAdmin === true || isAdminEmail(user?.email)
+  return user?.isAdmin === true
 }
 
+// isAdmin is intentionally always false here — App.jsx overwrites it
+// after fetching profiles.is_admin from the database.
 export function formatUser(supabaseUser) {
   if (!supabaseUser) return null
   const meta = supabaseUser.user_metadata || {}
   return {
     id:       supabaseUser.id,
     email:    supabaseUser.email,
-    name:     meta.name     || '',
-    city:     meta.city     || '',
-    isAdmin:  meta.isAdmin  || isAdminEmail(supabaseUser.email),
+    name:     meta.name || '',
+    city:     meta.city || '',
+    isAdmin:  false,
     joinedAt: supabaseUser.created_at,
   }
 }
@@ -28,11 +27,7 @@ export async function register(name, email, password) {
     email: email.trim(),
     password,
     options: {
-      data: {
-        name,
-        city: '',
-        isAdmin: isAdminEmail(email.trim()),
-      },
+      data: { name, city: '' },
     },
   })
   if (error) throw new Error(error.message)

@@ -47,6 +47,17 @@ export default function App() {
   const [editTarget,      setEditTarget]      = useState(() => history.state?.editTarget      || null)
   const [chatContext,     setChatContext]      = useState(() => history.state?.chatContext     || null)
 
+  async function loadUser(supabaseUser) {
+    if (!supabaseUser) return null
+    const base = formatUser(supabaseUser)
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', supabaseUser.id)
+      .maybeSingle()
+    return { ...base, isAdmin: profile?.is_admin === true }
+  }
+
   useEffect(() => {
     // Stamp the initial history entry so popstate always has state to restore
     if (!history.state) {
@@ -70,11 +81,11 @@ export default function App() {
     }
     window.addEventListener('popstate', handlePopState)
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setCurrentUser(formatUser(session?.user ?? null))
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      setCurrentUser(await loadUser(session?.user ?? null))
     })
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setCurrentUser(formatUser(session?.user ?? null))
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setCurrentUser(await loadUser(session?.user ?? null))
     })
     getListings().then(stored => {
       if (stored.length > 0) setVinylList([...stored, ...ALL_VINYL])
@@ -109,8 +120,7 @@ export default function App() {
     history.pushState(state, '', PAGE_PATHS[pageName] || '/')
   }
 
-  function handleLogin(user) {
-    setCurrentUser(user)
+  function handleLogin() {
     setPage('home')
     pushHistory('home', { page: 'home', searchQuery: '', searchGenre: '', selectedProduct: null, chatContext: null, editTarget: null })
     window.scrollTo(0, 0)
@@ -126,7 +136,7 @@ export default function App() {
 
   async function handleUpdateUser(updates) {
     const updated = await updateUser(updates)
-    if (updated) setCurrentUser(updated)
+    if (updated) setCurrentUser(prev => ({ ...updated, isAdmin: prev?.isAdmin ?? false }))
   }
 
   function navigate(pageName, opts = {}) {
