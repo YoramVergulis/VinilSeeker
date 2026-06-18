@@ -1,6 +1,6 @@
 # VinilSeeker — ויניל סיקר 🎵
 
-> The Hebrew-first Israeli marketplace where vinyl collectors find rare albums and passionate sellers reach the right ears.
+> The Hebrew-first Israeli marketplace for vinyl records, CDs, and physical music — where collectors find rare pressings and passionate sellers reach the right ears.
 
 [![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://vinilseeker.vercel.app)
 [![GitHub Repo](https://img.shields.io/badge/GitHub-Repo-blue)](https://github.com/yoramvergulis/vinilseeker)
@@ -11,23 +11,23 @@
 
 ## 📌 Overview
 
-VinilSeeker is a full-stack Israeli marketplace for buying and selling vinyl records, built with a crate-digger's attention to detail. Sellers upload their records in seconds using Discogs auto-fill, buyers discover rare pressings through smart filters and live Discogs search, and the two sides connect through real-time in-app messaging — all in Hebrew, RTL, and built for the Israeli market.
+VinilSeeker is a full-stack Israeli marketplace for buying and selling physical music — vinyl records, CDs, and discs of all kinds — built with a collector's attention to detail. Vinyl is at the heart of the platform, but the catalog spans every format: LPs, 7" singles, 12" maxis, CDs, and more. Sellers upload their items in seconds using Discogs auto-fill, buyers discover rare pressings through smart filters and live Discogs search, and the two sides connect through real-time in-app messaging — all in Hebrew, RTL, and built for the Israeli market.
 
 ---
 
 ## 🧩 The Problem
 
-Israel's vinyl market is fragmented across WhatsApp groups, Facebook Marketplace, and Yad2 — none of which are built for records. There's no way to filter by format (LP vs. 7"), condition (VG+ vs. Fair), or genre. Sellers don't know how to price their records. Buyers waste hours hunting across platforms with no standardized grading or trust signals.
+Israel's physical music market is fragmented across WhatsApp groups, Facebook Marketplace, and Yad2 — none of which are built for collectors. There's no way to filter by format (LP vs. CD vs. 7"), condition (VG+ vs. Fair), or genre. Sellers don't know how to price their items. Buyers waste hours hunting across platforms with no standardized grading, no format-specific fields, and no trust signals.
 
-The result: rare Israeli pressings are undersold, international classics are overpriced, and serious collectors — a growing community in Israel — have no real home.
+The result: rare Israeli pressings are undersold, international classics are overpriced, and serious collectors of vinyl, CDs, and discs — a growing community in Israel — have no real home.
 
 ---
 
 ## 🎯 Target Audience
 
-**Buyers:** Israeli vinyl collectors aged 20–50 who hunt record stores, dig through secondhand shops, and know the difference between a first press and a reissue. They want filters, condition grades, and seller trust signals — not a generic classifieds board.
+**Buyers:** Israeli music collectors aged 16–55 who hunt record stores and secondhand shops for vinyl records, CDs, and rare discs. They want format-specific filters, Goldmine condition grades, and seller trust signals — not a generic classifieds board.
 
-**Sellers:** Anyone from a seasoned collector thinning their collection to someone who inherited a crate of records and has no idea what they're worth. They need a tool that tells them the market price, fills in the details automatically, and gets their listing live in under two minutes.
+**Sellers:** Anyone from a seasoned collector thinning their vinyl or CD collection, to someone who inherited a crate of records and discs and has no idea what they're worth. They need a tool that tells them the market price, fills in the details automatically, and gets their listing live in under two minutes.
 
 ---
 
@@ -35,12 +35,12 @@ The result: rare Israeli pressings are undersold, international classics are ove
 
 | Solution | Limitation |
 |---|---|
-| Facebook Marketplace | No condition grading, no format filtering, not built for records, no Hebrew-first UX |
-| Yad2 | Generic classifieds — no vinyl-specific fields (pressing, condition, format, genre) |
-| Discogs Global | English-only, international pricing doesn't reflect the Israeli market, no local chat |
-| WhatsApp Groups | Unstructured, no search, no trust signals, messages disappear |
+| Facebook Marketplace | No condition grading, no format filtering, not built for physical music, no Hebrew-first UX |
+| Yad2 | Generic classifieds — no format-specific fields (pressing, condition, LP vs. CD vs. 7") |
+| Discogs Global | English-only, covers vinyl and CDs but international pricing doesn't reflect the Israeli market, no local chat |
+| WhatsApp Groups | Unstructured, no search, no trust signals, messages disappear, can't browse by format |
 
-**Our edge:** VinilSeeker is the only platform purpose-built for the Israeli vinyl community — Hebrew-first, RTL, with Discogs-powered auto-fill for sellers, real Goldmine condition grading, live Discogs search integration, in-app real-time chat, and a price calculator calibrated for the local market.
+**Our edge:** VinilSeeker is the only platform purpose-built for the Israeli physical music community — Hebrew-first, RTL, covering vinyl records, CDs, and all disc formats, with Discogs-powered auto-fill for sellers, real Goldmine condition grading, live Discogs search integration, in-app real-time chat, and a price calculator calibrated for the local market.
 
 ---
 
@@ -78,7 +78,7 @@ The result: rare Israeli pressings are undersold, international classics are ove
 |---|---|
 | `auth.users` | Supabase built-in auth — email, password, metadata (name, city, isAdmin) |
 | `profiles` | Public user profiles — name, city; synced via trigger on register |
-| `listing` | Vinyl listings — title, format, condition, price, city, cover image, release year |
+| `listing` | Music listings — title, format, condition, price, city, cover image, release year (vinyl, CD, disc) |
 | `artist` | Normalized artist records — found-or-created on listing insert |
 | `genre` | Normalized genre records — found-or-created on listing insert |
 | `listing_genres` | Junction table — many-to-many between listings and genres |
@@ -148,15 +148,15 @@ App runs at `http://localhost:5173`
 | Home | `/` | Landing page — hero, stats, featured listings, genre grid |
 | Auth | `/auth` | Login / Register / Forgot Password (3 views in one page) |
 | Search | `/search` | Full search with live Discogs integration and filters |
-| Product | `/product` | Vinyl listing detail — tracklist, seller card, similar records |
-| Upload | `/upload` | Create a listing in 5 steps with Discogs auto-fill |
+| Product | `/product` | Listing detail page — tracklist, seller card, similar records (vinyl, CD, disc) |
+| Upload | `/upload` | Create a listing in 5 steps with Discogs auto-fill (supports all formats) |
 | Profile | `/profile` | User profile + my listings + edit |
 | Saved | `/saved` | Wishlist + price alerts |
 | Chat | `/chat` | Real-time buyer/seller messaging |
 | Admin | `/admin` | Admin panel — listings, users, reports, stores (gated) |
-| Rare | `/rare` | Rare and collectible vinyl grid with rarity stars |
+| Rare | `/rare` | Rare and collectible vinyl, CDs, and discs grid with rarity stars |
 | How It Works | `/how` | Buyer and seller step-by-step guide |
-| Seller Guide | `/seller` | Photography tips, Goldmine grading table |
+| Seller Guide | `/seller` | Photography tips, Goldmine grading table (applies to vinyl and CDs) |
 | Pricing | `/pricing` | Market price calculator — 3-tier output |
 | Blog | `/blog` | Category-filtered articles with pagination |
 | Contact | `/contact` | Contact form with email validation |
@@ -183,7 +183,7 @@ Development was conversational and iterative. Each session had a goal, Claude pr
 
 ## 🎨 Design System
 
-VinilSeeker uses a bespoke design system built around the aesthetic of **late-night listening rooms and aged vinyl liner notes**:
+VinilSeeker uses a bespoke design system built around the aesthetic of **late-night listening rooms, aged liner notes, and the warm glow of a physical music collection**:
 
 - **Colors:** Deep aubergine purple `#3B1F5C`, aged cream `#F5EFE6`, vinyl black `#0F0814`, 45rpm gold `#D9A441`
 - **Typography:** Frank Ruhl Libre (Hebrew display/headlines) + Assistant (all UI body text)
