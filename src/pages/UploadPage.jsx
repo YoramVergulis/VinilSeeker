@@ -129,6 +129,7 @@ export default function UploadPage({ onNavigate, onAddVinyl, currentUser, onLogo
     if (!price || isNaN(price) || Number(price) <= 0)
                           e.price     = 'מחיר לא תקין'
     if (!city)            e.city      = 'בחר עיר'
+    if (!preview && !discogsId) e.img = 'יש להוסיף תמונה, או לבחור אלבום מ-Discogs'
     return e
   }
 
@@ -287,6 +288,10 @@ export default function UploadPage({ onNavigate, onAddVinyl, currentUser, onLogo
                 <span className={styles.dropzoneLabel}>לחץ להעלאת תמונה</span>
                 <span className={styles.dropzoneHint}>JPG או PNG · עד 5MB · או הדבק תמונה (Ctrl+V)</span>
               </button>
+            )}
+
+            {errors.img && (
+              <p className={styles.errorMsg} data-error>{errors.img}</p>
             )}
 
             {/* ── 2. פרטי התקליט ── */}
