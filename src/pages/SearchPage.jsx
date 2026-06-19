@@ -36,6 +36,13 @@ export default function SearchPage({ query: initialQuery = '', initialGenre = ''
   const [genre,    setGenre]    = useState(initialGenre || 'all')
   const [format,   setFormat]   = useState('all')
   const [sort,     setSort]     = useState('relevance')
+  const [showTop,  setShowTop]  = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setShowTop(window.scrollY > 400)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   /* Discogs state */
   const [discogsResults,    setDiscogsResults]    = useState([])
@@ -95,8 +102,8 @@ export default function SearchPage({ query: initialQuery = '', initialGenre = ''
     }
   }
 
-  const results = useMemo(() =>
-    vinylList
+  const results = useMemo(() => {
+    const filtered = vinylList
       .filter(v => {
         if (query) {
           const q = query.toLowerCase()
@@ -112,7 +119,20 @@ export default function SearchPage({ query: initialQuery = '', initialGenre = ''
         if (sort === 'newest')     return b.year  - a.year
         return 0
       })
-  , [vinylList, query, genre, format, sort])
+
+    // Deduplicate store items: same album sold by multiple stores → show once.
+    // ProductPage's "מוכרים זמינים" lists all stores via vinylList, so no info is lost.
+    const seen = new Set()
+    return filtered.filter(v => {
+      if (v.type !== 'store') return true
+      const key = v.albumId
+        ? `id:${v.albumId}`
+        : `t:${(v.title || '').toLowerCase()}|${(v.artist || '').toLowerCase()}`
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+  }, [vinylList, query, genre, format, sort])
 
   return (
     <Layout activePage="חיפוש" onNavigate={onNavigate} currentUser={currentUser} onLogout={onLogout}>
@@ -286,6 +306,19 @@ export default function SearchPage({ query: initialQuery = '', initialGenre = ''
             </div>
           )}
         </div>
+      )}
+
+      {showTop && (
+        <button
+          type="button"
+          className={styles.backToTop}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          aria-label="חזור לראש הדף"
+        >
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20">
+            <path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
       )}
 
     </Layout>

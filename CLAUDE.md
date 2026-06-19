@@ -1332,6 +1332,50 @@ The function runs as the DB owner (bypasses RLS) but is safe: it only touches `c
 
 **Build:** 122 modules, zero errors.
 
+### Session 25 — 2026-06-20
+**Goal:** Add Disc Center store, deduplicate search results across stores, back-to-top button
+
+#### Part 1 — Disc Center import
+
+**Files created:**
+- `scripts/import-disccenter.js` — parser for the scraped Disc Center markdown format (`diskcenter.txt`); extracts products with regex, strips format suffixes from album names, detects colored vinyl, filters to vinyl/CD only, inserts into `store_inventory`; deduplicates by URL across pages
+
+**Data source:** `diskcenter.txt` — 3 scraped pages from disccenter.co.il (new vinyl, Israeli music, DVD/Blu-Ray sections). 56 unique items parsed.
+
+**Filtering:**
+- Kept: 38 vinyl (LP, 2LP, תקליט) and CD items
+- Removed: 18 DVD and Blu-Ray items (including CD+Blu-Ray and 2CD+DVD combos)
+- Colored vinyl auto-detected from title keywords (Red Vinyl, Transparent Clear, צבעוני, ורוד, etc.) → `type: 'Coloured Vinyl (new)'`
+
+**Store details:** "Disc Center", "תל אביב" (דיזנגוף סנטר)
+
+**Overlap with Third Ear:** 18 albums appear in both stores (mostly Israeli releases). This is by design — ProductPage shows all stores carrying the same album under "מוכרים זמינים".
+
+**Album deduplication in import:** `buildAlbumMap` matched all 38 Disc Center albums to existing `albums` table rows (created during Third Ear import) — all share `album_id` FKs. This enables the ProductPage multi-store display.
+
+**Cleanup during session:**
+- Accidentally created "Disc Center DRY RUN" rows during testing — deleted via Supabase SDK
+- City was set to "ירושלים" by mistake — corrected to "תל אביב" via update query
+
+#### Part 2 — Deduplicate search results
+
+**Problem:** Same album sold by Disc Center AND Third Ear appeared as 2 separate cards in search.
+
+**Solution:** Deduplication added to the `results` useMemo in `SearchPage.jsx` — after filter+sort, walk results and skip store items with a `albumId` (or `title|artist` key) already seen. Private listings always pass through unchanged.
+
+**Why in SearchPage, not in `getStoreInventory`:** `vinylList` must keep all rows so ProductPage's `allOffers` (which filters `vinylList` by `albumId`) can list both stores under "מוכרים זמינים". Only the search display is deduplicated.
+
+**Files updated:**
+- `src/pages/SearchPage.jsx` — deduplication step added at end of `results` useMemo
+
+#### Part 3 — Back-to-top button in SearchPage
+
+**Files updated:**
+- `src/pages/SearchPage.jsx` — `showTop` state + `scroll` listener (`window.scrollY > 400`); fixed button rendered when `showTop === true`; `window.scrollTo({ top: 0, behavior: 'smooth' })` on click
+- `src/pages/SearchPage.module.css` — `.backToTop`: fixed position `bottom: 28px; left: 28px`, 44×44px purple circle, `--shadow-md`, hover lifts 3px
+
+**Status at end of session:** Disc Center (38 items) live alongside Third Ear. Duplicate albums show once in search, both stores in ProductPage. Back-to-top button in SearchPage.
+
 ---
 
 ## Rules for Claude in This Project
