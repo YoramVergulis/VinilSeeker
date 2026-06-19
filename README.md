@@ -69,6 +69,7 @@ The result: rare Israeli pressings are undersold, international classics are ove
 | Supabase DB | Database | Listings, artists, genres, albums, store inventory, wishlists, profiles, chat |
 | Supabase Realtime | WebSocket | Live chat message delivery without polling |
 | Discogs API | Third-party REST API | Search vinyl catalog, auto-fill listing fields, fetch tracklist & album notes; background cover enrichment for store inventory |
+| Firecrawl | Web scraper | Scraped Third Ear and Disc Center store pages to extract real product inventory (titles, artists, prices, URLs) |
 | Vercel Analytics | Analytics | Page-view tracking via `@vercel/analytics/react` |
 | Vercel | Hosting / CDN | SPA deployment with `vercel.json` rewrite rule for direct URL access |
 
