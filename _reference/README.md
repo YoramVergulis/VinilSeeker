@@ -70,6 +70,25 @@ The system is grounded in three feelings: **late-night listening**, **crate-digg
 
 ---
 
+## 🏪 Store Inventory — Albums in Multiple Stores
+
+The following 10 albums are currently stocked by **both Third Ear and Disc Center**. In the search results they appear as a single card showing the best (lowest) price, with a "2 חנויות" badge. On the product page, both stores appear under "מוכרים זמינים".
+
+| Artist | Album | Stores |
+|---|---|---|
+| חיים משה | אהבת חיי | Third Ear, Disc Center |
+| חיים משה | תן לזמן ללכת | Third Ear, Disc Center |
+| טנגו | סידור קבוע | Third Ear, Disc Center |
+| יאיר ניצני | האשם תמיד | Third Ear, Disc Center |
+| מרגלית צנעני | מנטה | Third Ear, Disc Center |
+| ניר כנען | כחול | Third Ear, Disc Center |
+| רועי כפרי | כפרי | Third Ear, Disc Center |
+| שפי ישי | אהבה ושנאה | Third Ear, Disc Center |
+| שקל | פריק | Third Ear, Disc Center |
+| FOO FIGHTERS | Your Favorite Toy | Third Ear, Disc Center |
+
+---
+
 ## 🚧 Caveats
 
 - **Fonts loaded from Google Fonts CDN** — if you need offline use, download Frank Ruhl Libre + Assistant `.woff2` files into `fonts/` and replace the `@import` in `colors_and_type.css`.
