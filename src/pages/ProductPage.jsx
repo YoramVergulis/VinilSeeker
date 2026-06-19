@@ -199,7 +199,7 @@ function StoreInventorySection({ stores }) {
 // Real covers are on i.discogs.com; placeholders are on st.discogs.com
 const hasRealCover = url => !!(url && !url.includes('st.discogs.com'))
 
-export default function ProductPage({ product: snapshotProduct, onNavigate, vinylList = [], currentUser = null, onLogout, onDeleteVinyl }) {
+export default function ProductPage({ product: snapshotProduct, onNavigate, vinylList = [], currentUser = null, onLogout, onDeleteVinyl, onUpdateVinyl }) {
   // Use the live version from vinylList so background enrichment (discogsId, img) is reflected
   const product = vinylList.find(v => v.id === snapshotProduct?.id) || snapshotProduct
 
@@ -243,11 +243,26 @@ export default function ProductPage({ product: snapshotProduct, onNavigate, viny
           || rel.images?.[0]?.uri
           || thumb
         // Save to DB (fire-and-forget)
-        if (resolvedImg) {
-          if (product?.albumId)
-            supabase.from('albums').update({ cover_image_url: resolvedImg, discogs_id: String(id) }).eq('id', product.albumId).then(() => {}).catch(() => {})
-          else if (product?.id?.startsWith('si-'))
+        if (product?.albumId) {
+          const upd = {}
+          if (resolvedImg) upd.cover_image_url = resolvedImg
+          if (id) upd.discogs_id = String(id)
+          if (Object.keys(upd).length)
+            supabase.from('albums').update(upd).eq('id', product.albumId).then(() => {}).catch(() => {})
+        } else if (product?.id?.startsWith?.('si-')) {
+          if (resolvedImg)
             supabase.from('store_inventory').update({ cover_image_url: resolvedImg }).eq('id', product.id.replace('si-', '')).then(() => {}).catch(() => {})
+        } else if (product?.type === 'private' && product?.id) {
+          const upd = {}
+          if (resolvedImg) upd.cover_image_url = resolvedImg
+          if (id) upd.discogs_id = String(id)
+          if (Object.keys(upd).length) {
+            supabase.from('listing').update(upd).eq('id', product.id).then(() => {}).catch(() => {})
+            onUpdateVinyl?.(product.id, {
+              ...(resolvedImg ? { img: resolvedImg } : {}),
+              ...(id ? { discogsId: String(id) } : {}),
+            })
+          }
         }
         // Ensure a primary image is always present for the renderer
         const hasPrimary = rel.images?.some(x => x.type === 'primary')

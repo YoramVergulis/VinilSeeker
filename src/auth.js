@@ -106,6 +106,7 @@ function mapRow(r) {
   return {
     id:          r.id,
     albumId:     r.album_id    || null,
+    discogsId:   r.discogs_id  || null,
     title:       r.title,
     artist:      r.artist?.name || '',
     year:        r.release_year,
@@ -127,7 +128,7 @@ export async function getListings() {
     .from('listing')
     .select(`
       id, title, format, condition, price, description,
-      cover_image_url, user_id, release_year, city, album_id,
+      cover_image_url, discogs_id, user_id, release_year, city, album_id,
       artist:artist_id(name),
       listing_genres(genre:genre_id(name))
     `)
@@ -149,6 +150,7 @@ export async function addListing(record) {
       price:           record.price,
       description:     record.desc,
       cover_image_url: record.img,
+      discogs_id:      record.discogsId || null,
       is_available:    true,
       user_id:         record.uploaderId,
       artist_id:       artistId,
@@ -185,6 +187,7 @@ export async function updateListing(id, updates) {
       price:           updates.price,
       description:     updates.desc,
       cover_image_url: updates.img,
+      discogs_id:      updates.discogsId || null,
       release_year:    updates.year,
       city:            updates.city,
       ...(artistId !== undefined && { artist_id: artistId }),

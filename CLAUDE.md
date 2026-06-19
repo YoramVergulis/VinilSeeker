@@ -1179,6 +1179,39 @@ DELETE FROM store_inventory WHERE store_name = 'Third Ear' AND ( ... same condit
 
 **Status at end of session:** `store_inventory` cleaned — only music inventory remains in the DB.
 
+### Session 21 — 2026-06-19
+**Goal:** Fix private listing (יד שנייה) cover images — save Discogs cover + `discogs_id` back to `listing` table from ProductPage
+
+**Problem:**
+- When a user opens a private listing on ProductPage, Effect 2 fetches Discogs data (cover, tracklist) and shows it in the UI — but it was only saving back to the `albums` or `store_inventory` tables, never to `listing`.
+- `discogs_id` was stored in UploadPage state and passed to `addListing`, but `addListing` never included it in the INSERT, and `mapRow` never read it back.
+- Result: after reload, the private listing card in Search showed a blank cover, and ProductPage had to re-fetch Discogs every time (no `discogsId` cached).
+
+**SQL run in Supabase:**
+```sql
+ALTER TABLE listing ADD COLUMN IF NOT EXISTS discogs_id text;
+```
+
+**Files updated:**
+- `src/auth.js`:
+  - `getListings` SELECT: added `discogs_id` to column list
+  - `mapRow`: added `discogsId: r.discogs_id || null`
+  - `addListing`: added `discogs_id: record.discogsId || null` to INSERT
+  - `updateListing`: added `discogs_id: updates.discogsId || null` to UPDATE
+- `src/pages/ProductPage.jsx`:
+  - Added `onUpdateVinyl` to prop destructuring
+  - Effect 2 (auto-enrich): replaced the single `if (resolvedImg)` save block with a 3-way branch:
+    1. `albumId` set → save to `albums` table (unchanged)
+    2. `id.startsWith('si-')` → save to `store_inventory` (unchanged)
+    3. `type === 'private'` → save `cover_image_url` + `discogs_id` to `listing` table AND call `onUpdateVinyl` to update the search card in memory immediately
+
+**Result after fix:**
+- User uploads private listing via Discogs auto-fill → `discogs_id` saved to DB → next page load, Effect 1 fires (instant Discogs cover via single API call)
+- User uploads private listing without Discogs (or auto-fill gave no ID) → Effect 2 fires on first ProductPage visit → cover + discogs_id saved to `listing` → search card shows cover immediately and on all future loads
+- User's own uploaded photo (base64): still saved directly to `listing.cover_image_url` via `addListing` as before; very large photos (>4MB base64) may silently fail — a known limitation; Supabase Storage would be the proper fix
+
+**Status at end of session:** Private listing Discogs covers now persist to DB. Search cards show cover images after the first ProductPage visit.
+
 ---
 
 ## Rules for Claude in This Project
