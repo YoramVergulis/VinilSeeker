@@ -1357,16 +1357,19 @@ The function runs as the DB owner (bypasses RLS) but is safe: it only touches `c
 - Accidentally created "Disc Center DRY RUN" rows during testing — deleted via Supabase SDK
 - City was set to "ירושלים" by mistake — corrected to "תל אביב" via update query
 
-#### Part 2 — Deduplicate search results
+#### Part 2 — Deduplicate search results + best price + neutral badge
 
-**Problem:** Same album sold by Disc Center AND Third Ear appeared as 2 separate cards in search.
+**Problem:** Same album sold by Disc Center AND Third Ear appeared as 2 separate cards in search. First pass showed only the first-seen item (not necessarily the cheapest); the store name badge still named a specific store.
 
-**Solution:** Deduplication added to the `results` useMemo in `SearchPage.jsx` — after filter+sort, walk results and skip store items with a `albumId` (or `title|artist` key) already seen. Private listings always pass through unchanged.
+**Solution:** Two-pass deduplication at the end of `results` useMemo in `SearchPage.jsx`:
+- **Pass 1:** Build a `Map<albumKey, { best, count }>` — tracks the lowest-price representative and total store count per album group
+- **Pass 2:** Filter to only the best-price item per group; replace badge with `"X חנויות"` when `count > 1`
+- Album key: `id:${albumId}` when the FK exists; `t:title|artist` as a string fallback
 
-**Why in SearchPage, not in `getStoreInventory`:** `vinylList` must keep all rows so ProductPage's `allOffers` (which filters `vinylList` by `albumId`) can list both stores under "מוכרים זמינים". Only the search display is deduplicated.
+**Why in SearchPage, not in `getStoreInventory`:** `vinylList` must keep all rows so ProductPage's `allOffers` (filtered by `albumId`) can list both stores under "מוכרים זמינים". Only the search grid is deduplicated.
 
 **Files updated:**
-- `src/pages/SearchPage.jsx` — deduplication step added at end of `results` useMemo
+- `src/pages/SearchPage.jsx` — two-pass deduplication at end of `results` useMemo; private listings always pass through unchanged
 
 #### Part 3 — Back-to-top button in SearchPage
 

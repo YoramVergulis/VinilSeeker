@@ -120,18 +120,44 @@ export default function SearchPage({ query: initialQuery = '', initialGenre = ''
         return 0
       })
 
-    // Deduplicate store items: same album sold by multiple stores → show once.
-    // ProductPage's "מוכרים זמינים" lists all stores via vinylList, so no info is lost.
-    const seen = new Set()
-    return filtered.filter(v => {
-      if (v.type !== 'store') return true
-      const key = v.albumId
+    // Deduplicate store items: same album in multiple stores → one card.
+    // Show best (lowest) price; replace store name badge with "X חנויות" when multi-store.
+    // ProductPage's "מוכרים זמינים" still lists all stores via vinylList — no info lost.
+    const storeKey = v =>
+      v.albumId
         ? `id:${v.albumId}`
         : `t:${(v.title || '').toLowerCase()}|${(v.artist || '').toLowerCase()}`
-      if (seen.has(key)) return false
-      seen.add(key)
-      return true
-    })
+
+    // Pass 1: find best price and count per album key
+    const groups = new Map()
+    for (const v of filtered) {
+      if (v.type !== 'store') continue
+      const key = storeKey(v)
+      const g = groups.get(key)
+      if (!g || (v.price ?? Infinity) < (g.best.price ?? Infinity)) {
+        groups.set(key, { best: v, count: (g?.count ?? 0) + 1 })
+      } else {
+        g.count++
+      }
+    }
+
+    // Pass 2: keep only the best-price item per group, update badge if multi-store
+    const emitted = new Set()
+    return filtered
+      .filter(v => {
+        if (v.type !== 'store') return true
+        const key = storeKey(v)
+        if (groups.get(key)?.best.id !== v.id) return false
+        if (emitted.has(key)) return false
+        emitted.add(key)
+        return true
+      })
+      .map(v => {
+        if (v.type !== 'store') return v
+        const g = groups.get(storeKey(v))
+        if (!g || g.count <= 1) return v
+        return { ...v, badge: { label: `${g.count} חנויות`, variant: 'dark' } }
+      })
   }, [vinylList, query, genre, format, sort])
 
   return (
