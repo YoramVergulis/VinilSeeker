@@ -1133,6 +1133,52 @@ This propagates covers from sibling store_inventory variants (e.g., black vinyl 
 
 **Build:** 121 modules, zero errors.
 
+### Session 20 — 2026-06-19
+**Goal:** Delete non-music items (books, turntables, Blu-rays) from `store_inventory`
+
+**No code files changed** — all fixes were SQL run in the Supabase SQL Editor.
+
+**Problem:** The Third Ear JSON import included non-music items:
+- **Turntables (פטיפון)**: Sony PS-LX3BT, SAFA HP-100 variants — `artist` field contains "פטיפון"
+- **Blu-rays**: `type` column = "Blu-ray" (films, not music)
+- **Books / merch**: `type` = "Vinyl (new)" but clearly books — Stranger Things scripts, Taylor Swift coloring books, Dune art books, Studio Ghibli sketchbooks, Seinfeld scripts, Kurt Cobain Journals, etc. Identified by: empty `artist` field + title keywords (script, journal, coloring, sketchbook, making of, etc.)
+
+**SQL run (preview first, then delete):**
+```sql
+-- Preview
+SELECT id, artist, album_name, type FROM store_inventory
+WHERE store_name = 'Third Ear'
+  AND (
+    artist ILIKE '%פטיפון%' OR album_name ILIKE '%SAFA HP%' OR album_name ILIKE '%PS-LX%'
+    OR type = 'Blu-ray'
+    OR ( (artist IS NULL OR artist = '') AND type = 'Vinyl (new)'
+         AND ( album_name ILIKE '%script%' OR album_name ILIKE '%journal%'
+            OR album_name ILIKE '%coloring%' OR album_name ILIKE '%colouring%'
+            OR album_name ILIKE '%sketchbook%' OR album_name ILIKE '%diary%'
+            OR album_name ILIKE '%making of%' OR album_name ILIKE '%photography%'
+            OR album_name ILIKE '%sticker book%' OR album_name ILIKE '%art and soul%'
+            OR album_name ILIKE '%all the songs%' OR album_name ILIKE '%be more%'
+            OR album_name ILIKE '%little guide%' OR album_name ILIKE '%never understood%'
+            OR album_name ILIKE '%rules for a knight%' OR album_name ILIKE '%future boy%'
+            OR album_name ILIKE '%sideways%' OR album_name ILIKE '%rear window%'
+            OR album_name ILIKE '%hateful eight%' OR album_name ILIKE '%seinfeld%'
+            OR album_name ILIKE '%totoro%' OR album_name ILIKE '%stranger things%'
+            OR album_name ILIKE '%spirited away%' OR album_name ILIKE '%howl%'
+            OR album_name ILIKE '%dune%' OR album_name ILIKE '%jungleland%'
+            OR album_name ILIKE '%kurt cobain: journals%' OR album_name ILIKE '%מי רצח%' )
+       )
+  );
+
+-- DELETE (same WHERE clause — confirmed and run by user)
+DELETE FROM store_inventory WHERE store_name = 'Third Ear' AND ( ... same conditions ... );
+```
+
+**Result:** Non-music items removed. Only real vinyl, CD, and music-related inventory remains.
+
+**Note for future imports:** The import script already filters by `type` containing "vinyl"/"cd"/"blu-ray" but Third Ear mislabels books as "Vinyl (new)". A future improvement would be to add a keyword blocklist in the import script to exclude items with no artist and book-like titles.
+
+**Status at end of session:** `store_inventory` cleaned — only music inventory remains in the DB.
+
 ---
 
 ## Rules for Claude in This Project
