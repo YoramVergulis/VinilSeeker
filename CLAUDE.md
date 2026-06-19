@@ -1212,6 +1212,23 @@ ALTER TABLE listing ADD COLUMN IF NOT EXISTS discogs_id text;
 
 **Status at end of session:** Private listing Discogs covers now persist to DB. Search cards show cover images after the first ProductPage visit.
 
+### Session 22 — 2026-06-19
+**Goal:** Add Vercel Analytics
+
+**Files updated:**
+- `src/main.jsx` — added `import { Analytics } from '@vercel/analytics/react'`; added `<Analytics />` inside `<StrictMode>` render, after `<App />`
+- `package.json` / `package-lock.json` — `npm i @vercel/analytics` added the package
+
+**Why main.jsx, not App.jsx:**
+App.jsx uses one `return` per page (`if (page === 'search') return <SearchPage ...>`) — adding `<Analytics />` there would require touching every branch. `main.jsx` is the single root wrapper that renders once and covers all pages automatically.
+
+**Import path note:**
+Vercel's "Get Started" docs show `@vercel/analytics/next` — that path is for Next.js Server Components only. This project is Vite + React, so the correct import is `@vercel/analytics/react`.
+
+**Result:** Analytics data appears in the Vercel dashboard → Analytics tab within ~30 seconds of the first page view after deployment.
+
+**Status at end of session:** Vercel Analytics live. No other files changed.
+
 ---
 
 ## Rules for Claude in This Project
