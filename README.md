@@ -132,14 +132,6 @@ App runs at `http://localhost:5173`
 
 ---
 
-## 🧪 Demo Credentials
-
-| Role | Email | Password |
-|---|---|---|
-| Regular user | demo@vinilseeker.com | demo1234 |
-| Admin | admin@vinilseeker.com | admin1234 |
-
----
 
 ## 📄 Page Inventory (19 pages)
 
