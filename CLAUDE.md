@@ -1229,6 +1229,54 @@ Vercel's "Get Started" docs show `@vercel/analytics/next` — that path is for N
 
 **Status at end of session:** Vercel Analytics live. No other files changed.
 
+### Session 23 — 2026-06-19
+**Goal:** Fix private listing cover persistence + admin inline edit with colored vinyl support
+
+**Problem 1 — Cover lost on hard refresh:**
+Effect 1 in ProductPage (which fires when `product.discogsId` is set) was calling `getDiscogsRelease()` and showing the cover in state, but never saving the URL back to the `listing` table. Every hard refresh triggered a new Discogs API call just to show the same image. Fixed by saving `cover_image_url` to the `listing` table inside Effect 1's `.then()`, whenever it's a private listing without a real cover already.
+
+**Problem 2 — Admin inline edit + colored vinyl:**
+Added "ערוך מכירה" button to the admin bar. Opens an inline edit panel below the breadcrumb. Fields differ by product type:
+- **Private listings**: artist, title, year, format, condition, price, city, genre pills, description, "ויניל צבעוני" checkbox
+- **Store items**: artist, album name, type (free text — e.g., "Colored Vinyl (new)"), style/note, price
+
+**SQL migration required (run in Supabase SQL Editor):**
+```sql
+ALTER TABLE listing ADD COLUMN IF NOT EXISTS colored_vinyl boolean DEFAULT false;
+```
+
+**Files updated:**
+- `src/auth.js`:
+  - `getListings` SELECT: added `colored_vinyl`
+  - `mapRow`: added `coloredVinyl: r.colored_vinyl || false`
+  - `addListing`: added `colored_vinyl: record.coloredVinyl || false`
+  - `updateListing`: added `colored_vinyl: updates.coloredVinyl ?? false`
+  - `getStoreInventory`: added `rawType: r.type || ''` and `storeStyle: r.style || ''` to returned shape
+  - Added `updateStoreItem(numericId, updates)` — updates `store_inventory` (artist, album_name, price_ils, type, style)
+- `src/pages/ProductPage.jsx`:
+  - Imported `updateListing` and `updateStoreItem` from auth
+  - Added `EDIT_FORMATS`, `EDIT_CONDITIONS`, `EDIT_CITIES` constants
+  - Effect 1 now saves `cover_image_url` back to `listing` table after fetching Discogs release (fix for cover disappearing on refresh)
+  - Added `editing`, `saving`, `editForm` state
+  - Added `startEdit()`, `handleSave()` functions
+  - Admin bar: added "ערוך מכירה" button alongside "מחק מכירה"; buttons wrapped in `.adminBtns` flex row
+  - Added admin edit panel JSX (conditional on `editing && editForm`)
+  - tagRow: added "ויניל צבעוני" tag shown when `product.coloredVinyl` OR `storeStyle`/`rawType` contains "color"
+- `src/pages/ProductPage.module.css`:
+  - Added `.adminBtns`, `.btnEditAdmin`
+  - Added `.adminEditPanel`, `.adminEditInner`, `.editTitle`
+  - Added `.editGrid`, `.editField`, `.editLabel`, `.editInput`, `.editSelect`, `.editTextarea`
+  - Added `.editPills`, `.editPill`, `.editPillActive`
+  - Added `.editCheckboxLabel`, `.editCheckbox`
+  - Added `.editActions`, `.btnSaveEdit`
+  - Added `.tagColored` (rainbow gradient pill for colored vinyl)
+
+**Colored vinyl detection (automatic, no edit needed):**
+- Private listings: `product.coloredVinyl === true` (new DB field)
+- Store items: `product.storeStyle` or `product.rawType` contains "color" — detected automatically from what's already in the DB (e.g., Third Ear items with type "Coloured Vinyl (new)" will show the tag without any admin action)
+
+**Build:** 122 modules, zero errors.
+
 ---
 
 ## Rules for Claude in This Project

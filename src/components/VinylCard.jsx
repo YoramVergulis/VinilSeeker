@@ -24,7 +24,7 @@ export default function VinylCard({
   }
 
   return (
-    <a href="#" className={styles.card} onClick={handleClick}>
+    <a href={`/product?id=${encodeURIComponent(id)}`} className={styles.card} onClick={handleClick}>
       <div className={styles.cover}>
         <div className={styles.vinylPeek} aria-hidden="true" />
 

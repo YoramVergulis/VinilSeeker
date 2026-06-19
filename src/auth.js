@@ -104,22 +104,23 @@ async function findOrCreateGenre(name) {
 function mapRow(r) {
   const cover = r.cover_image_url
   return {
-    id:          r.id,
-    albumId:     r.album_id    || null,
-    discogsId:   r.discogs_id  || null,
-    title:       r.title,
-    artist:      r.artist?.name || '',
-    year:        r.release_year,
-    format:      r.format,
-    genre:       r.listing_genres?.[0]?.genre?.name || '',
-    genres:      r.listing_genres?.map(lg => lg.genre?.name).filter(Boolean) || [],
-    price:       Number(r.price),
-    city:        r.city || '',
-    desc:        r.description,
-    condition:   r.condition,
-    img:         (cover && !cover.includes('st.discogs.com')) ? cover : null,
-    type:        'private',
-    uploaderId:  r.user_id,
+    id:           r.id,
+    albumId:      r.album_id    || null,
+    discogsId:    r.discogs_id  || null,
+    title:        r.title,
+    artist:       r.artist?.name || '',
+    year:         r.release_year,
+    format:       r.format,
+    genre:        r.listing_genres?.[0]?.genre?.name || '',
+    genres:       r.listing_genres?.map(lg => lg.genre?.name).filter(Boolean) || [],
+    price:        Number(r.price),
+    city:         r.city || '',
+    desc:         r.description,
+    condition:    r.condition,
+    img:          (cover && !cover.includes('st.discogs.com')) ? cover : null,
+    coloredVinyl: r.colored_vinyl || false,
+    type:         'private',
+    uploaderId:   r.user_id,
   }
 }
 
@@ -128,7 +129,7 @@ export async function getListings() {
     .from('listing')
     .select(`
       id, title, format, condition, price, description,
-      cover_image_url, discogs_id, user_id, release_year, city, album_id,
+      cover_image_url, discogs_id, user_id, release_year, city, album_id, colored_vinyl,
       artist:artist_id(name),
       listing_genres(genre:genre_id(name))
     `)
@@ -150,7 +151,8 @@ export async function addListing(record) {
       price:           record.price,
       description:     record.desc,
       cover_image_url: record.img,
-      discogs_id:      record.discogsId || null,
+      discogs_id:      record.discogsId  || null,
+      colored_vinyl:   record.coloredVinyl || false,
       is_available:    true,
       user_id:         record.uploaderId,
       artist_id:       artistId,
@@ -187,7 +189,8 @@ export async function updateListing(id, updates) {
       price:           updates.price,
       description:     updates.desc,
       cover_image_url: updates.img,
-      discogs_id:      updates.discogsId || null,
+      discogs_id:      updates.discogsId   || null,
+      colored_vinyl:   updates.coloredVinyl ?? false,
       release_year:    updates.year,
       city:            updates.city,
       ...(artistId !== undefined && { artist_id: artistId }),
@@ -214,27 +217,43 @@ export async function getStoreInventory() {
     const format    = t.includes('2lp') ? '2LP' : t.includes('vinyl') ? 'LP' : t.includes('cd') ? 'CD' : 'LP'
     const condition = t.includes('new') ? 'New' : t.includes('used') ? 'VG' : ''
     return {
-      id:         `si-${r.id}`,
-      albumId:    r.album_id              || null,
-      discogsId:  r.albums?.discogs_id    || null,
-      title:      r.album_name            || '',
-      artist:     r.artist                || '',
-      year:       r.albums?.release_year  || null,
+      id:          `si-${r.id}`,
+      albumId:     r.album_id              || null,
+      discogsId:   r.albums?.discogs_id    || null,
+      title:       r.album_name            || '',
+      artist:      r.artist                || '',
+      year:        r.albums?.release_year  || null,
       format,
-      genre:      '',
-      genres:     [],
-      price:      r.price_ils,
-      city:       r.store_city            || '',
-      img:        realImg(r.albums?.cover_image_url) || realImg(r.cover_image_url) || null,
+      genre:       '',
+      genres:      [],
+      price:       r.price_ils,
+      city:        r.store_city            || '',
+      img:         realImg(r.albums?.cover_image_url) || realImg(r.cover_image_url) || null,
       condition,
-      type:       'store',
-      storeName:  r.store_name            || '',
-      storeCity:  r.store_city            || '',
-      storeUrl:   r.url                   || '',
-      uploaderId: null,
-      badge:      { label: r.store_name || 'חנות', variant: 'dark' },
+      type:        'store',
+      rawType:     r.type                  || '',
+      storeStyle:  r.style                 || '',
+      storeName:   r.store_name            || '',
+      storeCity:   r.store_city            || '',
+      storeUrl:    r.url                   || '',
+      uploaderId:  null,
+      badge:       { label: r.store_name || 'חנות', variant: 'dark' },
     }
   })
+}
+
+export async function updateStoreItem(numericId, updates) {
+  const { error } = await supabase
+    .from('store_inventory')
+    .update({
+      artist:     updates.artist,
+      album_name: updates.title,
+      price_ils:  updates.price,
+      type:       updates.rawType,
+      style:      updates.storeStyle,
+    })
+    .eq('id', numericId)
+  if (error) throw new Error(error.message)
 }
 
 export async function deleteListing(product) {

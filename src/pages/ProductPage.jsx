@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import Layout from '../components/Layout'
 import VinylCard from '../components/VinylCard'
-import { isSaved, toggleSaved, checkIsAdmin } from '../auth'
+import { isSaved, toggleSaved, checkIsAdmin, updateListing, updateStoreItem } from '../auth'
 import { lookupDiscogs, getDiscogsRelease, normalizeTracklist } from '../discogs'
 import { TRACKLISTS } from '../data/tracklists'
 import { supabase } from '../supabase'
@@ -11,6 +11,10 @@ const GENRE_LABELS = {
   rock: 'רוק', metal: 'מטאל', jazz: "ג'אז",
   israeli: 'ישראלי', pop: 'פופ', classical: 'קלאסי', electronic: 'אלקטרוני',
 }
+
+const EDIT_FORMATS    = ['LP', '2LP', '7"', '12"']
+const EDIT_CONDITIONS = ['New', 'VG+', 'VG', 'Good', 'Fair']
+const EDIT_CITIES     = ['תל אביב', 'חיפה', 'ירושלים', 'ראשל"צ', 'פ"ת', 'נתניה', 'ב"ש', 'רמת גן', 'אחר']
 
 const DESCRIPTIONS = {
   metal:    'תקליט שמור היטב, נקי ומוכן להשמעה. הוינייל עצמו ללא שריטות משמעותיות. שרוול מקורי בתנאים טובים. נרכש ישירות ממהדורה מקורית.',
@@ -208,6 +212,9 @@ export default function ProductPage({ product: snapshotProduct, onNavigate, viny
   const [storeInventory,  setStoreInventory]  = useState([])
   const [confirmDelete,   setConfirmDelete]   = useState(false)
   const [deleting,        setDeleting]        = useState(false)
+  const [editing,         setEditing]         = useState(false)
+  const [editForm,        setEditForm]        = useState(null)
+  const [saving,          setSaving]          = useState(false)
   const isAdmin = checkIsAdmin(currentUser)
 
   useEffect(() => { setSaved(isSaved(product?.id)) }, [product?.id])
@@ -217,7 +224,18 @@ export default function ProductPage({ product: snapshotProduct, onNavigate, viny
     if (!product?.discogsId) return
     setDiscogsRelease(null)
     getDiscogsRelease(product.discogsId)
-      .then(setDiscogsRelease)
+      .then(release => {
+        setDiscogsRelease(release)
+        // Save the real cover back to the listing so future loads don't need to re-fetch
+        if (product?.type === 'private' && !hasRealCover(product?.img)) {
+          const primaryImg = release.images?.find(x => x.type === 'primary')?.uri || release.images?.[0]?.uri
+          if (primaryImg) {
+            supabase.from('listing').update({ cover_image_url: primaryImg }).eq('id', product.id)
+              .then(() => {}).catch(() => {})
+            onUpdateVinyl?.(product.id, { img: primaryImg })
+          }
+        }
+      })
       .catch(() => {})
   }, [product?.discogsId])
 
@@ -345,6 +363,84 @@ export default function ProductPage({ product: snapshotProduct, onNavigate, viny
     }
   }
 
+  function startEdit() {
+    setEditForm({
+      artist:       product.artist       || '',
+      title:        product.title        || '',
+      year:         product.year         ? String(product.year) : '',
+      format:       product.format       || 'LP',
+      condition:    product.condition    || '',
+      price:        product.price != null ? String(product.price) : '',
+      city:         product.city         || '',
+      genres:       product.genres?.length ? [...product.genres] : (product.genre ? [product.genre] : []),
+      desc:         product.desc         || '',
+      coloredVinyl: product.coloredVinyl || false,
+      rawType:      product.rawType      || '',
+      storeStyle:   product.storeStyle   || '',
+    })
+    setEditing(true)
+    setConfirmDelete(false)
+  }
+
+  async function handleSave() {
+    if (!editForm || saving) return
+    setSaving(true)
+    try {
+      if (product.type === 'store') {
+        const numId = String(product.id).replace('si-', '')
+        await updateStoreItem(numId, {
+          artist:     editForm.artist,
+          title:      editForm.title,
+          price:      Number(editForm.price) || product.price,
+          rawType:    editForm.rawType,
+          storeStyle: editForm.storeStyle,
+        })
+        onUpdateVinyl?.(product.id, {
+          artist:     editForm.artist,
+          title:      editForm.title,
+          price:      Number(editForm.price) || product.price,
+          rawType:    editForm.rawType,
+          storeStyle: editForm.storeStyle,
+        })
+      } else {
+        await updateListing(product.id, {
+          artist:       editForm.artist,
+          title:        editForm.title,
+          year:         parseInt(editForm.year) || null,
+          format:       editForm.format,
+          condition:    editForm.condition,
+          price:        Number(editForm.price),
+          city:         editForm.city,
+          genres:       editForm.genres,
+          genre:        editForm.genres[0] || '',
+          desc:         editForm.desc,
+          img:          product.img,
+          discogsId:    product.discogsId,
+          coloredVinyl: editForm.coloredVinyl,
+        })
+        onUpdateVinyl?.(product.id, {
+          artist:       editForm.artist,
+          title:        editForm.title,
+          year:         parseInt(editForm.year) || null,
+          format:       editForm.format,
+          condition:    editForm.condition,
+          price:        Number(editForm.price),
+          city:         editForm.city,
+          genres:       editForm.genres,
+          genre:        editForm.genres[0] || '',
+          desc:         editForm.desc,
+          coloredVinyl: editForm.coloredVinyl,
+        })
+      }
+      setEditing(false)
+      setEditForm(null)
+    } catch (err) {
+      console.error('Save failed:', err)
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <Layout activePage="" onNavigate={onNavigate} currentUser={currentUser} onLogout={onLogout}>
 
@@ -361,42 +457,189 @@ export default function ProductPage({ product: snapshotProduct, onNavigate, viny
 
       {/* ── Admin bar ── */}
       {isAdmin && (
-        <div className={styles.adminBar}>
-          <div className={styles.adminBarInner}>
-            {!confirmDelete ? (
-              <button
-                type="button"
-                className={styles.btnDeleteAdmin}
-                onClick={() => setConfirmDelete(true)}
-              >
-                <svg viewBox="0 0 16 16" fill="none" width="14" height="14" aria-hidden="true">
-                  <path d="M2 4h12M6 4V2h4v2M5 4l1 9h4l1-9" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                מחק מכירה
-              </button>
-            ) : (
-              <div className={styles.adminConfirm}>
-                <span className={styles.adminConfirmText}>האם אתה בטוח? פעולה זו אינה הפיכה.</span>
-                <button
-                  type="button"
-                  className={styles.btnDangerSm}
-                  onClick={handleDelete}
-                  disabled={deleting}
-                >
-                  {deleting ? 'מוחק…' : 'מחק'}
-                </button>
-                <button
-                  type="button"
-                  className={styles.btnCancelSm}
-                  onClick={() => setConfirmDelete(false)}
-                  disabled={deleting}
-                >
-                  ביטול
-                </button>
-              </div>
-            )}
+        <>
+          <div className={styles.adminBar}>
+            <div className={styles.adminBarInner}>
+              {!confirmDelete ? (
+                <div className={styles.adminBtns}>
+                  <button
+                    type="button"
+                    className={styles.btnEditAdmin}
+                    onClick={startEdit}
+                  >
+                    <svg viewBox="0 0 16 16" fill="none" width="14" height="14" aria-hidden="true">
+                      <path d="M11 2l3 3-8 8H3v-3l8-8z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    ערוך מכירה
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.btnDeleteAdmin}
+                    onClick={() => { setConfirmDelete(true); setEditing(false) }}
+                  >
+                    <svg viewBox="0 0 16 16" fill="none" width="14" height="14" aria-hidden="true">
+                      <path d="M2 4h12M6 4V2h4v2M5 4l1 9h4l1-9" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    מחק מכירה
+                  </button>
+                </div>
+              ) : (
+                <div className={styles.adminConfirm}>
+                  <span className={styles.adminConfirmText}>האם אתה בטוח? פעולה זו אינה הפיכה.</span>
+                  <button
+                    type="button"
+                    className={styles.btnDangerSm}
+                    onClick={handleDelete}
+                    disabled={deleting}
+                  >
+                    {deleting ? 'מוחק…' : 'מחק'}
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.btnCancelSm}
+                    onClick={() => setConfirmDelete(false)}
+                    disabled={deleting}
+                  >
+                    ביטול
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+
+          {/* ── Admin edit panel ── */}
+          {editing && editForm && (
+            <div className={styles.adminEditPanel}>
+              <div className={styles.adminEditInner}>
+                <h3 className={styles.editTitle}>
+                  {product.type === 'store' ? 'עריכת פריט חנות' : 'עריכת מכירה'}
+                </h3>
+
+                {product.type === 'store' ? (
+                  /* Store item fields */
+                  <div className={styles.editGrid}>
+                    <div className={styles.editField}>
+                      <label className={styles.editLabel}>אמן</label>
+                      <input className={styles.editInput} value={editForm.artist}
+                        onChange={e => setEditForm(f => ({ ...f, artist: e.target.value }))} />
+                    </div>
+                    <div className={styles.editField}>
+                      <label className={styles.editLabel}>שם האלבום</label>
+                      <input className={styles.editInput} value={editForm.title}
+                        onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))} />
+                    </div>
+                    <div className={styles.editField}>
+                      <label className={styles.editLabel}>סוג</label>
+                      <input className={styles.editInput} value={editForm.rawType}
+                        placeholder="Vinyl (new) / Colored Vinyl (new) / CD (used)…"
+                        onChange={e => setEditForm(f => ({ ...f, rawType: e.target.value }))} />
+                    </div>
+                    <div className={styles.editField}>
+                      <label className={styles.editLabel}>סגנון / הערה</label>
+                      <input className={styles.editInput} value={editForm.storeStyle}
+                        placeholder="Colored Vinyl, Limited Edition, 180g…"
+                        onChange={e => setEditForm(f => ({ ...f, storeStyle: e.target.value }))} />
+                    </div>
+                    <div className={styles.editField}>
+                      <label className={styles.editLabel}>מחיר (₪)</label>
+                      <input className={styles.editInput} type="number" value={editForm.price}
+                        onChange={e => setEditForm(f => ({ ...f, price: e.target.value }))} />
+                    </div>
+                  </div>
+                ) : (
+                  /* Private listing fields */
+                  <>
+                    <div className={styles.editGrid}>
+                      <div className={styles.editField}>
+                        <label className={styles.editLabel}>אמן</label>
+                        <input className={styles.editInput} value={editForm.artist}
+                          onChange={e => setEditForm(f => ({ ...f, artist: e.target.value }))} />
+                      </div>
+                      <div className={styles.editField}>
+                        <label className={styles.editLabel}>שם האלבום</label>
+                        <input className={styles.editInput} value={editForm.title}
+                          onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))} />
+                      </div>
+                      <div className={styles.editField}>
+                        <label className={styles.editLabel}>שנה</label>
+                        <input className={styles.editInput} type="number" value={editForm.year}
+                          onChange={e => setEditForm(f => ({ ...f, year: e.target.value }))} />
+                      </div>
+                      <div className={styles.editField}>
+                        <label className={styles.editLabel}>פורמט</label>
+                        <select className={styles.editSelect} value={editForm.format}
+                          onChange={e => setEditForm(f => ({ ...f, format: e.target.value }))}>
+                          {EDIT_FORMATS.map(v => <option key={v} value={v}>{v}</option>)}
+                        </select>
+                      </div>
+                      <div className={styles.editField}>
+                        <label className={styles.editLabel}>מצב</label>
+                        <select className={styles.editSelect} value={editForm.condition}
+                          onChange={e => setEditForm(f => ({ ...f, condition: e.target.value }))}>
+                          {EDIT_CONDITIONS.map(v => <option key={v} value={v}>{v}</option>)}
+                        </select>
+                      </div>
+                      <div className={styles.editField}>
+                        <label className={styles.editLabel}>מחיר (₪)</label>
+                        <input className={styles.editInput} type="number" value={editForm.price}
+                          onChange={e => setEditForm(f => ({ ...f, price: e.target.value }))} />
+                      </div>
+                      <div className={styles.editField}>
+                        <label className={styles.editLabel}>עיר</label>
+                        <select className={styles.editSelect} value={editForm.city}
+                          onChange={e => setEditForm(f => ({ ...f, city: e.target.value }))}>
+                          {EDIT_CITIES.map(v => <option key={v} value={v}>{v}</option>)}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className={styles.editField}>
+                      <label className={styles.editLabel}>ז׳אנר</label>
+                      <div className={styles.editPills}>
+                        {Object.entries(GENRE_LABELS).map(([val, label]) => {
+                          const sel = editForm.genres.includes(val)
+                          return (
+                            <button key={val} type="button"
+                              className={`${styles.editPill} ${sel ? styles.editPillActive : ''}`}
+                              onClick={() => setEditForm(f => ({
+                                ...f,
+                                genres: sel ? f.genres.filter(g => g !== val) : [...f.genres, val],
+                              }))}
+                            >{label}</button>
+                          )
+                        })}
+                      </div>
+                    </div>
+
+                    <div className={styles.editField}>
+                      <label className={styles.editLabel}>תיאור</label>
+                      <textarea className={styles.editTextarea} rows={3} maxLength={300}
+                        value={editForm.desc}
+                        onChange={e => setEditForm(f => ({ ...f, desc: e.target.value }))} />
+                    </div>
+
+                    <label className={styles.editCheckboxLabel}>
+                      <input type="checkbox" className={styles.editCheckbox}
+                        checked={editForm.coloredVinyl}
+                        onChange={e => setEditForm(f => ({ ...f, coloredVinyl: e.target.checked }))} />
+                      ויניל צבעוני
+                    </label>
+                  </>
+                )}
+
+                <div className={styles.editActions}>
+                  <button type="button" className={styles.btnSaveEdit} onClick={handleSave} disabled={saving}>
+                    {saving ? 'שומר…' : 'שמור שינויים'}
+                  </button>
+                  <button type="button" className={styles.btnCancelSm}
+                    onClick={() => { setEditing(false); setEditForm(null) }} disabled={saving}>
+                    ביטול
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* ── Main two-column layout ── */}
@@ -514,7 +757,12 @@ export default function ProductPage({ product: snapshotProduct, onNavigate, viny
             {genreLabels.map(label => (
               <span key={label} className={styles.tag}>{label}</span>
             ))}
-            <span className={styles.tag}>{year}</span>
+            {year && <span className={styles.tag}>{year}</span>}
+            {(product.coloredVinyl ||
+              product.storeStyle?.toLowerCase().includes('color') ||
+              product.rawType?.toLowerCase().includes('color')) && (
+              <span className={`${styles.tag} ${styles.tagColored}`}>ויניל צבעוני</span>
+            )}
             {cheapestPrice && (
               <span className={`${styles.tag} ${styles.tagPrice}`}>
                 מ-₪{cheapestPrice}

@@ -33,11 +33,15 @@ const PAGE_PATHS = {
 }
 const PATH_PAGES = Object.fromEntries(Object.entries(PAGE_PATHS).map(([k, v]) => [v, k]))
 
+// Product ID from middle-click new-tab open: /product?id=si-716
+const NEW_TAB_PRODUCT_ID = new URLSearchParams(window.location.search).get('id') || null
+
 export default function App() {
   // On refresh: history.state survives and contains full state.
-  // On direct link: parse the URL path to determine the initial page.
+  // On direct link (including middle-click new tab): parse URL to determine page.
   const [page, setPage] = useState(() =>
-    history.state?.page || PATH_PAGES[window.location.pathname] || 'home'
+    NEW_TAB_PRODUCT_ID ? 'product'
+      : history.state?.page || PATH_PAGES[window.location.pathname] || 'home'
   )
   const [searchQuery,     setSearchQuery]     = useState(() => history.state?.searchQuery     || '')
   const [searchGenre,     setSearchGenre]     = useState(() => history.state?.searchGenre     || '')
@@ -94,6 +98,11 @@ export default function App() {
       const merged = [...listings, ...storeItems]
       setVinylList(merged)
       startCoverEnrichment(merged)
+      // Middle-click new-tab: resolve product from URL ?id= param
+      if (NEW_TAB_PRODUCT_ID) {
+        const found = merged.find(v => v.id === NEW_TAB_PRODUCT_ID)
+        if (found) setSelectedProduct(found)
+      }
     })
 
     return () => {
