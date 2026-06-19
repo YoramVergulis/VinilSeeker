@@ -226,12 +226,16 @@ export default function ProductPage({ product: snapshotProduct, onNavigate, viny
     getDiscogsRelease(product.discogsId)
       .then(release => {
         setDiscogsRelease(release)
-        // Save the real cover back to the listing so future loads don't need to re-fetch
+        // Save the real cover back to the listing via RPC (bypasses RLS — owner-only update
+        // would block enrichment when admin or buyer views a listing they don't own)
         if (product?.type === 'private' && !hasRealCover(product?.img)) {
           const primaryImg = release.images?.find(x => x.type === 'primary')?.uri || release.images?.[0]?.uri
           if (primaryImg) {
-            supabase.from('listing').update({ cover_image_url: primaryImg }).eq('id', product.id)
-              .then(() => {}).catch(() => {})
+            supabase.rpc('enrich_listing_cover', {
+              listing_id: product.id,
+              img_url:    primaryImg,
+              d_id:       product.discogsId || null,
+            }).then(() => {}).catch(() => {})
             onUpdateVinyl?.(product.id, { img: primaryImg })
           }
         }
@@ -271,11 +275,13 @@ export default function ProductPage({ product: snapshotProduct, onNavigate, viny
           if (resolvedImg)
             supabase.from('store_inventory').update({ cover_image_url: resolvedImg }).eq('id', product.id.replace('si-', '')).then(() => {}).catch(() => {})
         } else if (product?.type === 'private' && product?.id) {
-          const upd = {}
-          if (resolvedImg) upd.cover_image_url = resolvedImg
-          if (id) upd.discogs_id = String(id)
-          if (Object.keys(upd).length) {
-            supabase.from('listing').update(upd).eq('id', product.id).then(() => {}).catch(() => {})
+          // Use RPC to bypass owner-only RLS — any viewer can enrich cover metadata
+          if (resolvedImg || id) {
+            supabase.rpc('enrich_listing_cover', {
+              listing_id: product.id,
+              img_url:    resolvedImg || null,
+              d_id:       id ? String(id) : null,
+            }).then(() => {}).catch(() => {})
             onUpdateVinyl?.(product.id, {
               ...(resolvedImg ? { img: resolvedImg } : {}),
               ...(id ? { discogsId: String(id) } : {}),
