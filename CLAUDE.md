@@ -1277,6 +1277,61 @@ ALTER TABLE listing ADD COLUMN IF NOT EXISTS colored_vinyl boolean DEFAULT false
 
 **Build:** 122 modules, zero errors.
 
+### Session 24 — 2026-06-19
+**Goal:** Fix cover image truly persisting (RLS root cause) + require image on upload
+
+#### Fix 1 — Cover still vanishing after Session 23 fix
+
+**Root cause:** The `listing` table RLS policy is `owner update only`. The direct `supabase.from('listing').update(...)` calls in ProductPage's Effect 1 and Effect 2 were silently rejected by Supabase whenever the viewer was not the listing owner — i.e., when an admin or a buyer (not the seller) viewed the listing. `.catch(() => {})` swallowed the error with no sign anything went wrong.
+
+**Solution — `SECURITY DEFINER` RPC function:**
+
+SQL run in Supabase SQL Editor:
+```sql
+CREATE OR REPLACE FUNCTION public.enrich_listing_cover(
+  listing_id uuid,
+  img_url    text,
+  d_id       text DEFAULT NULL
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  UPDATE listing
+  SET
+    cover_image_url = CASE
+      WHEN cover_image_url IS NULL OR cover_image_url NOT LIKE '%i.discogs.com%'
+      THEN img_url
+      ELSE cover_image_url
+    END,
+    discogs_id = COALESCE(discogs_id, d_id)
+  WHERE id = listing_id;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.enrich_listing_cover TO anon, authenticated;
+```
+
+The function runs as the DB owner (bypasses RLS) but is safe: it only touches `cover_image_url` and `discogs_id`, and only writes `cover_image_url` when no real `i.discogs.com` URL is already saved.
+
+**Files updated:**
+- `src/pages/ProductPage.jsx` — replaced both `supabase.from('listing').update(...)` cover-enrichment saves (Effect 1 and Effect 2) with `supabase.rpc('enrich_listing_cover', { listing_id, img_url, d_id })`
+
+#### Fix 2 — Require image on listing upload
+
+**Problem:** Users could submit a listing with no photo and no Discogs auto-fill, leaving a permanently blank-cover card with no `discogsId` to auto-enrich from.
+
+**Rule:** Image required **unless** Discogs auto-fill was used (`discogsId` is set). If the user selected an album from Discogs, the cover is fetched and saved automatically on first ProductPage visit via the RPC — no manual upload needed.
+
+**Files updated:**
+- `src/pages/UploadPage.jsx`:
+  - `validate()`: added `if (!preview && !discogsId) e.img = 'יש להוסיף תמונה, או לבחור אלבום מ-Discogs'`
+  - JSX: error message shown below the dropzone with `data-error` attribute so scroll-to-first-error works
+
+**Build:** 122 modules, zero errors.
+
 ---
 
 ## Rules for Claude in This Project
