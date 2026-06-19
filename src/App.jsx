@@ -20,7 +20,8 @@ import ContactPage from './pages/ContactPage'
 import TermsPage from './pages/TermsPage'
 import PrivacyPage from './pages/PrivacyPage'
 import { supabase } from './supabase'
-import { formatUser, logout, updateUser, getListings, addListing, updateListing, checkIsAdmin } from './auth'
+import { formatUser, logout, updateUser, getListings, getStoreInventory, addListing, updateListing, deleteListing, checkIsAdmin } from './auth'
+import { lookupDiscogs } from './discogs'
 
 // Page name → URL path mapping
 const PAGE_PATHS = {
@@ -86,8 +87,13 @@ export default function App() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setCurrentUser(await loadUser(session?.user ?? null))
     })
-    getListings().then(stored => {
-      if (stored.length > 0) setVinylList(stored)
+    Promise.all([
+      getListings().catch(e => { console.error('getListings failed:', e); return [] }),
+      getStoreInventory().catch(e => { console.error('getStoreInventory failed:', e); return [] }),
+    ]).then(([listings, storeItems]) => {
+      const merged = [...listings, ...storeItems]
+      setVinylList(merged)
+      startCoverEnrichment(merged)
     })
 
     return () => {
@@ -95,6 +101,61 @@ export default function App() {
       subscription.unsubscribe()
     }
   }, [])
+
+  function updateVinylItem(id, updates) {
+    setVinylList(prev => prev.map(v => v.id === id ? { ...v, ...updates } : v))
+  }
+
+  // Background cover enrichment — one Discogs lookup per album, 1 per 1.2s
+  function startCoverEnrichment(items) {
+    // Deduplicate: one item per albumId (or per store row if no albumId yet)
+    const seenAlbums = new Set()
+    const queue = items.filter(v => {
+      if (v.type !== 'store' || v.img) return false
+      if (v.albumId) {
+        if (seenAlbums.has(v.albumId)) return false
+        seenAlbums.add(v.albumId)
+      }
+      return true
+    })
+    if (!queue.length) return
+    let i = 0
+    function step() {
+      if (i >= queue.length) return
+      const item = queue[i++]
+      lookupDiscogs(item.artist, item.title, { quick: true })
+        .then(({ id: discogsId, img }) => {
+          if (!img && !discogsId) return  // Discogs found nothing
+          if (item.albumId) {
+            // Save to albums table — covers all stores carrying this album
+            const update = {}
+            if (img) update.cover_image_url = img
+            if (discogsId) update.discogs_id = String(discogsId)
+            if (Object.keys(update).length)
+              supabase.from('albums').update(update).eq('id', item.albumId).then(() => {}).catch(() => {})
+          }
+          if (img) {
+            // Also save to store_inventory row (reliable anon-key path)
+            const numId = item.id.replace('si-', '')
+            supabase.from('store_inventory').update({ cover_image_url: img }).eq('id', numId).then(() => {}).catch(() => {})
+          }
+          // Update all items in memory that share this album (img AND discogsId)
+          setVinylList(prev => prev.map(v => {
+            const matchAlbum = item.albumId && v.albumId === item.albumId
+            const matchItem  = v.id === item.id
+            if (!matchAlbum && !matchItem) return v
+            return {
+              ...v,
+              ...(img      ? { img }                   : {}),
+              ...(discogsId ? { discogsId: String(discogsId) } : {}),
+            }
+          }))
+        })
+        .catch(() => {})
+        .finally(() => setTimeout(step, 1200))
+    }
+    setTimeout(step, 2000) // start after 2s so initial render is fast
+  }
 
   async function addVinyl(record) {
     try {
@@ -104,6 +165,11 @@ export default function App() {
       console.error('addListing error:', err)
       setVinylList(prev => [record, ...prev])
     }
+  }
+
+  async function deleteVinyl(product) {
+    await deleteListing(product)
+    setVinylList(prev => prev.filter(v => v.id !== product.id))
   }
 
   async function editVinyl(id, updates) {
@@ -168,7 +234,7 @@ export default function App() {
     }
   }
 
-  const shared = { currentUser, onLogout: handleLogout, onNavigate: navigate }
+  const shared = { currentUser, onLogout: handleLogout, onNavigate: navigate, onUpdateVinyl: updateVinylItem, onDeleteVinyl: deleteVinyl }
 
   if (page === 'auth') {
     return <AuthPage onNavigate={navigate} onLogin={handleLogin} />

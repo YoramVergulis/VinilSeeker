@@ -65,6 +65,84 @@ export async function searchDiscogs(query, { page = 1 } = {}) {
   }
 }
 
+// Discogs placeholder SVGs are served from st.discogs.com — real art is on i.discogs.com
+function isRealImg(url) {
+  return !!(url && url.includes('i.discogs.com'))
+}
+
+// Normalize a search query: em/en dashes → space, strip backslashes, collapse whitespace
+function normalizeQ(q) {
+  return q.replace(/[–—]/g, ' ').replace(/\\/g, '').replace(/\s+/g, ' ').trim()
+}
+
+// Strip store-data noise from album titles:
+//   1. "Artist – Title" or "Artist - Title" prefix
+//   2. Edition notes in parens/brackets: (Black Vinyl), [2LP], (Official Soundtrack)
+function cleanAlbumTitle(artist, title) {
+  let t = title
+  if (artist) {
+    const esc = artist.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    t = t.replace(new RegExp(`^${esc}\\s*[–—\\-]\\s*`, 'i'), '')
+  }
+  // Strip any remaining "Something – " em/en dash prefix
+  t = t.replace(/^[^–—]+(–|—)\s*/, '')
+  // Strip parentheticals and brackets
+  t = t.replace(/\s*[\(\[][^\)\]]*[\)\]]/g, '').trim()
+  return t
+}
+
+// Search Discogs for a single query.
+// Returns { id, img } where img is only set when a REAL cover image is found.
+// id is returned even if img is null so callers can fetch the full release.
+async function discogsSearch(q) {
+  const normalized = normalizeQ(q)
+  if (!normalized) return null
+  const params = new URLSearchParams({ q: normalized, type: 'release', per_page: 10 })
+  const res = await fetch(`${BASE}/database/search?${params}`, { headers: AUTH })
+  if (!res.ok) return null
+  const data = await res.json()
+  const results = data.results ?? []
+  // Prefer results with real (non-placeholder) cover art
+  const withArt  = results.find(r => isRealImg(r.cover_image) || isRealImg(r.thumb))
+  const fallback = results[0]
+  const hit = withArt || fallback
+  if (!hit) return null
+  const imgUrl = hit.cover_image || hit.thumb || ''
+  return { id: hit.id, img: isRealImg(imgUrl) ? imgUrl : null }
+}
+
+// Look up a store item on Discogs.
+// quick=true  — 1 API call max (background batch; must stay under 60 req/min rate limit).
+// quick=false — up to 4 progressively looser queries (ProductPage single-item lookup).
+//
+// Returns { id, img }:
+//   img — real cover URL (i.discogs.com), or null if only placeholder art found.
+//   id  — best Discogs release match (lets caller do getDiscogsRelease for full images).
+export async function lookupDiscogs(artist, title, { quick = false } = {}) {
+  const clean = cleanAlbumTitle(artist, title)
+  const seen  = new Set()
+  const candidates = [
+    `${artist} ${clean}`,  // "Alice In Chains Dirt"  /  "St. Vincent The Nowhere Inn"
+    clean,                  // "Dirt"  /  "The Nowhere Inn"  — artist-name-mismatch fallback
+    `${artist} ${title}`,  // original with parens
+    title,
+  ]
+  const toTry = quick ? candidates.slice(0, 1) : candidates
+
+  let bestId = null
+  for (const q of toTry) {
+    const key = normalizeQ(q)
+    if (!key || seen.has(key)) continue
+    seen.add(key)
+    const hit = await discogsSearch(q)
+    if (!hit) continue
+    if (!bestId) bestId = hit.id
+    if (hit.img) return hit  // found real art — stop here
+  }
+  // Return id even without real art so ProductPage can call getDiscogsRelease for full images
+  return { id: bestId, img: null }
+}
+
 export async function getDiscogsRelease(id) {
   const res = await fetch(`${BASE}/releases/${id}`, { headers: AUTH })
   if (!res.ok) throw new Error(`Discogs ${res.status}`)

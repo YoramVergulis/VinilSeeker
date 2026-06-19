@@ -3,6 +3,9 @@ import { supabase } from './supabase'
 const SAVED_KEY  = 'vs_saved'
 const ALERTS_KEY = 'vs_alerts'
 
+// Discogs placeholder art is on st.discogs.com; real covers are on i.discogs.com
+const realImg = url => (url && url.includes('i.discogs.com')) ? url : null
+
 export function checkIsAdmin(user) {
   return user?.isAdmin === true
 }
@@ -99,8 +102,10 @@ async function findOrCreateGenre(name) {
 }
 
 function mapRow(r) {
+  const cover = r.cover_image_url
   return {
     id:          r.id,
+    albumId:     r.album_id    || null,
     title:       r.title,
     artist:      r.artist?.name || '',
     year:        r.release_year,
@@ -111,7 +116,7 @@ function mapRow(r) {
     city:        r.city || '',
     desc:        r.description,
     condition:   r.condition,
-    img:         r.cover_image_url,
+    img:         (cover && !cover.includes('st.discogs.com')) ? cover : null,
     type:        'private',
     uploaderId:  r.user_id,
   }
@@ -122,7 +127,7 @@ export async function getListings() {
     .from('listing')
     .select(`
       id, title, format, condition, price, description,
-      cover_image_url, user_id, release_year, city,
+      cover_image_url, user_id, release_year, city, album_id,
       artist:artist_id(name),
       listing_genres(genre:genre_id(name))
     `)
@@ -195,6 +200,50 @@ export async function updateListing(id, updates) {
       supabase.from('listing_genres').insert({ listing_id: id, genre_id: genreId })
     )
   )
+}
+
+export async function getStoreInventory() {
+  const { data } = await supabase
+    .from('store_inventory')
+    .select('id, store_name, store_city, artist, album_name, price_ils, type, style, url, album_id, cover_image_url, albums(cover_image_url, discogs_id, release_year)')
+  return (data || []).map(r => {
+    const t = (r.type || '').toLowerCase()
+    const format    = t.includes('2lp') ? '2LP' : t.includes('vinyl') ? 'LP' : t.includes('cd') ? 'CD' : 'LP'
+    const condition = t.includes('new') ? 'New' : t.includes('used') ? 'VG' : ''
+    return {
+      id:         `si-${r.id}`,
+      albumId:    r.album_id              || null,
+      discogsId:  r.albums?.discogs_id    || null,
+      title:      r.album_name            || '',
+      artist:     r.artist                || '',
+      year:       r.albums?.release_year  || null,
+      format,
+      genre:      '',
+      genres:     [],
+      price:      r.price_ils,
+      city:       r.store_city            || '',
+      img:        realImg(r.albums?.cover_image_url) || realImg(r.cover_image_url) || null,
+      condition,
+      type:       'store',
+      storeName:  r.store_name            || '',
+      storeCity:  r.store_city            || '',
+      storeUrl:   r.url                   || '',
+      uploaderId: null,
+      badge:      { label: r.store_name || 'חנות', variant: 'dark' },
+    }
+  })
+}
+
+export async function deleteListing(product) {
+  if (!product) return
+  if (product.type === 'store') {
+    const numId = String(product.id).replace('si-', '')
+    const { error } = await supabase.from('store_inventory').delete().eq('id', numId)
+    if (error) throw new Error(error.message)
+  } else {
+    const { error } = await supabase.from('listing').delete().eq('id', product.id)
+    if (error) throw new Error(error.message)
+  }
 }
 
 // --- Saved items (localStorage + Supabase) ---

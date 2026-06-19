@@ -98,7 +98,6 @@ export default function SearchPage({ query: initialQuery = '', initialGenre = ''
   const results = useMemo(() =>
     vinylList
       .filter(v => {
-        if (v.type === 'store') return false
         if (query) {
           const q = query.toLowerCase()
           if (!`${v.title} ${v.artist}`.toLowerCase().includes(q)) return false

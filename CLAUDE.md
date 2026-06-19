@@ -983,6 +983,156 @@ ALTER TABLE store_inventory DISABLE ROW LEVEL SECURITY;
 
 **Status at end of session:** 235 real Third Ear inventory items live. Mock vinyl data removed. Site is fully real-data-only.
 
+### Session 17 — 2026-06-19
+**Goal:** Show Third Ear store inventory in Search, auto-enrich store items from Discogs, fix "צור קשר" to redirect to store URL
+
+**Files updated:**
+- `src/auth.js` — added `getStoreInventory()`: fetches all `store_inventory` rows and maps them to the vinyl shape (`id: si-{n}`, `type: 'store'`, `storeName`, `storeCity`, `storeUrl`, format/condition derived from `type` text, `year: null`, `img: null`, `badge: { label: store_name, variant: 'dark' }`)
+- `src/App.jsx` — replaced `getListings().then(...)` with `Promise.all([getListings(), getStoreInventory()])` — both fetch in parallel and merge into `vinylList`; imported `getStoreInventory`
+- `src/discogs.js` — added `lookupDiscogs(query)`: format-agnostic Discogs search (no Vinyl filter, per_page 5), returns first result's release id; used for CDs and items where the vinyl-filtered search would miss
+- `src/pages/ProductPage.jsx`:
+  - Imported `lookupDiscogs`
+  - Added auto-enrich `useEffect`: fires when `!product.discogsId && !product.img` (store items with no cover) — calls `lookupDiscogs(artist + title)` → `getDiscogsRelease(id)` → sets cover image, tracklist, album notes from Discogs
+  - `OfferCard`: "צור קשר" is now an `<a href={offer.storeUrl} target="_blank">` for store offers with a URL (was a disabled button); private seller "צור קשר" still opens chat as before
+  - `StoreInventorySection` query: skips the DB query when `product.type === 'store'` (the product itself is a store item — avoids showing it twice)
+  - `StoreInventorySection` "לחנות" link: renamed to "צור קשר" (done in session 16.5 — kept)
+- `src/components/VinylCard.jsx` — meta line changed from `{artist} · {year} · {format}` to `{[artist, year, format].filter(Boolean).join(' · ')}` — handles `year: null` cleanly for store inventory items
+
+**How it works end-to-end:**
+1. App loads → `getListings()` + `getStoreInventory()` run in parallel → 235 Third Ear items + any user listings all merged into `vinylList`
+2. Search page shows all items including Third Ear inventory (with store badge, no cover initially)
+3. User clicks a Third Ear item → ProductPage opens with `product.type === 'store'`
+4. `lookupDiscogs("artist title")` fires → fetches matching Discogs release → cover image, tracklist, album notes fill in automatically
+5. "מוכרים זמינים" section shows the store offer(s) with a working "צור קשר" link that opens the Third Ear product URL in a new tab
+6. "זמין בחנויות" (StoreInventorySection) section is hidden for store items (avoids duplication)
+
+**Build:** 121 modules, zero errors. Dev server confirmed at http://localhost:5173
+
+### Session 17b — 2026-06-19 (continued)
+**Goal:** Fix store items not showing in search; add Discogs cover enrichment with Supabase persistence
+
+**Root cause of search bug:** `SearchPage.jsx` line 101 had `if (v.type === 'store') return false` — this was written when store-type items were listing-table offers that shouldn't appear in search. Now that `type: 'store'` means Third Ear inventory items, that line hid all 235 of them. Removed.
+
+**Supabase SQL required (user must run):**
+```sql
+ALTER TABLE store_inventory ADD COLUMN IF NOT EXISTS cover_image_url text;
+```
+
+**Files updated:**
+- `src/pages/SearchPage.jsx` — removed `if (v.type === 'store') return false` from filter
+- `src/discogs.js` — `lookupDiscogs(query)` now returns `{ id, img }` (previously just `id`); `img` comes from `cover_image || thumb` on first Discogs search result
+- `src/auth.js` — `getStoreInventory()` now selects `cover_image_url` and maps to `img: r.cover_image_url || null`; items with saved covers load them instantly from DB
+- `src/App.jsx` — imported `lookupDiscogs`; added `updateVinylItem(id, updates)` function (updates a single item in vinylList); added `startCoverEnrichment(items)` — runs in background after data loads, works through store items with no `img`, 1 per 1.2s (≈50/min, under 60/min Discogs limit), saves `cover_image_url` to `store_inventory`, calls `setVinylList` to update search in real time; `onUpdateVinyl` added to `shared` props
+- `src/pages/ProductPage.jsx` — updated `lookupDiscogs` call to destructure `{ id, img }`; after fetching full Discogs release for a store item, saves the primary image URL to `store_inventory.cover_image_url`
+
+**Cover enrichment flow:**
+1. App loads 235 store items (with `img: null` initially, or saved cover if already enriched)
+2. `startCoverEnrichment` starts 2 seconds after load — works through items with no `img`
+3. Per item: `lookupDiscogs("artist title")` → 1 API call → gets thumbnail image URL
+4. Saves `cover_image_url` to `store_inventory` row in Supabase
+5. `setVinylList` updates the item in memory → VinylCard in search re-renders with cover
+6. Next app load: `getStoreInventory()` reads saved covers from DB → instant display
+7. ProductPage: when a store item is opened, also saves the higher-quality primary image from the full Discogs release (overrides the thumbnail)
+
+### Session 18 — 2026-06-19
+**Goal:** Albums table refactor (canonical album per record), fix image persistence, admin delete button on ProductPage
+
+**New Supabase table:**
+- `albums` — canonical album record shared across all stores and private listings
+  - Columns: `id` (bigserial), `title`, `artist`, `discogs_id`, `cover_image_url`, `release_year`, `notes`, `tracklist` (jsonb), `created_at`
+  - RLS: enabled with permissive `FOR ALL USING (true)` policy (catalog data — public read/write)
+  - `store_inventory.album_id` FK → `albums.id`
+  - `listing.album_id` FK → `albums.id`
+
+**SQL run this session:**
+```sql
+CREATE TABLE IF NOT EXISTS albums (...);
+ALTER TABLE albums DISABLE ROW LEVEL SECURITY; -- then re-enabled with open policy
+ALTER TABLE store_inventory ADD COLUMN IF NOT EXISTS album_id bigint REFERENCES albums(id);
+ALTER TABLE listing         ADD COLUMN IF NOT EXISTS album_id bigint REFERENCES albums(id);
+-- Migrated existing store_inventory rows → created albums from them → linked album_id
+-- Re-enabled RLS on albums with: CREATE POLICY "albums_all" ON albums FOR ALL USING (true) WITH CHECK (true);
+-- Listing delete admin policy: CREATE POLICY "listing_delete_admin" ON listing FOR DELETE USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true));
+GRANT INSERT, UPDATE, DELETE ON albums TO anon; -- plus NOTIFY pgrst schema reload
+```
+
+**Files updated:**
+- `scripts/import-third-ear.js` — now a generic store importer; accepts `"Store Name" "City"` as CLI args 2+3 (defaults: Third Ear / תל אביב); clears old rows for the store before re-inserting (idempotent); find-or-create albums via `buildAlbumMap()`; sets `album_id` on each `store_inventory` row; uses `SUPABASE_SERVICE_ROLE_KEY` from `.env` if present (bypasses RLS for album inserts)
+- `src/auth.js` — `getStoreInventory()`: selects `album_id`, `cover_image_url` (direct column as fallback), and `albums(cover_image_url, discogs_id, release_year)` join; maps `img: r.albums?.cover_image_url || r.cover_image_url || null`, `albumId`, `discogsId`, `year` from albums join; `getListings()`: added `album_id` to select; `mapRow()` includes `albumId: r.album_id || null`; added `deleteListing(product)` — deletes from `store_inventory` (store items) or `listing` (private) based on `product.type`
+- `src/App.jsx` — `startCoverEnrichment()`: deduplicates by `albumId` (one Discogs call per album, not per store row); saves to `albums` table AND `store_inventory` (dual write for reliability); updates all items sharing the same `albumId` in memory at once; added `deleteVinyl(product)` async function → calls `deleteListing`, removes from `vinylList`; `onDeleteVinyl: deleteVinyl` added to `shared` props
+- `src/pages/ProductPage.jsx` — `allOffers` grouping now uses `albumId` FK match first, falls back to `title|artist` string match; auto-enrich saves Discogs data to `albums` table (preferred) or `store_inventory` (fallback if no albumId); added admin delete UI: `confirmDelete` state, admin bar with "מחק מכירה" button → inline confirm panel → calls `onDeleteVinyl` + navigates to search; `checkIsAdmin` imported from auth
+- `src/pages/ProductPage.module.css` — added `.adminBar`, `.adminConfirm`, `.adminConfirmText`, `.btnDeleteAdmin`, `.btnDangerSm`, `.btnCancelSm`
+
+**Image persistence fix (this session):**
+- Root cause: Supabase JS v2 query builder is lazy — `.update().eq()` without `.then()` never fires. Fixed in App.jsx and ProductPage by adding `.then(() => {}).catch(() => {})` or `await`.
+- Dual save: `store_inventory.cover_image_url` (direct, always works) + `albums.cover_image_url` (shared, needs open RLS policy)
+- Read fallback: `r.albums?.cover_image_url || r.cover_image_url || null` in getStoreInventory
+
+**Import script CLI:**
+```
+node scripts/import-third-ear.js path/to/file.json                    # Third Ear (default)
+node scripts/import-third-ear.js path/to/file.json "Store Name" "City"  # any store
+```
+Requires `SUPABASE_SERVICE_ROLE_KEY` in `.env` for album creation. Store inventory rows still insert without it.
+
+**Admin delete (ProductPage):**
+- Visible only when `checkIsAdmin(currentUser)` is true
+- Strip appears below breadcrumb: "מחק מכירה" button → "האם אתה בטוח?" inline confirm with red "מחק" + "ביטול"
+- Deletes: store items → `store_inventory` row; private listings → `listing` row (requires `listing_delete_admin` RLS policy)
+- On confirm: removes from vinylList in memory + navigates to search
+
+**Status at end of session:** Albums table live. Import script generic (supports any store). Cover images saved to albums table (shared across stores). Admin delete button on ProductPage. Build: 121 modules, zero errors.
+
+### Session 19 — 2026-06-19
+**Goal:** Systematic fix for Discogs cover enrichment — all store items, Hebrew support, placeholder URL bug
+
+**Root causes identified (from analyzing the full store_inventory CSV):**
+1. **Background enrichment bailed on `!img`** — even when a Discogs release ID was found, it was discarded if no thumbnail was available. ProductPage's Effect 1 (which uses `discogsId` to fetch the full release with real images) never had data to work with.
+2. **Effect 2 bailed on any truthy `product.img`** — `st.discogs.com` placeholder SVG URLs were being treated as real covers, permanently blocking re-enrichment.
+3. **ProductPage used a snapshot of the product** — when background enrichment updated `vinylList` with a `discogsId`, the already-open ProductPage never saw it (the effects had no reason to re-fire).
+4. **`mapRow` kept placeholder URLs** — private listings uploaded via Discogs auto-fill that got a `st.discogs.com` placeholder saved as `cover_image_url` would appear "enriched" forever.
+5. **`Ella Fitzgerald \| Louis Armstrong`** — backslash in the artist field was passed raw to Discogs search query.
+
+**Files updated:**
+- `src/discogs.js` — `normalizeQ()` now also strips backslashes before sending to Discogs API
+- `src/auth.js` — `mapRow()` filters `st.discogs.com` placeholder URLs: `img: (cover && !cover.includes('st.discogs.com')) ? cover : null`
+- `src/App.jsx` — `startCoverEnrichment()`: saves `discogsId` to memory AND albums table even when no thumbnail image found (enables ProductPage Effect 1 to fire on next open); memory update covers both `img` and `discogsId` fields
+- `src/pages/ProductPage.jsx`:
+  - Looks up the **live product from `vinylList`** instead of using the snapshot passed as prop — once background enrichment adds `discogsId` to memory, Effect 1 re-fires automatically
+  - Added `hasRealCover(url)` helper: `!!(url && !url.includes('st.discogs.com'))`
+  - Effect 2 (auto-enrich): now skips only when `product.discogsId` is set OR when cover is a real (non-placeholder) URL — placeholder URLs no longer block enrichment
+  - `coverImg` falls back to `hasRealCover(img) ? img : null` — never shows a placeholder as the cover image
+
+**SQL run this session (backfills albums table with covers already in store_inventory):**
+```sql
+UPDATE albums a
+SET cover_image_url = si.cover_image_url
+FROM store_inventory si
+WHERE si.album_id = a.id
+  AND si.cover_image_url LIKE '%i.discogs.com%'
+  AND (a.cover_image_url IS NULL OR a.cover_image_url NOT LIKE '%i.discogs.com%');
+```
+This propagates covers from sibling store_inventory variants (e.g., black vinyl has cover, pink vinyl didn't) to the shared albums row, so all variants load the cover on next app load.
+
+**Hebrew search confirmed working:**
+- Discogs API supports UTF-8 — Hebrew artist/title searches (`טנגו`, `דודו פארוק`, etc.) work for Israeli records catalogued on Discogs
+- An earlier version of this session's code skipped Hebrew items from enrichment — this was wrong and reverted immediately
+
+**How the enrichment system works after this session:**
+
+*Background enrichment (App.jsx, `startCoverEnrichment`):*
+1. Runs 2s after load; processes store items without `img`, one per 1.2s
+2. Calls `lookupDiscogs(artist, title, { quick: true })` — 1 Discogs API call per item
+3. If real cover found (`i.discogs.com`): saves to `albums` + `store_inventory`, updates memory with `img` + `discogsId`
+4. If only Discogs ID found (no thumbnail): saves `discogsId` to `albums` + memory — no image, but ProductPage can now use Effect 1
+
+*ProductPage enrichment (2 effects):*
+- **Effect 1** fires when `product.discogsId` is set → `getDiscogsRelease(id)` → full release with real high-quality images + tracklist
+- **Effect 2** fires when no `discogsId` AND no real cover → `lookupDiscogs(artist, title, { quick: false })` (up to 4 candidate queries) → full release → saves cover + discogsId to DB
+- Because ProductPage now uses the live product from `vinylList`, Effect 1 auto-fires when background enrichment adds a `discogsId` to memory (no refresh needed)
+
+**Build:** 121 modules, zero errors.
+
 ---
 
 ## Rules for Claude in This Project

@@ -40,6 +40,87 @@
   font-weight: 500;
 }
 
+/* ── Admin bar ───────────────────────────────────────────── */
+.adminBar {
+  background: #fff8f8;
+  border-bottom: 1px solid var(--danger);
+  padding: var(--s-2) var(--s-12);
+}
+
+.adminBarInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.adminConfirm {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+
+.adminConfirmText {
+  font-family: var(--font-body);
+  font-size: var(--t-body-sm);
+  color: var(--danger);
+  font-weight: 500;
+}
+
+.btnDeleteAdmin {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-family: var(--font-body);
+  font-size: var(--t-body-sm);
+  font-weight: 600;
+  color: var(--danger);
+  background: none;
+  border: 1.5px solid var(--danger);
+  border-radius: var(--r-full);
+  padding: var(--s-1) var(--s-4);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btnDeleteAdmin:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btnDangerSm {
+  font-family: var(--font-body);
+  font-size: var(--t-body-sm);
+  font-weight: 600;
+  color: #fff;
+  background: var(--danger);
+  border: none;
+  border-radius: var(--r-full);
+  padding: var(--s-1) var(--s-4);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btnDangerSm:hover { opacity: 0.85; }
+.btnDangerSm:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btnCancelSm {
+  font-family: var(--font-body);
+  font-size: var(--t-body-sm);
+  font-weight: 500;
+  color: var(--ink-2);
+  background: none;
+  border: 1.5px solid var(--rule);
+  border-radius: var(--r-full);
+  padding: var(--s-1) var(--s-4);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.btnCancelSm:hover { border-color: var(--ink-2); }
+.btnCancelSm:disabled { opacity: 0.5; cursor: not-allowed; }
+
 /* ── Main layout ─────────────────────────────────────────── */
 .main {
   max-width: 1200px;

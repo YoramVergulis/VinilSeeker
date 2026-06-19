@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import Layout from '../components/Layout'
 import VinylCard from '../components/VinylCard'
-import { isSaved, toggleSaved } from '../auth'
-import { getDiscogsRelease, normalizeTracklist } from '../discogs'
+import { isSaved, toggleSaved, checkIsAdmin } from '../auth'
+import { lookupDiscogs, getDiscogsRelease, normalizeTracklist } from '../discogs'
 import { TRACKLISTS } from '../data/tracklists'
 import { supabase } from '../supabase'
 import styles from './ProductPage.module.css'
@@ -84,15 +84,21 @@ function OfferCard({ offer, isBest, onNavigate, productTitle }) {
         </div>
         <div className={styles.offerRight}>
           <div className={styles.offerPrice}>₪{offer.price}</div>
-          <button
-            type="button"
-            className={styles.contactBtn}
-            onClick={handleContact}
-            disabled={!canContact}
-            title={!canContact ? 'מכירת הדגמה — לא ניתן ליצור קשר' : undefined}
-          >
-            צור קשר
-          </button>
+          {isStore && offer.storeUrl ? (
+            <a href={offer.storeUrl} target="_blank" rel="noopener noreferrer" className={styles.contactBtn}>
+              צור קשר
+            </a>
+          ) : (
+            <button
+              type="button"
+              className={styles.contactBtn}
+              onClick={handleContact}
+              disabled={!canContact}
+              title={!canContact ? 'לא ניתן ליצור קשר' : undefined}
+            >
+              צור קשר
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -175,7 +181,7 @@ function StoreInventorySection({ stores }) {
                 )}
                 {entry.url && (
                   <a href={entry.url} target="_blank" rel="noopener noreferrer" className={styles.storeRowLink}>
-                    לחנות
+                    צור קשר
                     <svg viewBox="0 0 16 16" fill="none" width="11" height="11" aria-hidden="true">
                       <path d="M6 3H3v10h10v-3M9 3h4m0 0v4m0-4L7 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
@@ -190,13 +196,23 @@ function StoreInventorySection({ stores }) {
   )
 }
 
-export default function ProductPage({ product, onNavigate, vinylList = [], currentUser = null, onLogout }) {
+// Real covers are on i.discogs.com; placeholders are on st.discogs.com
+const hasRealCover = url => !!(url && !url.includes('st.discogs.com'))
+
+export default function ProductPage({ product: snapshotProduct, onNavigate, vinylList = [], currentUser = null, onLogout, onDeleteVinyl }) {
+  // Use the live version from vinylList so background enrichment (discogsId, img) is reflected
+  const product = vinylList.find(v => v.id === snapshotProduct?.id) || snapshotProduct
+
   const [saved,           setSaved]           = useState(() => isSaved(product?.id))
   const [discogsRelease,  setDiscogsRelease]  = useState(null)
   const [storeInventory,  setStoreInventory]  = useState([])
+  const [confirmDelete,   setConfirmDelete]   = useState(false)
+  const [deleting,        setDeleting]        = useState(false)
+  const isAdmin = checkIsAdmin(currentUser)
 
   useEffect(() => { setSaved(isSaved(product?.id)) }, [product?.id])
 
+  // If we already know the Discogs release ID, fetch the full release (tracklist + images)
   useEffect(() => {
     if (!product?.discogsId) return
     setDiscogsRelease(null)
@@ -205,8 +221,46 @@ export default function ProductPage({ product, onNavigate, vinylList = [], curre
       .catch(() => {})
   }, [product?.discogsId])
 
+  // Auto-enrich items with no known Discogs ID and no real cover yet
   useEffect(() => {
-    if (!product) return
+    // Skip if Effect 1 already handles it, or if we already have a real cover
+    if (product?.discogsId) return
+    if (hasRealCover(product?.img)) return
+    if (!product?.artist || !product?.title) return
+
+    setDiscogsRelease(null)
+    ;(async () => {
+      try {
+        const { id, img: thumb } = await lookupDiscogs(product.artist, product.title)
+        if (!id && !thumb) return
+        if (!id) {
+          setDiscogsRelease({ images: [{ type: 'primary', uri: thumb }] })
+          return
+        }
+        const rel = await getDiscogsRelease(id)
+        // Best image: primary from release → any image → thumbnail from search
+        const resolvedImg = rel.images?.find(x => x.type === 'primary')?.uri
+          || rel.images?.[0]?.uri
+          || thumb
+        // Save to DB (fire-and-forget)
+        if (resolvedImg) {
+          if (product?.albumId)
+            supabase.from('albums').update({ cover_image_url: resolvedImg, discogs_id: String(id) }).eq('id', product.albumId).then(() => {}).catch(() => {})
+          else if (product?.id?.startsWith('si-'))
+            supabase.from('store_inventory').update({ cover_image_url: resolvedImg }).eq('id', product.id.replace('si-', '')).then(() => {}).catch(() => {})
+        }
+        // Ensure a primary image is always present for the renderer
+        const hasPrimary = rel.images?.some(x => x.type === 'primary')
+        setDiscogsRelease(
+          hasPrimary ? rel
+            : { ...rel, images: [{ type: 'primary', uri: resolvedImg || thumb }, ...(rel.images || [])] }
+        )
+      } catch {}
+    })()
+  }, [product?.id])
+
+  useEffect(() => {
+    if (!product || product.type === 'store') { setStoreInventory([]); return }
     setStoreInventory([])
     const artist = product.artist?.toLowerCase().trim() || ''
     const title  = product.title?.toLowerCase().trim()  || ''
@@ -237,17 +291,24 @@ export default function ProductPage({ product, onNavigate, vinylList = [], curre
 
   const rawGenres   = genres?.length ? genres : genre ? [genre] : []
   const genreLabels = rawGenres.map(g => GENRE_LABELS[g]).filter(Boolean)
-  const coverImg    = discogsRelease?.images?.find(i => i.type === 'primary')?.uri || img
+  const coverImg    = discogsRelease?.images?.find(i => i.type === 'primary')?.uri
+    || discogsRelease?.images?.[0]?.uri
+    || (hasRealCover(img) ? img : null)
   const description = discogsRelease?.notes || desc || DESCRIPTIONS[genre] || DESCRIPTIONS.default
 
   // ── Find all offers for this album ──
+  const albumId  = product?.albumId
   const albumKey = `${title?.toLowerCase()}|${artist?.toLowerCase()}`
   const tracks   = discogsRelease
     ? normalizeTracklist(discogsRelease.tracklist)
     : (TRACKLISTS[albumKey] || null)
+  // Prefer FK match (album_id) for reliability; fall back to string match
   const allOffers = useMemo(() =>
-    vinylList.filter(v => `${v.title?.toLowerCase()}|${v.artist?.toLowerCase()}` === albumKey)
-  , [vinylList, albumKey])
+    vinylList.filter(v =>
+      (albumId && v.albumId === albumId) ||
+      `${v.title?.toLowerCase()}|${v.artist?.toLowerCase()}` === albumKey
+    )
+  , [vinylList, albumKey, albumId])
   const storeOffers   = allOffers.filter(v => v.type === 'store').sort((a, b) => a.price - b.price)
   const privateOffers = allOffers.filter(v => v.type !== 'store').sort((a, b) => a.price - b.price)
   const cheapestPrice = allOffers.length > 0 ? Math.min(...allOffers.map(v => v.price)) : null
@@ -255,6 +316,19 @@ export default function ProductPage({ product, onNavigate, vinylList = [], curre
   const similar = vinylList
     .filter(v => v.id !== product.id && v.genre === genre && v.type !== 'store')
     .slice(0, 3)
+
+  async function handleDelete() {
+    if (!onDeleteVinyl) return
+    setDeleting(true)
+    try {
+      await onDeleteVinyl(product)
+      onNavigate('search')
+    } catch (err) {
+      console.error('Delete failed:', err)
+      setDeleting(false)
+      setConfirmDelete(false)
+    }
+  }
 
   return (
     <Layout activePage="" onNavigate={onNavigate} currentUser={currentUser} onLogout={onLogout}>
@@ -269,6 +343,46 @@ export default function ProductPage({ product, onNavigate, vinylList = [], curre
           <span className={styles.crumbCurrent}>{title}</span>
         </div>
       </div>
+
+      {/* ── Admin bar ── */}
+      {isAdmin && (
+        <div className={styles.adminBar}>
+          <div className={styles.adminBarInner}>
+            {!confirmDelete ? (
+              <button
+                type="button"
+                className={styles.btnDeleteAdmin}
+                onClick={() => setConfirmDelete(true)}
+              >
+                <svg viewBox="0 0 16 16" fill="none" width="14" height="14" aria-hidden="true">
+                  <path d="M2 4h12M6 4V2h4v2M5 4l1 9h4l1-9" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                מחק מכירה
+              </button>
+            ) : (
+              <div className={styles.adminConfirm}>
+                <span className={styles.adminConfirmText}>האם אתה בטוח? פעולה זו אינה הפיכה.</span>
+                <button
+                  type="button"
+                  className={styles.btnDangerSm}
+                  onClick={handleDelete}
+                  disabled={deleting}
+                >
+                  {deleting ? 'מוחק…' : 'מחק'}
+                </button>
+                <button
+                  type="button"
+                  className={styles.btnCancelSm}
+                  onClick={() => setConfirmDelete(false)}
+                  disabled={deleting}
+                >
+                  ביטול
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── Main two-column layout ── */}
       <div className={styles.main}>

@@ -50,7 +50,7 @@ export default function VinylCard({
 
       <div className={styles.body}>
         <div className={styles.title}>{title}</div>
-        <div className={styles.meta}>{artist} · {year} · {format}</div>
+        <div className={styles.meta}>{[artist, year, format].filter(Boolean).join(' · ')}</div>
         <div className={styles.foot}>
           {price != null && (
             <div>

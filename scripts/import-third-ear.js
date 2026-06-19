@@ -1,13 +1,17 @@
 /**
- * Import Third Ear inventory JSON into Supabase store_inventory table.
- * Usage:  node scripts/import-third-ear.js path/to/third_ear_products.json
+ * Generic store inventory importer for VinilSeeker.
+ * Usage: node scripts/import-third-ear.js path/to/file.json "Store Name" "City"
+ *
+ * Defaults to Third Ear / תל אביב if store name/city are omitted.
+ * Re-running is safe — clears existing rows for the store before re-inserting.
+ *
+ * JSON items expected shape: { artist, album_name, price_ils, type, style, url, tracks }
  */
 
 import { createClient } from '@supabase/supabase-js'
 import { readFileSync }  from 'fs'
 import { resolve }       from 'path'
 
-// ── Read .env manually (no dotenv dependency needed) ──────────────────────────
 function loadEnv() {
   try {
     const raw = readFileSync(resolve(process.cwd(), '.env'), 'utf-8')
@@ -20,25 +24,67 @@ function loadEnv() {
         })
     )
   } catch {
-    console.error('Could not read .env file — make sure you run from the project root.')
+    console.error('Could not read .env — run from project root.')
     process.exit(1)
   }
 }
 
 const env = loadEnv()
-const supabase = createClient(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_ANON_KEY)
-
-// ── Music types to include (everything else is equipment / books) ─────────────
-const MUSIC_TYPES = ['vinyl', 'cd', 'blu-ray', 'dvd', 'cassette']
-function isMusic(item) {
-  const t = (item.type || '').toLowerCase()
-  return MUSIC_TYPES.some(m => t.includes(m))
+// Use service role key for imports (bypasses RLS). Falls back to anon key.
+const apiKey   = env.SUPABASE_SERVICE_ROLE_KEY || env.VITE_SUPABASE_ANON_KEY
+const supabase = createClient(env.VITE_SUPABASE_URL, apiKey)
+if (!env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.warn('⚠  No SUPABASE_SERVICE_ROLE_KEY in .env — album inserts may fail due to RLS.')
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────────
-const jsonPath = process.argv[2]
+const MUSIC_TYPES = ['vinyl', 'cd', 'blu-ray', 'dvd', 'cassette']
+const isMusic = item => MUSIC_TYPES.some(m => (item.type || '').toLowerCase().includes(m))
+
+// Returns Map<"lower_artist|lower_title" → albumId>.
+// Fetches all existing albums once, then batch-inserts anything new.
+async function buildAlbumMap(items) {
+  const { data: existing } = await supabase.from('albums').select('id, artist, title')
+  const map = new Map((existing || []).map(a => [
+    `${a.artist.toLowerCase()}|${a.title.toLowerCase()}`, a.id,
+  ]))
+
+  const toInsert = []
+  const seen     = new Set()
+  for (const item of items) {
+    const a   = (item.artist     || '').trim()
+    const t   = (item.album_name || '').trim()
+    const key = `${a.toLowerCase()}|${t.toLowerCase()}`
+    if (!map.has(key) && !seen.has(key)) {
+      seen.add(key)
+      toInsert.push({ artist: a, title: t })
+    }
+  }
+
+  if (toInsert.length) {
+    console.log(`Creating ${toInsert.length} new album records...`)
+    const BATCH = 100
+    for (let i = 0; i < toInsert.length; i += BATCH) {
+      const { data: created, error } = await supabase
+        .from('albums')
+        .insert(toInsert.slice(i, i + BATCH))
+        .select('id, artist, title')
+      if (error) { console.error('Album batch error:', error.message); continue }
+      for (const a of created || []) {
+        map.set(`${a.artist.toLowerCase()}|${a.title.toLowerCase()}`, a.id)
+      }
+    }
+  }
+
+  return map
+}
+
+// ── CLI args ──────────────────────────────────────────────────────────────────
+const jsonPath  = process.argv[2]
+const storeName = process.argv[3] || 'Third Ear'
+const storeCity = process.argv[4] || 'תל אביב'
+
 if (!jsonPath) {
-  console.error('Usage: node scripts/import-third-ear.js path/to/third_ear_products.json')
+  console.error('Usage: node scripts/import-third-ear.js path/to/file.json "Store Name" "City"')
   process.exit(1)
 }
 
@@ -47,66 +93,54 @@ try {
   items = JSON.parse(readFileSync(resolve(jsonPath), 'utf-8'))
   if (!Array.isArray(items)) items = [items]
 } catch (e) {
-  console.error('Failed to parse JSON file:', e.message)
+  console.error('Failed to parse JSON:', e.message)
   process.exit(1)
 }
 
 const musicItems = items.filter(isMusic)
-console.log(`Total items: ${items.length} | Music items to import: ${musicItems.length}`)
+console.log(`Total: ${items.length} | Music: ${musicItems.length} | Store: ${storeName} (${storeCity})`)
 
-// ── Look up Third Ear store id (read-only, won't fail on RLS) ────────────────
-async function getThirdEarStoreId() {
-  const { data } = await supabase
-    .from('store')
-    .select('id')
-    .ilike('name', 'Third Ear')
-    .limit(1)
-  if (data && data.length > 0) {
-    console.log('Found Third Ear store, id:', data[0].id)
-    return data[0].id
-  }
-  console.log('Third Ear not found in store table — store_id will be null (that is fine)')
-  return null
-}
+async function main() {
+  // 1. Clear existing rows for this store (makes re-import safe)
+  const { error: delErr } = await supabase
+    .from('store_inventory')
+    .delete()
+    .eq('store_name', storeName)
+  if (delErr) console.warn('Could not clear old rows (RLS?):', delErr.message)
+  else console.log(`Cleared existing "${storeName}" rows.`)
 
-// ── Import in batches of 50 ───────────────────────────────────────────────────
-async function batchInsert(rows, storeId) {
+  // 2. Find-or-create albums for every unique artist+title pair
+  const albumMap = await buildAlbumMap(musicItems)
+
+  // 3. Build store_inventory rows
+  const rows = musicItems.map(item => {
+    const a   = (item.artist     || '').trim()
+    const t   = (item.album_name || '').trim()
+    const key = `${a.toLowerCase()}|${t.toLowerCase()}`
+    return {
+      store_name: storeName,
+      store_city: storeCity,
+      artist:     a || null,
+      album_name: t || null,
+      album_id:   albumMap.get(key) ?? null,
+      price_ils:  item.price_ils != null ? Math.round(Number(item.price_ils)) : null,
+      type:       item.type  || null,
+      style:      item.style || null,
+      url:        item.url   || null,
+      tracks:     Array.isArray(item.tracks) ? item.tracks : [],
+    }
+  })
+
+  // 4. Batch insert
   const BATCH = 50
   let inserted = 0
   for (let i = 0; i < rows.length; i += BATCH) {
     const batch = rows.slice(i, i + BATCH)
     const { error } = await supabase.from('store_inventory').insert(batch)
-    if (error) {
-      console.error(`Batch ${Math.floor(i / BATCH) + 1} failed:`, error.message)
-    } else {
-      inserted += batch.length
-      console.log(`Inserted ${inserted}/${rows.length}`)
-    }
+    if (error) console.error(`Batch ${Math.floor(i / BATCH) + 1} error:`, error.message)
+    else { inserted += batch.length; process.stdout.write(`\rInserted ${inserted}/${rows.length}`) }
   }
-  return inserted
+  console.log(`\nDone — ${inserted}/${rows.length} rows imported.`)
 }
 
-async function main() {
-  const storeId = await getThirdEarStoreId()
-
-  const rows = musicItems.map(item => ({
-    store_id:   storeId,
-    store_name: 'Third Ear',
-    store_city: 'תל אביב',
-    artist:     item.artist    || null,
-    album_name: item.album_name || null,
-    price_ils:  item.price_ils  != null ? Math.round(Number(item.price_ils)) : null,
-    type:       item.type       || null,
-    style:      item.style      || null,
-    url:        item.url        || null,
-    tracks:     Array.isArray(item.tracks) ? item.tracks : [],
-  }))
-
-  const count = await batchInsert(rows, storeId)
-  console.log(`\nDone — ${count} items imported.`)
-}
-
-main().catch(err => {
-  console.error('Unexpected error:', err)
-  process.exit(1)
-})
+main().catch(err => { console.error(err); process.exit(1) })
