@@ -1379,6 +1379,24 @@ The function runs as the DB owner (bypasses RLS) but is safe: it only touches `c
 
 **Status at end of session:** Disc Center (38 items) live alongside Third Ear. Duplicate albums show once in search, both stores in ProductPage. Back-to-top button in SearchPage.
 
+### Session 26 — 2026-06-21
+**Goal:** Replace all fake stores on the Stores page with only real store data (Third Ear + Disc Center)
+
+**Problem:** The `/stores` page showed 6 invented stores (דיסקו תל אביב, הרמת המחט, גרוב ירושלים, etc.) that don't exist. There was also a Supabase `store` table fetch that had unreliable data (RLS blocked store inserts in Session 18 — store names were denormalized to `store_inventory` directly instead).
+
+**Files updated:**
+- `src/data/stores.js` — replaced all 6 fake stores with 2 real ones: Third Ear (`https://thirdear.co.il`) and Disc Center (`https://diskcenter.co.il`); added `url` field; removed `since` field
+- `src/pages/StoresPage.jsx` — removed Supabase `store` table fetch entirely; updated `StoreCard` to accept `url` instead of `since`; changed "צור קשר" button to a real `<a href>` link opening the store website in a new tab, labeled "לאתר החנות →"; removed `useState`/`useEffect`/`supabase` imports
+- `src/pages/StoresPage.module.css` — added `text-decoration: none; display: inline-flex; align-items: center; gap: var(--s-1)` to `.contactBtn` so the anchor tag renders correctly as a pill button
+
+**Real store data:**
+| Store | City | URL |
+|---|---|---|
+| Third Ear — האוזן השלישית | תל אביב | https://thirdear.co.il |
+| Disc Center | תל אביב (דיזנגוף סנטר) | https://diskcenter.co.il |
+
+**Status at end of session:** Stores page shows only real stores. "לאתר החנות" button opens the store's real website in a new tab.
+
 ---
 
 ## Rules for Claude in This Project
