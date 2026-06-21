@@ -5,7 +5,7 @@ export const STORES = [
     city: 'תל אביב',
     genres: ['rock', 'pop', 'jazz', 'electronic', 'classical', 'israeli'],
     desc: 'חנות הויניל האיקונית של תל אביב. מלאי ענק של תקליטים חדשים ומשומשים מכל הסגנונות — רוק, ג\'אז, אלקטרוני, מוזיקה ישראלית ועוד.',
-    url: 'https://thirdear.co.il',
+    url: 'https://third-ear.com',
   },
   {
     id: 'disc-center',
@@ -13,6 +13,6 @@ export const STORES = [
     city: 'תל אביב',
     genres: ['rock', 'pop', 'israeli', 'electronic'],
     desc: 'חנות מוסיקה בדיזנגוף סנטר, תל אביב. מגוון רחב של תקליטים חדשים, כולל מהדורות מיוחדות, ויניל צבעוני ומוזיקה ישראלית.',
-    url: 'https://diskcenter.co.il',
+    url: 'https://www.disccenter.co.il',
   },
 ]
