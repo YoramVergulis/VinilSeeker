@@ -1,7 +1,5 @@
-import { useState, useEffect } from 'react'
 import Layout from '../components/Layout'
 import { STORES } from '../data/stores'
-import { supabase } from '../supabase'
 import styles from './StoresPage.module.css'
 
 const GENRE_LABELS = {
@@ -9,7 +7,7 @@ const GENRE_LABELS = {
   israeli: 'ישראלי', pop: 'פופ', classical: 'קלאסי', electronic: 'אלקטרוני',
 }
 
-function StoreCard({ name, city, genres, desc, since }) {
+function StoreCard({ name, city, genres, desc, url }) {
   return (
     <div className={styles.card}>
       <div className={styles.cardTop}>
@@ -22,8 +20,6 @@ function StoreCard({ name, city, genres, desc, since }) {
               <circle cx="8" cy="6" r="1.5" stroke="currentColor" strokeWidth="1.2"/>
             </svg>
             {city}
-            <span className={styles.dot}>·</span>
-            פועלת מ-{since}
           </div>
         </div>
       </div>
@@ -36,27 +32,23 @@ function StoreCard({ name, city, genres, desc, since }) {
             <span key={g} className={styles.genrePill}>{GENRE_LABELS[g]}</span>
           ))}
         </div>
-        <button type="button" className={styles.contactBtn}>צור קשר</button>
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.contactBtn}
+        >
+          לאתר החנות
+          <svg viewBox="0 0 16 16" fill="none" width="12" height="12" aria-hidden="true" style={{ marginRight: 4 }}>
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </a>
       </div>
     </div>
   )
 }
 
 export default function StoresPage({ onNavigate, currentUser, onLogout }) {
-  const [stores, setStores] = useState(STORES)
-
-  useEffect(() => {
-    supabase
-      .from('store')
-      .select('*')
-      .order('since', { ascending: true })
-      .then(({ data }) => {
-        if (data && data.length > 0) {
-          setStores(data.map(s => ({ ...s, desc: s.description })))
-        }
-      })
-  }, [])
-
   return (
     <Layout activePage="חנויות" onNavigate={onNavigate} currentUser={currentUser} onLogout={onLogout}>
 
@@ -70,7 +62,7 @@ export default function StoresPage({ onNavigate, currentUser, onLogout }) {
 
       <div className={styles.body}>
         <div className={styles.grid}>
-          {stores.map(store => (
+          {STORES.map(store => (
             <StoreCard key={store.id} {...store} />
           ))}
         </div>
