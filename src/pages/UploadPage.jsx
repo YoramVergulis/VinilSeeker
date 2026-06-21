@@ -4,17 +4,19 @@ import { searchDiscogs, getDiscogsRelease } from '../discogs'
 import styles from './UploadPage.module.css'
 
 const FORMATS   = ['LP', '2LP', '7"', '12"']
-const GENRES    = ['רוק', 'מטאל', "ג'אז", 'ישראלי', 'פופ', 'קלאסי', 'אלקטרוני']
+const GENRES    = ['רוק', 'מטאל', "ג'אז", 'ישראלי', 'פופ', 'קלאסי', 'אלקטרוני', 'פאנק / סול', 'פולק', 'היפ הופ', 'רגאיי', 'בלוז']
 const CITIES    = ['תל אביב', 'חיפה', 'ירושלים', 'ראשל"צ', 'פ"ת', 'נתניה', 'ב"ש', 'רמת גן', 'אחר']
 
 const GENRE_VALUE_MAP = {
   'רוק': 'rock', 'מטאל': 'metal', "ג'אז": 'jazz',
   'ישראלי': 'israeli', 'פופ': 'pop', 'קלאסי': 'classical', 'אלקטרוני': 'electronic',
+  'פאנק / סול': 'funk', 'פולק': 'folk', 'היפ הופ': 'hiphop', 'רגאיי': 'reggae', 'בלוז': 'blues',
 }
 
 const REVERSE_GENRE_MAP = {
   rock: 'רוק', metal: 'מטאל', jazz: "ג'אז",
   israeli: 'ישראלי', pop: 'פופ', classical: 'קלאסי', electronic: 'אלקטרוני',
+  funk: 'פאנק / סול', folk: 'פולק', hiphop: 'היפ הופ', reggae: 'רגאיי', blues: 'בלוז',
 }
 
 const CONDITIONS = [

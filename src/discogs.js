@@ -13,13 +13,19 @@ function parseArtistTitle(raw = '') {
 }
 
 const GENRE_MAP = [
-  { test: l => l.includes('rock'),                            value: 'rock'       },
-  { test: l => l.includes('metal'),                           value: 'metal'      },
-  { test: l => l.includes('jazz'),                            value: 'jazz'       },
-  { test: l => l.includes('pop'),                             value: 'pop'        },
-  { test: l => l.includes('classic'),                         value: 'classical'  },
-  { test: l => l.includes('electro'),                         value: 'electronic' },
-  { test: l => l.includes('israel') || l.includes('middle'),  value: 'israeli'    },
+  { test: l => l.includes('metal') || l.includes('hard rock'),                       value: 'metal'      },
+  { test: l => l.includes('rock'),                                                    value: 'rock'       },
+  { test: l => l.includes('hip') || l.includes('rap'),                               value: 'hiphop'     },
+  { test: l => l.includes('funk') || l.includes('soul') || l.includes('r&b'),        value: 'funk'       },
+  { test: l => l.includes('reggae') || l.includes('ska') || l.includes('dub'),       value: 'reggae'     },
+  { test: l => l.includes('blues'),                                                   value: 'blues'      },
+  { test: l => l.includes('folk') || l.includes('country') || l.includes('world'),   value: 'folk'       },
+  { test: l => l.includes('latin') || l.includes('bossa') || l.includes('salsa'),    value: 'latin'      },
+  { test: l => l.includes('jazz'),                                                    value: 'jazz'       },
+  { test: l => l.includes('pop'),                                                     value: 'pop'        },
+  { test: l => l.includes('classic'),                                                 value: 'classical'  },
+  { test: l => l.includes('electro') || l.includes('synth') || l.includes('ambient'),value: 'electronic' },
+  { test: l => l.includes('israel') || l.includes('middle') || l.includes('mizrahi'),value: 'israeli'    },
 ]
 
 const FORMAT_PRIORITY = ['2LP', 'LP', '12"', '7"', 'EP']

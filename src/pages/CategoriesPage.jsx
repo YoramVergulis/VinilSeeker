@@ -2,13 +2,18 @@ import Layout from '../components/Layout'
 import styles from './CategoriesPage.module.css'
 
 const GENRES = [
-  { key: 'rock',       label: 'רוק',       color: 'var(--purple-700)' },
-  { key: 'metal',      label: 'מטאל',      color: 'var(--vinyl-black)' },
-  { key: 'jazz',       label: "ג'אז",       color: 'var(--gold-700)' },
-  { key: 'israeli',    label: 'ישראלי',    color: 'var(--burgundy)' },
-  { key: 'pop',        label: 'פופ',        color: 'var(--purple-600)' },
-  { key: 'classical',  label: 'קלאסי',     color: 'var(--success)' },
-  { key: 'electronic', label: 'אלקטרוני',  color: 'var(--ink-2)' },
+  { key: 'rock',       label: 'רוק',         color: 'var(--purple-700)' },
+  { key: 'metal',      label: 'מטאל',        color: 'var(--vinyl-black)' },
+  { key: 'jazz',       label: "ג'אז",         color: 'var(--gold-700)' },
+  { key: 'israeli',    label: 'ישראלי',      color: 'var(--burgundy)' },
+  { key: 'pop',        label: 'פופ',          color: 'var(--purple-600)' },
+  { key: 'classical',  label: 'קלאסי',       color: 'var(--success)' },
+  { key: 'electronic', label: 'אלקטרוני',    color: 'var(--ink-2)' },
+  { key: 'funk',       label: 'פאנק / סול',  color: 'var(--gold-500)' },
+  { key: 'folk',       label: 'פולק',         color: 'var(--gold-700)' },
+  { key: 'hiphop',     label: 'היפ הופ',     color: 'var(--ink)' },
+  { key: 'reggae',     label: 'רגאיי',        color: 'var(--success)' },
+  { key: 'blues',      label: 'בלוז',         color: 'var(--ink-3)' },
 ]
 
 function DiscIcon({ color }) {

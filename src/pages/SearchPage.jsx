@@ -5,14 +5,19 @@ import { searchDiscogs } from '../discogs'
 import styles from './SearchPage.module.css'
 
 const GENRES = [
-  { value: 'all',       label: 'הכל'      },
-  { value: 'rock',      label: 'רוק'      },
-  { value: 'metal',     label: 'מטאל'     },
-  { value: 'jazz',      label: "ג'אז"     },
-  { value: 'israeli',   label: 'ישראלי'   },
-  { value: 'pop',       label: 'פופ'      },
-  { value: 'classical', label: 'קלאסי'    },
-  { value: 'electronic',label: 'אלקטרוני' },
+  { value: 'all',       label: 'הכל'         },
+  { value: 'rock',      label: 'רוק'         },
+  { value: 'metal',     label: 'מטאל'        },
+  { value: 'jazz',      label: "ג'אז"        },
+  { value: 'israeli',   label: 'ישראלי'      },
+  { value: 'pop',       label: 'פופ'         },
+  { value: 'classical', label: 'קלאסי'       },
+  { value: 'electronic',label: 'אלקטרוני'    },
+  { value: 'funk',      label: 'פאנק / סול'  },
+  { value: 'folk',      label: 'פולק'        },
+  { value: 'hiphop',    label: 'היפ הופ'     },
+  { value: 'reggae',    label: 'רגאיי'       },
+  { value: 'blues',     label: 'בלוז'        },
 ]
 
 const FORMATS = [
@@ -109,7 +114,7 @@ export default function SearchPage({ query: initialQuery = '', initialGenre = ''
           const q = query.toLowerCase()
           if (!`${v.title} ${v.artist}`.toLowerCase().includes(q)) return false
         }
-        if (genre  !== 'all' && v.genre  !== genre)  return false
+        if (genre !== 'all' && v.genre !== genre && !(v.genres?.includes(genre))) return false
         if (format !== 'all' && v.format !== format) return false
         return true
       })

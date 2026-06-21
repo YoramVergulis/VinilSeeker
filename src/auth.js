@@ -211,7 +211,7 @@ export async function updateListing(id, updates) {
 export async function getStoreInventory() {
   const { data } = await supabase
     .from('store_inventory')
-    .select('id, store_name, store_city, artist, album_name, price_ils, type, style, url, album_id, cover_image_url, albums(cover_image_url, discogs_id, release_year)')
+    .select('id, store_name, store_city, artist, album_name, price_ils, type, style, url, album_id, cover_image_url, albums(cover_image_url, discogs_id, release_year, genres)')
   return (data || []).map(r => {
     const t = (r.type || '').toLowerCase()
     const format    = t.includes('2lp') ? '2LP' : t.includes('vinyl') ? 'LP' : t.includes('cd') ? 'CD' : 'LP'
@@ -224,8 +224,8 @@ export async function getStoreInventory() {
       artist:      r.artist                || '',
       year:        r.albums?.release_year  || null,
       format,
-      genre:       '',
-      genres:      [],
+      genre:       r.albums?.genres?.[0] || '',
+      genres:      r.albums?.genres      || [],
       price:       r.price_ils,
       city:        r.store_city            || '',
       img:         realImg(r.albums?.cover_image_url) || realImg(r.cover_image_url) || null,
