@@ -1397,6 +1397,57 @@ The function runs as the DB owner (bypasses RLS) but is safe: it only touches `c
 
 **Status at end of session:** Stores page shows only real stores. "לאתר החנות" button opens the store's real website in a new tab.
 
+### Session 27 — 2026-06-25
+**Goal:** Add more genres (matching Discogs taxonomy) and enrich store inventory albums with genres from Discogs API
+
+**Part 1 — New genres added to UI (5 new genres)**
+
+New genre keys: `funk` (פאנק / סול), `folk` (פולק), `hiphop` (היפ הופ), `reggae` (רגאיי), `blues` (בלוז)
+
+**Files updated:**
+- `src/discogs.js` — expanded GENRE_MAP from 7 to 13 entries; added metal/hard-rock, hiphop, funk, reggae, blues, folk, latin; reordered so metal comes before rock (prevents "hard rock" matching rock first); added synth/ambient → electronic, mizrahi → israeli
+- `src/pages/SearchPage.jsx` — added 5 new genre filter pills; fixed genre filter to check BOTH `v.genre` and `v.genres?.includes(genre)` (store items were being excluded from genre search because their genre lives in an array)
+- `src/pages/UploadPage.jsx` — added 5 new genres to `GENRES` array, `GENRE_VALUE_MAP`, and `REVERSE_GENRE_MAP`
+- `src/pages/CategoriesPage.jsx` — added 5 new genre cards with colors: funk=gold-500, folk=gold-700, hiphop=ink, reggae=success, blues=ink-3
+- `src/auth.js` — updated `getStoreInventory()` to join `albums(genres)` and map to `genre`/`genres` fields in the vinyl shape (previously hardcoded to empty)
+- `src/data/stores.js` — fixed store URLs: Third Ear → `https://third-ear.com`, Disc Center → `https://www.disccenter.co.il`
+
+**Part 2 — DB genre enrichment script**
+
+**File created:** `scripts/enrich-album-genres.js`
+- Fetches all albums with `discogs_id` but empty `genres[]`
+- Calls Discogs `/releases/{id}` API for each
+- Maps Discogs `genres[]` + `styles[]` to app genre keys
+- Updates `albums.genres` (text array column)
+- Rate: 1 req per 1.2s (safe under 60/min limit)
+
+**SQL run in Supabase:**
+```sql
+ALTER TABLE albums ADD COLUMN IF NOT EXISTS genres text[] DEFAULT '{}';
+```
+
+**Script result:** 213/221 albums enriched, 8 network errors (retryable), 0 unmapped
+- Hebrew albums: אריק איינשטיין → folk, שקל → hiphop, דודו פארוק → hiphop, עידן רייכל → reggae/folk
+- Multi-genre: Kutiman → [electronic, jazz, funk, blues, folk, israeli]
+
+**Genre system now:**
+| Key | Hebrew | Notes |
+|---|---|---|
+| rock | רוק | |
+| metal | מטאל | matched before rock to catch "hard rock" |
+| jazz | ג'אז | |
+| pop | פופ | |
+| classical | קלאסי | |
+| electronic | אלקטרוני | includes synth, ambient |
+| israeli | ישראלי | includes mizrahi, middle east |
+| funk | פאנק / סול | new — includes soul, R&B |
+| folk | פולק | new — includes country, world |
+| hiphop | היפ הופ | new — includes rap |
+| reggae | רגאיי | new — includes ska, dub |
+| blues | בלוז | new |
+
+**Status at end of session:** 12 genres live across all pages. Store inventory items now filterable by genre. DB enriched.
+
 ---
 
 ## Rules for Claude in This Project
